@@ -69,6 +69,27 @@ object CollectionUtil {
   }
 
   //////////////////////////////////////////////////////
+  // counts(): Map[A, Int]
+  //   - Map each distinct item in the collection to the number of times it appears.
+  //////////////////////////////////////////////////////
+
+  implicit class Enriched_counts_GenTraversableOnce[A](self: GenTraversableOnce[A]) {
+    /**
+     * Map each distinct item in the collection to the number of times it appears.
+     *
+     * @return Map from items to their counts
+     */
+    def counts(): Map[A, Int] = {
+      val m = mutable.Map.empty[A, Int]
+      for (item <- self) {
+        val count = m.getOrElseUpdate(item, 0)
+        m(item) = count + 1
+      }
+      m.toMap
+    }
+  }
+
+  //////////////////////////////////////////////////////
   // groupByKey(): Map[T,Repr[U]]
   //   - For a collection of pairs (k,v), create a map from each `k` to the  
   //     collection of `v`s with which it is associated.

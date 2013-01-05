@@ -44,6 +44,17 @@ class CollectionUtilTests {
   }
 
   @Test
+  def test_counts() {
+    val coll1 = Vector('a, 'b, 'c, 'b, 'd, 'a, 'c, 'c, 'b)
+    val grouped1: Map[Symbol, Int] = coll1.counts
+    assertEquals(Map('a -> 2, 'b -> 3, 'c -> 3, 'd -> 1), grouped1)
+
+    val coll2 = Iterator('a, 'b, 'c, 'b, 'd, 'a, 'c, 'c, 'b)
+    val grouped2: Map[Symbol, Int] = coll2.counts
+    assertEquals(Map('a -> 2, 'b -> 3, 'c -> 3, 'd -> 1), grouped2)
+  }
+
+  @Test
   def test_groupByKey() {
     val coll1 = Vector(1 -> 'a, 2 -> 'b, 3 -> 'c, 2 -> 'a, 2 -> 'b, 3 -> 'd)
     val grouped1: Map[Int, Vector[Symbol]] = coll1.groupByKey
