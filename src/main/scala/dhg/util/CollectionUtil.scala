@@ -427,6 +427,90 @@ object CollectionUtil {
   }
 
   //////////////////////////////////////////////////////
+  // mapTo[B](f: A => B): Repr[(A,B)]
+  //   - Map a function over the collection, returning a set of pairs consisting 
+  //     of the original item and the result of the function application
+  //   - Functionally equivalent to:
+  //         map(x => x -> f(x))
+  //////////////////////////////////////////////////////
+
+  implicit class Enriched_mapTo_GenTraversableLike[A, Repr <: GenTraversable[A]](self: GenTraversableLike[A, Repr]) {
+    /**
+     * Map a function over the collection, returning a set of pairs consisting
+     * of the original item and the result of the function application
+     *
+     * Functionally equivalent to: map(x => x -> f(x))
+     *
+     * @param f	the function to map
+     * @return the new collection
+     */
+    def mapTo[B, That](f: A => B)(implicit bf: CanBuildFrom[Repr, (A, B), That]): That = {
+      val b = bf(self.asInstanceOf[Repr])
+      b.sizeHint(self.size)
+      for (x <- self) b += x -> f(x)
+      b.result
+    }
+  }
+
+  implicit class Enriched_mapTo_Iterator[A](self: Iterator[A]) {
+    /**
+     * Map a function over the collection, returning a set of pairs consisting
+     * of the original item and the result of the function application
+     *
+     * Functionally equivalent to: map(x => x -> f(x))
+     *
+     * @param f	the function to map
+     * @return a new iterator
+     */
+    def mapTo[B](f: A => B): Iterator[(A, B)] = new Iterator[(A, B)] {
+      def hasNext = self.hasNext
+      def next() = {
+        val x = self.next
+        x -> f(x)
+      }
+    }
+  }
+
+  //////////////////////////////////////////////////////
+  // mapToVal[B](v: B): Repr[(A,B)]
+  //   - Map each item in the collection to a particular value
+  //   - Functionally equivalent to:
+  //         map(x => x -> v)
+  //////////////////////////////////////////////////////
+
+  implicit class Enriched_mapToVal_GenTraversableLike[A, Repr <: GenTraversable[A]](self: GenTraversableLike[A, Repr]) {
+    /**
+     * Map each item in the collection to a particular value
+     *
+     * Functionally equivalent to: map(x => x -> v)
+     *
+     * @param v	the value to map to
+     * @return the new collection
+     */
+    def mapToVal[B, That](v: => B)(implicit bf: CanBuildFrom[Repr, (A, B), That]): That = {
+      val b = bf(self.asInstanceOf[Repr])
+      b.sizeHint(self.size)
+      for (x <- self) b += x -> v
+      b.result
+    }
+  }
+
+  implicit class Enriched_mapToVal_Iterator[A](self: Iterator[A]) {
+    /**
+     * Map each item in the collection to a particular value
+     *
+     * Functionally equivalent to: map(x => x -> v)
+     *
+     * @param v	the value to map to
+     * @return a new iterator
+     */
+    def mapToVal[B](v: => B): Iterator[(A, B)] = new Iterator[(A, B)] {
+      def hasNext = self.hasNext
+      def next() = self.next -> v
+    }
+  }
+
+  //////////////////////////////////////////////////////
   // mapKeys(f: T => R): Repr[(R,U)]
   //   - In a collection of pairs, map a function over the first item of each pair.
   //   - Functionally equivalent to:
@@ -505,6 +589,50 @@ object CollectionUtil {
         val (k, v) = self.next()
         k -> f(v)
       }
+    }
+  }
+
+  //////////////////////////////////////////////////////
+  // mapt[A,B,R](f: (A,B) => R): Repr[R]
+  //   - map over a Tuple2
+  //   - same as `xs.map { case (x,y) => f(x,y) } `
+  //////////////////////////////////////////////////////
+
+  implicit class Enriched_mapt_2_GenTraversableLike[A, B, Repr <: GenTraversable[(A, B)]](self: GenTraversableLike[(A, B), Repr]) {
+    def mapt[R, That](f: (A, B) => R)(implicit bf: CanBuildFrom[Repr, R, That]) = {
+      val b = bf(self.asInstanceOf[Repr])
+      b.sizeHint(self.size)
+      for (x <- self) b += f(x._1, x._2)
+      b.result
+    }
+  }
+
+  implicit class Enriched_mapt_2_Iterator[A, B](self: Iterator[(A, B)]) {
+    def mapt[R](f: (A, B) => R) = new Iterator[R] {
+      override def next() = {
+        val x = self.next
+        f(x._1, x._2)
+      }
+      override def hasNext() = self.hasNext
+    }
+  }
+
+  implicit class Enriched_mapt_3_GenTraversableLike[A, B, C, Repr <: GenTraversable[(A, B, C)]](self: GenTraversableLike[(A, B, C), Repr]) {
+    def mapt[R, That](f: (A, B, C) => R)(implicit bf: CanBuildFrom[Repr, R, That]) = {
+      val b = bf(self.asInstanceOf[Repr])
+      b.sizeHint(self.size)
+      for (x <- self) b += f(x._1, x._2, x._3)
+      b.result
+    }
+  }
+
+  implicit class Enriched_mapt_3_Iterator[A, B, C](self: Iterator[(A, B, C)]) {
+    def mapt[R](f: (A, B, C) => R) = new Iterator[R] {
+      override def next() = {
+        val x = self.next
+        f(x._1, x._2, x._3)
+      }
+      override def hasNext() = self.hasNext
     }
   }
 
@@ -610,16 +738,5 @@ object CollectionUtil {
       b.result
     }
   }
-
-  //////////////////////////////////////////////////////
-  // Conversion (.toX) methods
-  //////////////////////////////////////////////////////
-  implicit class Enriched_toVector_GenTraversableOnce[A](self: GenTraversableOnce[A]) {
-    def toVector =
-      if (self.isEmpty) Vector.empty[A]
-      else Vector.newBuilder[A] ++= self.toIterator result
-  }
-  implicit def addToVectorToArray[A](self: Array[A]): Enriched_toVector_GenTraversableOnce[A] =
-    new Enriched_toVector_GenTraversableOnce(self)
 
 }

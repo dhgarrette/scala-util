@@ -248,6 +248,39 @@ class CollectionUtilTests {
   }
 
   @Test
+  def test_mapTo() {
+    val coll1 = List(1, 2, 3, 4)
+    val res1: List[(Int, Int)] = coll1.mapTo(_ + 2)
+    assertEquals(List(1 -> 3, 2 -> 4, 3 -> 5, 4 -> 6), res1)
+
+    val coll2 = Set(1, 2, 3, 4)
+    val res2: Set[(Int, Int)] = coll2.mapTo(_ + 2)
+    assertEquals(Set(1 -> 3, 2 -> 4, 3 -> 5, 4 -> 6), res2)
+
+    val coll3 = Iterator(1, 2, 3, 4)
+    val res3: Iterator[(Int, Int)] = coll3.mapTo(_ + 2)
+    assertEqualsIterator(Iterator(1 -> 3, 2 -> 4, 3 -> 5, 4 -> 6), res3)
+  }
+
+  @Test
+  def test_mapToVal() {
+    var counter1 = 1
+    val coll1 = List('a, 'b, 'c, 'd)
+    val res1: List[(Symbol, Int)] = coll1.mapToVal({ counter1 *= 2; counter1 + 3 })
+    assertEquals(List('a -> 5, 'b -> 7, 'c -> 11, 'd -> 19), res1)
+
+    var counter2 = 1
+    val coll2 = Set('a, 'b, 'c, 'd)
+    val res2: Set[(Symbol, Int)] = coll2.mapToVal({ counter2 *= 2; counter2 + 3 })
+    assertEquals(Set('a -> 5, 'b -> 7, 'c -> 11, 'd -> 19), res2)
+
+    var counter3 = 1
+    val coll3 = Iterator('a, 'b, 'c, 'd)
+    val res3: Iterator[(Symbol, Int)] = coll3.mapToVal({ counter3 *= 2; counter3 + 3 })
+    assertEqualsIterator(Iterator('a -> 5, 'b -> 7, 'c -> 11, 'd -> 19), res3)
+  }
+
+  @Test
   def test_mapKeys() {
     val coll1 = Map(1 -> 'a, 2 -> 'b, 3 -> 'c)
     val res1: Map[Int, Symbol] = coll1.mapKeys(_ + 2)
@@ -281,6 +314,33 @@ class CollectionUtilTests {
     assertEquals(Map('a -> 3, 'b -> 4, 'c -> 5), res3)
     assertEquals(Map('a -> 3, 'b -> 4, 'c -> 5), res3)
     assertEquals(3, callCount)
+  }
+
+  @Test
+  def test_mapt() {
+    val coll2_1 = Map(('a, 1), ('b, 2), ('c, 3))
+    val res2_1: Map[String, Int] = coll2_1.mapt((x, y) => (x + "x", y + 2))
+    assertEquals(Map(("'ax", 3), ("'bx", 4), ("'cx", 5)), res2_1)
+
+    val coll2_2 = List(('a, 1), ('b, 2), ('c, 3))
+    val res2_2: List[(String, Int)] = coll2_2.mapt((x, y) => (x + "x", y + 2))
+    assertEquals(List(("'ax", 3), ("'bx", 4), ("'cx", 5)), res2_2)
+
+    val coll2_3 = Iterator(('a, 1), ('b, 2), ('c, 3))
+    val res2_3: Iterator[(String, Int)] = coll2_3.mapt((x, y) => (x + "x", y + 2))
+    assertEqualsIterator(Iterator(("'ax", 3), ("'bx", 4), ("'cx", 5)), res2_3)
+
+    val coll3_1 = Set(('a, 1, 5), ('b, 2, 6), ('c, 3, 7))
+    val res3_1: Set[(String, Int, Int)] = coll3_1.mapt((x, y, z) => (x + "x", y + 2, z - 1))
+    assertEquals(Set(("'ax", 3, 4), ("'bx", 4, 5), ("'cx", 5, 6)), res3_1)
+
+    val coll3_2 = List(('a, 1, 5), ('b, 2, 6), ('c, 3, 7))
+    val res3_2: List[(String, Int, Int)] = coll3_2.mapt((x, y, z) => (x + "x", y + 2, z - 1))
+    assertEquals(List(("'ax", 3, 4), ("'bx", 4, 5), ("'cx", 5, 6)), res3_2)
+
+    val coll3_3 = Iterator(('a, 1, 5), ('b, 2, 6), ('c, 3, 7))
+    val res3_3: Iterator[(String, Int, Int)] = coll3_3.mapt((x, y, z) => (x + "x", y + 2, z - 1))
+    assertEqualsIterator(Iterator(("'ax", 3, 4), ("'bx", 4, 5), ("'cx", 5, 6)), res3_3)
   }
 
   @Test
@@ -318,17 +378,6 @@ class CollectionUtilTests {
     val coll3 = Map('a -> 1.0, 'b -> 1.5, 'c -> 2.5, 'd -> 5.0)
     val avg3: Map[Symbol, Double] = coll3.normalizeValues
     assertEquals(Map('a -> 0.1, 'b -> 0.15, 'c -> 0.25, 'd -> 0.5), avg3)
-  }
-
-  @Test
-  def test_toVector() {
-    val coll1 = List(1, 2, 3)
-    val vec1: Vector[Int] = coll1.toVector
-    assertEquals(Vector(1, 2, 3), vec1)
-
-    val coll2 = Array('a, 'b, 'c)
-    val vec2: Vector[Symbol] = coll2.toVector
-    assertEquals(Vector('a, 'b, 'c), vec2)
   }
 
   def assertException(block: => Unit)(handle: PartialFunction[Throwable, Unit]) {
