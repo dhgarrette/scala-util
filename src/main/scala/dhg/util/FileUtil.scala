@@ -96,7 +96,7 @@ object FileUtils {
       return found.trim
     }
     catch {
-      case _ => {
+      case _: Throwable => {
         checked += "which " + name
       }
     }

@@ -10,3 +10,4 @@ libraryDependencies ++= Seq(
   "junit" % "junit" % "4.10" % "test",
   "com.novocode" % "junit-interface" % "0.6" % "test->default") //switch to ScalaTest at some point...
 
+scalacOptions ++= Seq("-deprecation")

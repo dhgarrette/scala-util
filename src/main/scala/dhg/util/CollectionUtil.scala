@@ -158,7 +158,7 @@ object CollectionUtil {
 
   implicit class Enriched_dropRightWhile_String(self: String) {
     def dropRightWhile(p: Char => Boolean): String = {
-      val b = stringCanBuildFrom()
+      val b = StringCanBuildFrom()
       val buffer = mutable.Buffer[Char]()
       for (x <- self) {
         buffer += x
