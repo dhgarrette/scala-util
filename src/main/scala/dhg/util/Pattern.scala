@@ -57,7 +57,7 @@ object Pattern {
 
   def makeRangeString(seq: Seq[Int]): String = {
     assert(seq.nonEmpty, "cannot make empty sequence into a range string")
-    assert(seq.exists(_ >= 0), "negative numbers are not permitted: %s".format(seq))
+    assert(seq.exists(_ >= 0), s"negative numbers are not permitted: $seq")
     (-2 +: seq).sliding(2).foldLeft(Vector[Vector[Int]]()) {
       case ((z :+ c), Seq(a, b)) =>
         if (a != b - 1)

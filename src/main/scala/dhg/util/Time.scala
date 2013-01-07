@@ -7,9 +7,9 @@ object Time {
   }
 
   def time[T, R](name: String, block: => T, log: String => R): T = {
-    log("starting: " + name)
+    log(s"starting: $name")
     val (r, t) = timer(block)
-    log("finished: " + name + " in " + t + " seconds")
+    log(s"finished: $name in $t seconds")
     r
   }
 
@@ -19,7 +19,7 @@ object Time {
 
   def time1[T, R](name: String, block: => T, log: String => R): T = {
     val (r, t) = timer(block)
-    log(name + " - " + t + " seconds")
+    log(s"$name - $t seconds")
     r
   }
 

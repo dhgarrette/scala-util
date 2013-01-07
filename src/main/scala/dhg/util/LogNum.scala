@@ -86,7 +86,7 @@ final class LogNum(val logValue: Double) extends Ordered[LogNum] {
   def toFloat = toDouble.toFloat
   def toDouble = exp(logValue)
 
-  override def toString = "LogNum(%s)".format(toDouble)
+  override def toString = s"LogNum(${toDouble})"
 }
 
 object LogNum {

@@ -28,17 +28,17 @@ object CollectionUtil {
   //////////////////////////////////////////////////////
 
   implicit class Enriched_toTuple_Seq[A](seq: Seq[A]) {
-    def toTuple2 = seq match { case Seq(a, b) => (a, b); case x => throw new AssertionError("Cannot convert sequence of length %s into Tuple2: %s".format(seq.size, x)) }
-    def toTuple3 = seq match { case Seq(a, b, c) => (a, b, c); case x => throw new AssertionError("Cannot convert sequence of length %s into Tuple3: %s".format(seq.size, x)) }
-    def toTuple4 = seq match { case Seq(a, b, c, d) => (a, b, c, d); case x => throw new AssertionError("Cannot convert sequence of length %s into Tuple4: %s".format(seq.size, x)) }
-    def toTuple5 = seq match { case Seq(a, b, c, d, e) => (a, b, c, d, e); case x => throw new AssertionError("Cannot convert sequence of length %s into Tuple5: %s".format(seq.size, x)) }
+    def toTuple2 = seq match { case Seq(a, b) => (a, b); case x => throw new AssertionError(s"Cannot convert sequence of length ${seq.size} into Tuple2: $x") }
+    def toTuple3 = seq match { case Seq(a, b, c) => (a, b, c); case x => throw new AssertionError(s"Cannot convert sequence of length ${seq.size} into Tuple3: $x") }
+    def toTuple4 = seq match { case Seq(a, b, c, d) => (a, b, c, d); case x => throw new AssertionError(s"Cannot convert sequence of length ${seq.size} into Tuple4: $x") }
+    def toTuple5 = seq match { case Seq(a, b, c, d, e) => (a, b, c, d, e); case x => throw new AssertionError(s"Cannot convert sequence of length ${seq.size} into Tuple5: $x") }
   }
 
   implicit class Enriched_toTuple_Array[A](seq: Array[A]) {
-    def toTuple2 = seq match { case Array(a, b) => (a, b); case x => throw new AssertionError("Cannot convert array of length %s into Tuple2: Array(%s)".format(seq.size, x.mkString(", "))) }
-    def toTuple3 = seq match { case Array(a, b, c) => (a, b, c); case x => throw new AssertionError("Cannot convert array of length %s into Tuple3: Array(%s)".format(seq.size, x.mkString(", "))) }
-    def toTuple4 = seq match { case Array(a, b, c, d) => (a, b, c, d); case x => throw new AssertionError("Cannot convert array of length %s into Tuple4: Array(%s)".format(seq.size, x.mkString(", "))) }
-    def toTuple5 = seq match { case Array(a, b, c, d, e) => (a, b, c, d, e); case x => throw new AssertionError("Cannot convert array of length %s into Tuple5: Array(%s)".format(seq.size, x.mkString(", "))) }
+    def toTuple2 = seq match { case Array(a, b) => (a, b); case x => throw new AssertionError(s"Cannot convert array of length ${seq.size} into Tuple2: Array(${x.mkString(", ")})") }
+    def toTuple3 = seq match { case Array(a, b, c) => (a, b, c); case x => throw new AssertionError(s"Cannot convert array of length ${seq.size} into Tuple3: Array(${x.mkString(", ")})") }
+    def toTuple4 = seq match { case Array(a, b, c, d) => (a, b, c, d); case x => throw new AssertionError(s"Cannot convert array of length ${seq.size} into Tuple4: Array(${x.mkString(", ")})") }
+    def toTuple5 = seq match { case Array(a, b, c, d, e) => (a, b, c, d, e); case x => throw new AssertionError(s"Cannot convert array of length ${seq.size} into Tuple5: Array(${x.mkString(", ")})") }
   }
 
   //////////////////////////////////////////////////////

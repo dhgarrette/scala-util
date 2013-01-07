@@ -4,7 +4,7 @@ import scala.sys.process._
 
 /**
  * A class for conveniently running command-line operations.
- * 
+ *
  * e.g.
  *   val cmd = Subprocess.findBinary("tr")
  *   cmd.args("l", "L").call("hello")   // "heLLo"
@@ -27,7 +27,7 @@ case class Subprocess(binary: String, args: Seq[String] = Nil) {
   def call(): String = {
     val (exitcode, stdout, stderr) = callAllReturns()
     if (exitcode != 0)
-      sys.error("ERROR CALLING: %s %s\nReturncode: %d\n%s".format(binary, args.mkString(" "), exitcode, stderr))
+      sys.error(s"ERROR CALLING: $binary ${args.mkString(" ")}\nReturncode: $exitcode\n$stderr")
     stdout
   }
 
@@ -40,7 +40,7 @@ case class Subprocess(binary: String, args: Seq[String] = Nil) {
   def call(inputStr: String): String = {
     val (exitcode, stdout, stderr) = callAllReturns(inputStr)
     if (exitcode != 0)
-      sys.error("ERROR CALLING: %s %s\nReturncode: %d\n%s".format(binary, args.mkString(" "), exitcode, stderr))
+      sys.error(s"ERROR CALLING: $binary ${args.mkString(" ")}\nReturncode: $exitcode\n$stderr")
     stdout
   }
 

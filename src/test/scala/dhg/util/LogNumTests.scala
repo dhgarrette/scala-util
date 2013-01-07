@@ -137,7 +137,7 @@ class LogNumTests {
   def assertEqualsNumericLog[N](a: N, b: N)(implicit num: Numeric[N]) {
     (a, b) match {
       case (a: LogNum, b: LogNum) => assertEqualsLog(a, b)
-      case _ => fail("a and b are not LogNum instances: a:[%s], b:[%s]".format(a, b))
+      case _ => fail(s"a and b are not LogNum instances: a:[$a], b:[$b]")
     }
   }
 
