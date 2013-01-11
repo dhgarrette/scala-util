@@ -23,11 +23,11 @@ object Pattern {
   }
   //  implicit def double2unapplyDouble(objA: Double.type) = UDouble
 
-  object Map {
+  object UMap {
     def unapplySeq[A, B](m: Map[A, B]): Option[Seq[(A, B)]] = Some(m.toIndexedSeq)
   }
 
-  object Set {
+  object USet {
     def unapplySeq[A](s: Set[A]): Option[Seq[A]] = Some(s.toIndexedSeq)
   }
 
@@ -71,24 +71,6 @@ object Pattern {
         case Seq(x) => x.toString
         case s => s.head + "-" + s.last
       }.mkString(",")
-  }
-
-  object +: {
-    def unapply[CC, A, That](seq: CC)(implicit asSeq: CC => Seq[A], cbf: CanBuildFrom[CC, A, That]): Option[(A, That)] = {
-      if (seq.nonEmpty)
-        Some(seq.head, cbf(seq) ++= seq.tail result)
-      else
-        None
-    }
-  }
-
-  object :+ {
-    def unapply[CC, A, That](seq: CC)(implicit asSeq: CC => Seq[A], cbf: CanBuildFrom[CC, A, That]): Option[(That, A)] = {
-      if (seq.nonEmpty)
-        Some(cbf(seq) ++= seq.dropRight(1) result, seq.last)
-      else
-        None
-    }
   }
 
   object Iterable {

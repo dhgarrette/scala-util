@@ -73,5 +73,5 @@ case class Subprocess(binary: String, args: Seq[String] = Nil) {
 
 object Subprocess {
   def findBinary(binaryName: String, binDir: Option[String] = None, envar: Option[String] = None) =
-    new Subprocess(FileUtils.findBinary(binaryName, binDir, envar))
+    new Subprocess(FileUtil.findBinary(binaryName, binDir, envar))
 }
