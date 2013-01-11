@@ -742,4 +742,14 @@ object CollectionUtil {
     }
   }
 
+  //////////////////////////////////////////////////////
+  // shuffle
+  //////////////////////////////////////////////////////
+
+  implicit class Enriched_shuffle_TraversableOnce[T, CC[X] <: TraversableOnce[X]](xs: CC[T]) {
+    def shuffle(implicit bf: CanBuildFrom[CC[T], T, CC[T]]): CC[T] = {
+      (bf(xs) ++= Random.shuffle(xs)).result
+    }
+  }
+
 }

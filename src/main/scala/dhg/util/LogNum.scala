@@ -67,7 +67,7 @@ final class LogNum(val logValue: Double) extends Ordered[LogNum] {
 
   override def equals(o: Any): Boolean = o match {
     case o: LogNum => logValue == o.logValue
-    case o => o == exp(logValue)
+    case o => o == toDouble
   }
   override def hashCode(): Int = toDouble ##
 
