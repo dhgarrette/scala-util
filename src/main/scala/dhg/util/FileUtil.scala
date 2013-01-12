@@ -33,7 +33,8 @@ object FileUtil {
   }
 
   def pathjoin(parts: Seq[String]): String = {
-    parts.flatMap(_.split(separator)).filter(_.nonEmpty).mkString(separator)
+    val start = if (parts.head.startsWith(separator)) separator else ""
+    parts.flatMap(_.split(separator)).filter(_.nonEmpty).mkString(start, separator, "")
   }
 
   /**
