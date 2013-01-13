@@ -1,21 +1,15 @@
 package dhg.util
 
-import scala.collection.GenIterable
-import scala.collection.GenIterableLike
-import scala.collection.GenTraversable
+import scala.annotation.tailrec
 import scala.collection.GenTraversableLike
 import scala.collection.GenTraversableOnce
-import scala.collection.IterableLike
+import scala.collection.SeqLike
 import scala.collection.TraversableLike
 import scala.collection.generic.CanBuildFrom
-import scala.collection.mutable
 import scala.collection.immutable
+import scala.collection.mutable
 import scala.collection.mutable.Builder
 import scala.util.Random
-import scala.annotation.tailrec
-import scala.collection.generic.IsTraversableOnce
-import scala.collection.generic.IsTraversableLike
-import scala.collection.SeqLike
 
 /**
  * @author Dan Garrette (dhg@cs.utexas.edu)
