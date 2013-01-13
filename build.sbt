@@ -11,3 +11,5 @@ libraryDependencies ++= Seq(
   "com.novocode" % "junit-interface" % "0.6" % "test->default") //switch to ScalaTest at some point...
 
 scalacOptions ++= Seq("-deprecation")
+
+initialCommands in console := "import dhg.util.CollectionUtil._, dhg.util.Pattern._"

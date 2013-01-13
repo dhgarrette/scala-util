@@ -70,7 +70,7 @@ object CollectionUtil {
   //   - Map each distinct item in the collection to the number of times it appears.
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_counts_GenTraversableOnce[A](self: GenTraversableOnce[A]) {
+  implicit class Enriched_counts_TraversableOnce[A](self: TraversableOnce[A]) {
     /**
      * Map each distinct item in the collection to the number of times it appears.
      *
@@ -93,7 +93,7 @@ object CollectionUtil {
   //   - Equivalent to self.groupBy(_._1).map { case (k, elems) => (k, elems.map(_._2)) }
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_groupByKey_Traversable[K, V, Repr <: Traversable[(K, V)]](self: TraversableLike[(K, V), Repr]) {
+  implicit class Enriched_groupByKey_Traversable[K, V, Repr](self: TraversableLike[(K, V), Repr]) {
     /**
      * For a collection of pairs (k,v), create a map from each `k` to the
      * collection of `v`s with which it is associated.
@@ -243,7 +243,7 @@ object CollectionUtil {
       self.splitWhere(_ == delim, builder)
   }
 
-  implicit class Enriched_split_GenTraversable[A, Repr](self: GenTraversableLike[A, Repr]) {
+  implicit class Enriched_split_Traversable[A, Repr](self: TraversableLike[A, Repr]) {
     /**
      * Split this collection on each occurrence of the delimiter.  Delimiters
      * do not appear in the output.
@@ -318,7 +318,7 @@ object CollectionUtil {
       }
   }
 
-  implicit class Enriched_splitWhere_GenTraversable[A, Repr](self: GenTraversableLike[A, Repr]) {
+  implicit class Enriched_splitWhere_Traversable[A, Repr](self: TraversableLike[A, Repr]) {
     /**
      * Split this on items for which the predicate is true.  Delimiters
      * do not appear in the output.
@@ -627,7 +627,7 @@ object CollectionUtil {
      * @return the average (mean)
      */
     def avg = {
-      val (total, count) = self.toIterator.foldLeft((num.zero, num.zero)) {
+      val (total, count) = self.foldLeft((num.zero, num.zero)) {
         case ((total, count), x) => (num.plus(total, x), num.plus(count, num.one))
       }
       num.div(total, count)
@@ -641,7 +641,7 @@ object CollectionUtil {
      * @return the average (mean)
      */
     def avg = {
-      val (total, count) = self.toIterator.foldLeft((0, 0)) {
+      val (total, count) = self.foldLeft((0, 0)) {
         case ((total, count), x) => (total + x, count + 1)
       }
       total.toDouble / count
