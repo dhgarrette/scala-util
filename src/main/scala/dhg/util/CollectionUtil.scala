@@ -99,7 +99,7 @@ object CollectionUtil {
   //   - Equivalent to self.groupBy(_._1).map { case (k, elems) => (k, elems.map(_._2)) }
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_groupByKey_Traversable[A, Repr <: Traversable[A]](self: TraversableLike[A, Repr]) {
+  implicit class Enriched_groupByKey_Traversable[K, V, Repr <: Traversable[(K, V)]](self: TraversableLike[(K, V), Repr]) {
     /**
      * For a collection of pairs (k,v), create a map from each `k` to the
      * collection of `v`s with which it is associated.
@@ -108,9 +108,9 @@ object CollectionUtil {
      *
      * @return Map from `k`s to collections of `v`s
      */
-    def groupByKey[K, V, That](implicit ev: A <:< (K, V), bf: CanBuildFrom[Repr, V, That]): Map[K, That] = {
+    def groupByKey[That](implicit bf: CanBuildFrom[Repr, V, That]): Map[K, That] = {
       val m = mutable.Map.empty[K, Builder[V, That]]
-      for ((key, value) <- self.map(ev)) {
+      for ((key, value) <- self) {
         val bldr = m.getOrElseUpdate(key, bf(self.asInstanceOf[Repr]))
         bldr += value
       }
@@ -416,7 +416,7 @@ object CollectionUtil {
 
   implicit class Enriched_unzip_Iterator[T, U](self: Iterator[(T, U)]) {
     def unzip(): (Vector[T], Vector[U]) =
-      this.unzip(Vector.newBuilder[T], Vector.newBuilder[U])
+      unzip(Vector.newBuilder[T], Vector.newBuilder[U])
 
     def unzip[ThatT <: Iterable[T], ThatU <: Iterable[U]](tBuilder: => Builder[T, ThatT], uBuilder: => Builder[U, ThatU]): (ThatT, ThatU) = {
       val tBldr = tBuilder
@@ -448,10 +448,7 @@ object CollectionUtil {
      * @return the new collection
      */
     def mapTo[B, That](f: A => B)(implicit bf: CanBuildFrom[Repr, (A, B), That]): That = {
-      val b = bf(self.asInstanceOf[Repr])
-      b.sizeHint(self.size)
-      for (x <- self) b += x -> f(x)
-      b.result
+      self.map(x => x -> f(x))
     }
   }
 
@@ -491,10 +488,7 @@ object CollectionUtil {
      * @return the new collection
      */
     def mapToVal[B, That](v: => B)(implicit bf: CanBuildFrom[Repr, (A, B), That]): That = {
-      val b = bf(self.asInstanceOf[Repr])
-      b.sizeHint(self.size)
-      for (x <- self) b += x -> v
-      b.result
+      self.map(_ -> v)
     }
   }
 
@@ -530,10 +524,7 @@ object CollectionUtil {
      * @return a collection of pairs
      */
     def mapKeys[R, That](f: T => R)(implicit bf: CanBuildFrom[Repr, (R, U), That]) = {
-      val b = bf(self.asInstanceOf[Repr])
-      b.sizeHint(self.size)
-      for ((k, v) <- self) b += f(k) -> v
-      b.result
+      for ((k, v) <- self) yield f(k) -> v
     }
   }
 
@@ -571,10 +562,7 @@ object CollectionUtil {
      * @return a collection of pairs
      */
     def mapVals[R, That](f: U => R)(implicit bf: CanBuildFrom[Repr, (T, R), That]) = {
-      val b = bf(self.asInstanceOf[Repr])
-      b.sizeHint(self.size)
-      for ((k, v) <- self) b += k -> f(v)
-      b.result
+      for ((k, v) <- self) yield k -> f(v)
     }
   }
 
@@ -603,39 +591,33 @@ object CollectionUtil {
 
   implicit class Enriched_mapt_2_GenTraversableLike[A, B, Repr](self: GenTraversableLike[(A, B), Repr]) {
     def mapt[R, That](f: (A, B) => R)(implicit bf: CanBuildFrom[Repr, R, That]) = {
-      val b = bf(self.asInstanceOf[Repr])
-      b.sizeHint(self.size)
-      for (x <- self) b += f(x._1, x._2)
-      b.result
+      self.map(x => f(x._1, x._2))
     }
   }
 
   implicit class Enriched_mapt_2_Iterator[A, B](self: Iterator[(A, B)]) {
     def mapt[R](f: (A, B) => R) = new Iterator[R] {
-      override def next() = {
+      def next() = {
         val x = self.next
         f(x._1, x._2)
       }
-      override def hasNext() = self.hasNext
+      def hasNext() = self.hasNext
     }
   }
 
   implicit class Enriched_mapt_3_GenTraversableLike[A, B, C, Repr](self: GenTraversableLike[(A, B, C), Repr]) {
     def mapt[R, That](f: (A, B, C) => R)(implicit bf: CanBuildFrom[Repr, R, That]) = {
-      val b = bf(self.asInstanceOf[Repr])
-      b.sizeHint(self.size)
-      for (x <- self) b += f(x._1, x._2, x._3)
-      b.result
+      self.map(x => f(x._1, x._2, x._3))
     }
   }
 
   implicit class Enriched_mapt_3_Iterator[A, B, C](self: Iterator[(A, B, C)]) {
     def mapt[R](f: (A, B, C) => R) = new Iterator[R] {
-      override def next() = {
+      def next() = {
         val x = self.next
         f(x._1, x._2, x._3)
       }
-      override def hasNext() = self.hasNext
+      def hasNext() = self.hasNext
     }
   }
 
@@ -644,13 +626,13 @@ object CollectionUtil {
   //   - Find the average (mean) of this collection of numbers
   //////////////////////////////////////////////////////
 
-  implicit class Enrich_avg_GenTraversableOnce[A](self: GenTraversableOnce[A]) {
+  implicit class Enrich_avg_GenTraversableOnce[A](self: GenTraversableOnce[A])(implicit num: Fractional[A]) {
     /**
      * Find the average (mean) of this collection of numbers.
      *
      * @return the average (mean)
      */
-    def avg(implicit num: Fractional[A]) = {
+    def avg = {
       val (total, count) = self.toIterator.foldLeft((num.zero, num.zero)) {
         case ((total, count), x) => (num.plus(total, x), num.plus(count, num.one))
       }
@@ -684,11 +666,8 @@ object CollectionUtil {
      * @return normalized values
      */
     def normalize[That](implicit num: Fractional[A], bf: CanBuildFrom[Repr, A, That]) = {
-      val b = bf(self.asInstanceOf[Repr])
-      b.sizeHint(self.size)
       val total = self.sum
-      for (x <- self) b += num.div(x, total)
-      b.result
+      self.map(num.div(_, total))
     }
   }
 
@@ -699,11 +678,8 @@ object CollectionUtil {
      * @return normalized values
      */
     def normalize[That](implicit bf: CanBuildFrom[Repr, Double, That]) = {
-      val b = bf(self.asInstanceOf[Repr])
-      b.sizeHint(self.size)
       val total = self.sum.toDouble
-      for (x <- self) b += x / total
-      b.result
+      self.map(_ / total)
     }
   }
 
@@ -719,11 +695,8 @@ object CollectionUtil {
      * @return a collection of pairs
      */
     def normalizeValues[That](implicit num: Fractional[U], bf: CanBuildFrom[Repr, (T, U), That]) = {
-      val b = bf(self.asInstanceOf[Repr])
-      b.sizeHint(self.size)
       val total = self.foldLeft(num.zero)((z, a) => num.plus(z, a._2))
-      for ((k, v) <- self) b += k -> num.div(v, total)
-      b.result
+      for ((k, v) <- self) yield k -> num.div(v, total)
     }
   }
 
@@ -734,11 +707,8 @@ object CollectionUtil {
      * @return a collection of pairs
      */
     def normalizeValues[That](implicit bf: CanBuildFrom[Repr, (T, Double), That]) = {
-      val b = bf(self.asInstanceOf[Repr])
-      b.sizeHint(self.size)
       val total = self.foldLeft(0)((z, a) => z + a._2).toDouble
-      for ((k, v) <- self) b += k -> (v / total)
-      b.result
+      for ((k, v) <- self) yield k -> (v / total)
     }
   }
 
