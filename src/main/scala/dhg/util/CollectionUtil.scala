@@ -765,10 +765,19 @@ object CollectionUtil {
   // shuffle
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_shuffle_TraversableOnce[T, CC[X] <: TraversableOnce[X]](xs: CC[T]) {
-    def shuffle(implicit bf: CanBuildFrom[CC[T], T, CC[T]]): CC[T] = {
-      (bf(xs) ++= Random.shuffle(xs)).result
-    }
+  //  implicit class Enriched_shuffle_TraversableOnce[T, CC[X] <: TraversableOnce[X]](xs: CC[T]) {
+  //    def shuffle(implicit bf: CanBuildFrom[CC[T], T, CC[T]]): CC[T] = {
+  //      (bf(xs) ++= Random.shuffle(xs)).result
+  //    }
+  //  }
+
+  implicit class Enriched_shuffle_Seq[A, Repr](self: SeqLike[A, Repr]) {
+    def shuffle[That](implicit bf: CanBuildFrom[Repr, A, That]): That =
+      (bf(self.asInstanceOf[Repr]) ++= Random.shuffle(self)).result
+  }
+
+  implicit class Enriched_shuffle_Iterator[A](self: Iterator[A]) {
+    def shuffle: Iterator[A] = Random.shuffle(self)
   }
 
 }
