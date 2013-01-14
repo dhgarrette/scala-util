@@ -87,6 +87,42 @@ object CollectionUtil {
   }
 
   //////////////////////////////////////////////////////
+  // groupBy(f: A => K): Repr[(R,U)]
+  //   - Make Traversable.groupBy functionality available to Iterator
+  //////////////////////////////////////////////////////
+
+  implicit class Enriched_groupBy_Iterator[A](self: Iterator[A]) {
+    /**
+     * Same functionality as Traversable.groupBy(f)
+     *
+     * @param f	function mapping items to new keys
+     * @return Map from new keys to original items
+     */
+    def groupBy[K](f: A => K): Map[K, Vector[A]] =
+      this.groupBy(f, Vector.newBuilder[A])
+
+    /**
+     * Same functionality as Traversable.groupBy(f)
+     *
+     * @param f	function mapping items to new keys
+     * @param builder	a builder to construct collections of items that have been grouped
+     * @return Map from new keys to original items
+     */
+    def groupBy[K, That <: Iterable[A]](f: A => K, builder: => Builder[A, That]): Map[K, That] = {
+      val m = mutable.Map.empty[K, Builder[A, That]]
+      for (elem <- self) {
+        val key = f(elem)
+        val bldr = m.getOrElseUpdate(key, builder)
+        bldr += elem
+      }
+      val b = Map.newBuilder[K, That]
+      for ((k, v) <- m)
+        b += ((k, v.result))
+      b.result
+    }
+  }
+
+  //////////////////////////////////////////////////////
   // groupByKey(): Map[T,Repr[U]]
   //   - For a collection of pairs (k,v), create a map from each `k` to the  
   //     collection of `v`s with which it is associated.
@@ -113,6 +149,25 @@ object CollectionUtil {
         b += ((k, v.result))
       b.result
     }
+  }
+
+  implicit class Enriched_groupByKey_Iterator[A](self: Iterator[A]) {
+    /**
+     * For a collection of pairs, group by the first item in the pair.
+     *
+     * @return Map from first items of the pairs to collections of items that have been grouped
+     */
+    def groupByKey[T, U](implicit ev: A <:< (T, U)): Map[T, Vector[U]] =
+      groupByKey(Vector.newBuilder[U])
+
+    /**
+     * For a collection of pairs, group by the first item in the pair.
+     *
+     * @param builder a builder to construct collections of items that have been grouped
+     * @return Map from first items of the pairs to collections of items that have been grouped
+     */
+    def groupByKey[T, U, That <: Iterable[U]](builder: => Builder[U, That])(implicit ev: A <:< (T, U)): Map[T, That] =
+      self.groupBy(_._1).mapVals(v => (builder ++= v.map(_._2)).result)
   }
 
   //////////////////////////////////////////////////////
