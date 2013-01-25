@@ -31,6 +31,11 @@ object TestUtil {
       assertEquals(e, a)
   }
 
+  def assertEqualsSmart[T](expected: (T, Double), actual: (T, Double)) {
+    assertEquals(expected._1, actual._1)
+    assertEqualsDouble(expected._2, actual._2)
+  }
+
   def assertEqualsSmart[T](expected: Map[T, Double], actual: Map[T, Double]) {
     def keystr(m: Map[T, Double]) = s"${m.keys.toVector.map(_.toString).sorted.mkString(", ")}"
     assertEquals("Wrong keys.", keystr(expected), keystr(actual))
