@@ -6,6 +6,7 @@ import org.junit.Assert._
 import org.junit.Test
 
 import dhg.util.CollectionUtil._
+import dhg.util.TestUtil._
 
 /**
  * @author Dan Garrette (dhg@cs.utexas.edu)
@@ -378,16 +379,6 @@ class CollectionUtilTests {
     val coll3 = Map('a -> 1.0, 'b -> 1.5, 'c -> 2.5, 'd -> 5.0)
     val avg3: Map[Symbol, Double] = coll3.normalizeValues
     assertEquals(Map('a -> 0.1, 'b -> 0.15, 'c -> 0.25, 'd -> 0.5), avg3)
-  }
-
-  def assertException(block: => Unit)(handle: PartialFunction[Throwable, Unit]) {
-    try { block; fail("no exception thrown") } catch (handle)
-  }
-
-  def assertEqualsIterator[A](expected: Iterator[A], actual: Iterator[A]) {
-    while (expected.hasNext && actual.hasNext)
-      assertEquals(expected.next, actual.next)
-    assertEquals("Iterators have different lengths", expected.hasNext, actual.hasNext)
   }
 
 }

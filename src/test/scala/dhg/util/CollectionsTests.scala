@@ -7,6 +7,7 @@ import org.junit.Test
 
 import dhg.util.CollectionUtil._
 import dhg.util.Collections._
+import dhg.util.TestUtil._
 
 class CollectionsTests {
 
@@ -39,12 +40,6 @@ class CollectionsTests {
     assertEqualsSameElements(Buffer("d", "e"), calculated)
     assertEquals(2, m("b"))
     assertEqualsSameElements(Buffer("d", "e"), calculated)
-  }
-
-  def assertEqualsSameElements[T: Ordering](expected: Seq[T], actual: Seq[T]) {
-    assertEquals("%s vs %s: DIFFERENCE: (%s)".format(expected, actual, (expected ++ actual).toSet -- (expected.toSet & actual.toSet)), expected.sorted.size, actual.sorted.size)
-    for ((e, a) <- expected.sorted zipSafe actual.sorted)
-      assertEquals(e, a)
   }
 
 }
