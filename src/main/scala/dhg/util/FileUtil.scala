@@ -4,7 +4,9 @@ import java.io.BufferedWriter
 import java.io.File
 import java.io.File.createTempFile
 import java.io.File.separator
+import java.io.FileOutputStream
 import java.io.FileWriter
+import java.io.OutputStreamWriter
 import java.io.Writer
 import java.net.URI
 
@@ -166,7 +168,7 @@ object FileUtil {
    * file is closed when finished.
    */
   def readUsing[R](file: File)(block: BufferedSource => R): R = {
-    Arm.using(Source.fromFile(file))(block)
+    using(Source.fromFile(file))(block)
   }
 
   /**
@@ -176,7 +178,17 @@ object FileUtil {
    */
   def writeUsing[R](file: File)(block: BufferedWriter => R): R = {
     file.parent.foreach(_.mkdirs())
-    Arm.using(new BufferedWriter(new FileWriter(file)))(block)
+    using(new BufferedWriter(new FileWriter(file)))(block)
+  }
+
+  /**
+   * Open a file for writing (creating the containing directory structure if
+   * necessary), execute a block of code, and ensure that the file is closed
+   * when finished.
+   */
+  def writeUsing[R](file: File, encoding: String)(block: BufferedWriter => R): R = {
+    file.parent.foreach(_.mkdirs())
+    using(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), encoding)))(block)
   }
 
   /**
