@@ -49,7 +49,7 @@ object FileUtil {
     f
   }
 
-  implicit class EnhancedFile(self: File) {
+  implicit class EnhancedFile(val self: File) extends AnyVal {
 
     def path = {
       self.getPath

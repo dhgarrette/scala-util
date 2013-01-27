@@ -4,7 +4,7 @@ object StringUtil {
 
   val WhitespaceRe = """\s*""".r
   val RTrimRe = """(.*\S)\s*""".r
-  implicit class EnrichedString(self: String) {
+  implicit class EnrichedString(val self: String) extends AnyVal {
     def rtrim = self match {
       case WhitespaceRe() => ""
       case RTrimRe(trimmed) => trimmed
