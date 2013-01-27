@@ -1,6 +1,8 @@
 package dhg.util
 
 import scala.math._
+import scalaz._
+import Scalaz._
 
 /**
  * This Numeric class represents values using logarithms.  The underlying
@@ -70,7 +72,7 @@ object LogNum {
   val zero = new LogNum(Double.NegativeInfinity)
   val one = new LogNum(0.0)
 
-  trait LogNumOrdering extends Ordering[LogNum] {
+  trait LogNumOrdering extends scala.math.Ordering[LogNum] {
     override def compare(a: LogNum, b: LogNum) = a compare b
   }
 
@@ -91,8 +93,13 @@ object LogNum {
     override def one = LogNum.one
   }
 
-  implicit class EnrichedNumeric[N](self: N)(implicit num: Numeric[N]) {
+  implicit class NumericWithToLogNum[N](self: N)(implicit num: Numeric[N]) {
     def toLogNum = new LogNum(log(num.toDouble(self)))
   }
+
+  implicit def LogNumSemigroup: Semigroup[LogNum] =
+    new Semigroup[LogNum] {
+      def append(f1: LogNum, f2: => LogNum) = f1 + f2
+    }
 
 }
