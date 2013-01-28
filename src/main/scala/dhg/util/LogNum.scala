@@ -97,9 +97,4 @@ object LogNum {
     def toLogNum = new LogNum(log(num.toDouble(self)))
   }
 
-  implicit def LogNumSemigroup: Semigroup[LogNum] =
-    new Semigroup[LogNum] {
-      def append(f1: LogNum, f2: => LogNum) = f1 + f2
-    }
-
 }
