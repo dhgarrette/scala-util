@@ -7,7 +7,10 @@ object Collections {
 
   class MemoMap[A, B](startEntries: Map[A, B], default: A => B) extends (A => B) with Iterable[(A, B)] { //mutable.Map[A, B] {
     private[this] val cache = mutable.Map[A, B]() ++ startEntries
-    override def apply(key: A): B = cache.getOrElseUpdate(key, default(key))
+    override def apply(key: A): B =
+      synchronized {
+        cache.getOrElseUpdate(key, default(key))
+      }
     override def size = cache.size
     override def iterator: Iterator[(A, B)] = cache.iterator
   }

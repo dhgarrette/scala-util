@@ -573,7 +573,7 @@ object CollectionUtil {
      * @return a collection of pairs
      */
     def mapKeys[R, That](f: T => R)(implicit bf: CanBuildFrom[Repr, (R, U), That]) = {
-      for ((k, v) <- self) yield f(k) -> v
+      self.map(x => f(x._1) -> x._2)
     }
   }
 
@@ -611,7 +611,7 @@ object CollectionUtil {
      * @return a collection of pairs
      */
     def mapVals[R, That](f: U => R)(implicit bf: CanBuildFrom[Repr, (T, R), That]) = {
-      for ((k, v) <- self) yield k -> f(v)
+      self.map(x => x._1 -> f(x._2))
     }
   }
 
@@ -745,7 +745,7 @@ object CollectionUtil {
      */
     def normalizeValues[That](implicit num: Fractional[U], bf: CanBuildFrom[Repr, (T, U), That]) = {
       val total = self.foldLeft(num.zero)((z, a) => num.plus(z, a._2))
-      for ((k, v) <- self) yield k -> num.div(v, total)
+      self.map(x => x._1 -> num.div(x._2, total))
     }
   }
 
@@ -757,7 +757,7 @@ object CollectionUtil {
      */
     def normalizeValues[That](implicit bf: CanBuildFrom[Repr, (T, Double), That]) = {
       val total = self.foldLeft(0)((z, a) => z + a._2).toDouble
-      for ((k, v) <- self) yield k -> (v / total)
+      self.map(x => x._1 -> (x._2 / total))
     }
   }
 
