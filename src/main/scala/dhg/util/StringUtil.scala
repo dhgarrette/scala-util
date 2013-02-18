@@ -9,6 +9,9 @@ object StringUtil {
       case WhitespaceRe() => ""
       case RTrimRe(trimmed) => trimmed
     }
+
+    def splitlines = self.split("\n")
+    def splitWhitespace = self.split("\\s+")
   }
 
 }
