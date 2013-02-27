@@ -3,8 +3,8 @@ package dhg.util
 import java.io.File
 import java.io.Reader
 import java.io.Writer
-
 import scala.io.Source
+import java.io.Closeable
 
 object Arm {
 
@@ -13,11 +13,7 @@ object Arm {
     def close(): Unit
   }
 
-  implicit class ManagedWriter[T <: Writer](val self: T) extends Managed[T] {
-    def close() { self.close() }
-  }
-
-  implicit class ManagedReader[T <: Reader](val self: T) extends Managed[T] {
+  implicit class ManagedCloseable[T <: Closeable](val self: T) extends Managed[T] {
     def close() { self.close() }
   }
 
