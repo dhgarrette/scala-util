@@ -633,6 +633,37 @@ object CollectionUtil {
   }
 
   //////////////////////////////////////////////////////
+  // submap(f: T => R): Repr[R]
+  //   - In a collection of collections, map a function over the inner collections without flattening.
+  //   - Equivalent to: this.map(_.map(x => f(x)))
+  //////////////////////////////////////////////////////
+
+  implicit class Enriched_submap_GenTraversable[T, TRepr, SRepr](val self: GenTraversableLike[GenTraversableLike[T, TRepr], SRepr]) extends AnyVal {
+    /**
+     * In a collection of collections, map a function over the inner collections without flattening.
+     *
+     * @param f	function to map over the inner collections
+     * @return a collection of collections
+     */
+    def submap[R, TThat, SThat](f: T => R)(implicit tbf: CanBuildFrom[TRepr, R, TThat], bf: CanBuildFrom[SRepr, TThat, SThat]) = {
+      self.map(s => s.map(f)(tbf))
+    }
+  }
+
+  implicit class Enriched_submap_Iterator[T, Repr](val self: Iterator[GenTraversableLike[T, Repr]]) { // extends AnyVal {
+    /**
+     * In a collection of collections, map a function over the inner collections without flattening.
+     *
+     * @param f	function to map over the inner collections
+     * @return a collection of collections
+     */
+    def submap[R, That](f: T => R)(implicit bf: CanBuildFrom[Repr, R, That]) = new Iterator[That] {
+      def hasNext = self.hasNext
+      def next() = self.next().map(f)(bf)
+    }
+  }
+
+  //////////////////////////////////////////////////////
   // mapt[A,B,R](f: (A,B) => R): Repr[R]
   //   - map over a Tuple2
   //   - same as `xs.map { case (x,y) => f(x,y) } `
