@@ -1,29 +1,27 @@
-package dhg.util
+package dhg.util.math
 
 import scala.math._
-
 import org.junit.Assert._
 import org.junit.Test
+import dhg.util.math.LogDouble._
 
-import dhg.util.LogNum._
-
-class LogNumTests {
+class LogDoubleTests {
 
   @Test
   def test_sum() {
-    val a = new LogNum(-772.740105887932)
+    val a = new LogDouble(-772.740105887932)
     val l = List(a)
-    val s = LogNum.zero + a
-    assertTrue(s != LogNum.zero)
+    val s = LogDouble.zero + a
+    assertTrue(s != LogDouble.zero)
   }
 
   @Test
   def test_operators() {
-    val a: LogNum = 3.toLogNum
-    val b: LogNum = 5.toLogNum
-    val c: LogNum = 6.toLogNum
-    val d: LogNum = 2.toLogNum
-    val e: LogNum = 8.toLogNum
+    val a: LogDouble = 3.toLogDouble
+    val b: LogDouble = 5.toLogDouble
+    val c: LogDouble = 6.toLogDouble
+    val d: LogDouble = 2.toLogDouble
+    val e: LogDouble = 8.toLogDouble
 
     assertEquals(log(3.0), (a.logValue: Double), 0.0000001)
     assertEquals(3.0, (a.toDouble: Double), 0.0000001)
@@ -45,7 +43,7 @@ class LogNumTests {
     assertTrue(b > a)
     assertFalse(b < a)
 
-    assertEqualsLog(LogNum(10), List(a, b, d).sum)
+    assertEqualsLog(LogDouble.apply(10), List(a, b, d).sum)
     assertEqualsNumericLog(b, List(a, b).max)
     assertEqualsNumericLog(b, List(b, a).max)
     assertEqualsNumericLog(a, List(a, b).min)
@@ -54,11 +52,11 @@ class LogNumTests {
 
   @Test
   def test_numeric() {
-    val a: LogNum = 3.toLogNum
-    val b: LogNum = 5.toLogNum
-    val c: LogNum = 6.toLogNum
-    val d: LogNum = 2.toLogNum
-    val e: LogNum = 8.toLogNum
+    val a: LogDouble = 3.toLogDouble
+    val b: LogDouble = 5.toLogDouble
+    val c: LogDouble = 6.toLogDouble
+    val d: LogDouble = 2.toLogDouble
+    val e: LogDouble = 8.toLogDouble
 
     def stuff[N](a: N, b: N, c: N, d: N, e: N)(implicit num: Fractional[N]) = {
       assertEqualsNumericLog(b, num.plus(d, a))
@@ -75,14 +73,14 @@ class LogNumTests {
     stuff(a, b, c, d, e)
   }
 
-  def assertEqualsLog(a: LogNum, b: LogNum) {
+  def assertEqualsLog(a: LogDouble, b: LogDouble) {
     assertEquals(a.toDouble, b.toDouble, 0.0000001)
   }
 
   def assertEqualsNumericLog[N](a: N, b: N)(implicit num: Numeric[N]) {
     (a, b) match {
-      case (a: LogNum, b: LogNum) => assertEqualsLog(a, b)
-      case _ => fail(s"a and b are not LogNum instances: a:[$a], b:[$b]")
+      case (a: LogDouble, b: LogDouble) => assertEqualsLog(a, b)
+      case _ => fail(s"a and b are not LogDouble instances: a:[$a], b:[$b]")
     }
   }
 
