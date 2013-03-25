@@ -31,7 +31,8 @@ class LogDoubleTests {
     assertEqualsLog(d, b - a)
     assertEqualsLog(c, d * a)
     assertEqualsLog(d, c / a)
-    assertEqualsLog(e, d ** a)
+    assertEqualsLog(e, d ** 3)
+    assertEqualsLog(e, d ** 3.0)
 
     assertEqualsLog(b, a max b)
     assertEqualsLog(b, b max a)

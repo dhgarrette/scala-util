@@ -43,7 +43,9 @@ class LogDouble(val logValue: Double) extends AnyVal with Ordered[LogDouble] {
 
   def *(other: LogDouble): LogDouble = new LogDouble(logValue + other.logValue)
   def /(other: LogDouble): LogDouble = new LogDouble(logValue - other.logValue)
-  def **(pow: LogDouble): LogDouble = new LogDouble(pow.toDouble * logValue)
+
+  def **(pow: Int): LogDouble = new LogDouble(pow * logValue)
+  def **(pow: Double): LogDouble = new LogDouble(pow * logValue)
 
   override def compare(that: LogDouble) = logValue.compare(that.logValue)
   def max(that: LogDouble): LogDouble = if (this.logValue > that.logValue) this else that
