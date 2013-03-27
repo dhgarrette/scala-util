@@ -95,8 +95,18 @@ object LogDouble {
     override def one = LogDouble.one
   }
 
-  implicit class NumericWithToLogDouble[N](self: N)(implicit num: Numeric[N]) {
-    def toLogDouble = new LogDouble(log(num.toDouble(self)))
+  //  implicit class NumericWithToLogDouble[N](self: N)(implicit num: Numeric[N]) {
+  //    def toLogDouble = new LogDouble(math.log(num.toDouble(self)))
+  //    def log = toLogDouble
+  //  }
+
+  implicit class IntWithToLogDouble(val self: Int) extends AnyVal {
+    def toLogDouble: LogDouble = new LogDouble(math.log(self))
+    def log: LogDouble = toLogDouble
   }
 
+  implicit class DoubleWithToLogDouble(val self: Double) extends AnyVal {
+    def toLogDouble: LogDouble = new LogDouble(math.log(self))
+    def log: LogDouble = toLogDouble
+  }
 }
