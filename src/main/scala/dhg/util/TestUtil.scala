@@ -2,6 +2,9 @@ package dhg.util
 
 import org.junit.Assert._
 import dhg.util.CollectionUtil._
+import dhg.util.math.LogDouble
+import dhg.util.math.LogDouble._
+import scala.math.log
 
 object TestUtil {
 
@@ -36,11 +39,27 @@ object TestUtil {
     assertEqualsDouble(expected._2, actual._2)
   }
 
+  def assertEqualsSmartLog[T](expected: (T, Double), actual: (T, LogDouble)) {
+    assertEquals(expected._1, actual._1)
+    assertEqualsDouble(log(expected._2), actual._2.logValue)
+  }
+
+  def assertEqualsSmart[T](expected: Double, actual: LogDouble) {
+    assertEqualsDouble(log(expected), actual.logValue)
+  }
+
   def assertEqualsSmart[T](expected: Map[T, Double], actual: Map[T, Double]) {
     def keystr(m: Map[T, Double]) = s"${m.keys.toVector.map(_.toString).sorted.mkString(", ")}"
     assertEquals("Wrong keys.", keystr(expected), keystr(actual))
     for ((k, ev) <- expected)
       assertEqualsDouble(ev, actual(k))
+  }
+
+  def assertEqualsSmartLog[T](expected: Map[T, Double], actual: Map[T, LogDouble]) {
+    def keystr(m: Map[T, _]) = s"${m.keys.toVector.map(_.toString).sorted.mkString(", ")}"
+    assertEquals("Wrong keys.", keystr(expected), keystr(actual))
+    for ((k, ev) <- expected)
+      assertEqualsDouble(log(ev), actual(k).logValue)
   }
 
   def assertEqualsSmart[A](expected: Option[Map[A, Double]], actual: Option[Map[A, Double]]) {
