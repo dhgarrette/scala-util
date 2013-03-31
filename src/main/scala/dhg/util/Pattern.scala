@@ -5,7 +5,6 @@ import scala.collection.generic.CanBuildFrom
 object Pattern {
 
   object UInt {
-    def x = 1
     val IntRE = """^(-?\d+)$""".r
     def unapply(v: String): Option[Int] = v match {
       case IntRE(s) => Some(s.toInt)
@@ -22,6 +21,14 @@ object Pattern {
     }
   }
   //  implicit def double2unapplyDouble(objA: Double.type) = UDouble
+
+  object UBoolean {
+    val booleanRE = """([Tt][Rr][Uu][Ee]|[Ff][Aa][Ll][Ss][Ee])""".r
+    def unapply(v: String): Option[Boolean] = v match {
+      case booleanRE(s) => Some(s.toBoolean)
+      case _ => None
+    }
+  }
 
   object UMap {
     def unapplySeq[A, B](m: Map[A, B]): Option[Seq[(A, B)]] = Some(m.toIndexedSeq)
