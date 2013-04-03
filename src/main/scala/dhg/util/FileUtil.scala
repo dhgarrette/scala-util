@@ -9,12 +9,14 @@ import java.io.FileWriter
 import java.io.OutputStreamWriter
 import java.io.Writer
 import java.net.URI
-
 import scala.collection.breakOut
 import scala.io.BufferedSource
 import scala.io.Source
-
 import dhg.util.Arm._
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.util.zip.GZIPInputStream
+import java.io.FileInputStream
 
 object FileUtil {
 
@@ -131,6 +133,28 @@ object FileUtil {
       Arm.readLines(self, encoding)
     }
 
+  }
+
+  case class BufferedReaderIterator(reader: BufferedReader) extends Iterator[String] {
+    override def hasNext() = reader.ready
+    override def next() = reader.readLine()
+  }
+
+  object GzFileIterator {
+    def apply(file: File, encoding: String) = {
+      new BufferedReaderIterator(
+        new BufferedReader(
+          new InputStreamReader(
+            new GZIPInputStream(
+              new FileInputStream(file)), encoding)))
+    }
+    def apply(file: File) = {
+      new BufferedReaderIterator(
+        new BufferedReader(
+          new InputStreamReader(
+            new GZIPInputStream(
+              new FileInputStream(file)))))
+    }
   }
 
   def findBinary(name: String, binDir: Option[String] = None, envar: Option[String] = None): String = {
