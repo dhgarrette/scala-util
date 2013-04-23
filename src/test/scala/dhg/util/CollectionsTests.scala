@@ -1,15 +1,22 @@
 package dhg.util
 
 import scala.collection.mutable.Buffer
-
 import org.junit.Assert._
 import org.junit.Test
-
 import dhg.util.CollectionUtil._
 import dhg.util.Collections._
 import dhg.util.TestUtil._
 
 class CollectionsTests {
+
+  @Test
+  def test_UniversalSet() {
+    val u = UniversalSet[Int]()
+    assertTrue(u(5))
+    assertTrue(u eq (u + 1))
+    assertException(u.iterator) { case e: NotImplementedError => }
+    assertException(u - 1) { case e: NotImplementedError => }
+  }
 
   @Test
   def test_MemoMap() {

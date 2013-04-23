@@ -5,6 +5,21 @@ import scala.collection.mutable
 
 object Collections {
 
+  class UniversalSet[A] extends Set[A] {
+    override def contains(key: A): Boolean = true
+    override def iterator: Iterator[A] = throw new NotImplementedError("UniversalSet cannot be iterated over")
+    override def +(elem: A): UniversalSet[A] = this // Anything added to a UniversalSet is still a UniversalSet
+    override def -(elem: A): UniversalSet[A] = throw new NotImplementedError("Nothing can be removed from a UniversalSet")
+    override def toString() = "UniversalSet()"
+  }
+  object UniversalSet {
+    def apply[A]() = new UniversalSet[A]
+  }
+
+  //
+  //
+  //
+
   class MemoMap[A, B](startEntries: Map[A, B], default: A => B) extends (A => B) with Iterable[(A, B)] { //mutable.Map[A, B] {
     private[this] val cache = mutable.Map[A, B]() ++ startEntries
     override def apply(key: A): B =
