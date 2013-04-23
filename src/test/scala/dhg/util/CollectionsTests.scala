@@ -11,7 +11,7 @@ class CollectionsTests {
 
   @Test
   def test_UniversalSet() {
-    val u = UniversalSet[Int]()
+    val u: Set[Int] = UniversalSet()
     assertTrue(u(5))
     assertTrue(u eq (u + 1))
     assertException(u.iterator) { case e: NotImplementedError => }
