@@ -83,6 +83,13 @@ object FileUtil {
     }
 
     /**
+     * Creating the file's containing directory structure if necessary.
+     */
+    def mkParentDir() {
+      self.parent.foreach(_.mkdirs())
+    }
+
+    /**
      * Delete this file, even if it is a non-empty directory.
      */
     def deleteRecursive(): Boolean = {
@@ -157,6 +164,9 @@ object FileUtil {
     }
   }
 
+  def bufferedWriter(file: File) = new BufferedWriter(new FileWriter(file))
+  def bufferedWriter(file: File, encoding: String) = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), encoding))
+
   def findBinary(name: String, binDir: Option[String] = None, envar: Option[String] = None): String = {
     val checked = collection.mutable.Buffer[String]()
 
@@ -201,8 +211,8 @@ object FileUtil {
    * when finished.
    */
   def writeUsing[R](file: File)(block: BufferedWriter => R): R = {
-    file.parent.foreach(_.mkdirs())
-    using(new BufferedWriter(new FileWriter(file)))(block)
+    file.mkParentDir()
+    using(bufferedWriter(file))(block)
   }
 
   /**
@@ -211,8 +221,8 @@ object FileUtil {
    * when finished.
    */
   def writeUsing[R](file: File, encoding: String)(block: BufferedWriter => R): R = {
-    file.parent.foreach(_.mkdirs())
-    using(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), encoding)))(block)
+    file.mkParentDir()
+    using(bufferedWriter(file, encoding))(block)
   }
 
   /**
