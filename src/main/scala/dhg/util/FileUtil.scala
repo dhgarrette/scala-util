@@ -17,6 +17,7 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.util.zip.GZIPInputStream
 import java.io.FileInputStream
+import scala.util.matching.Regex
 
 object FileUtil {
 
@@ -89,20 +90,35 @@ object FileUtil {
       self.parent.foreach(_.mkdirs())
     }
 
-    /**
-     * Delete this file, even if it is a non-empty directory.
-     */
-    def deleteRecursive(): Boolean = {
-      if (self.isDirectory)
-        self.listFiles.filter(_ != null).foreach(_.deleteRecursive())
-      self.delete()
+    def ls() = {
+      self.listFiles
+    }
+
+    def ls(regex: Regex, pathMatch: Boolean = false) = {
+      val files = self.listFiles
+      def getName(f: File) =
+        if (pathMatch) f.getAbsolutePath
+        else f.getName
+      files.filter(f => regex.pattern.matcher(getName(f)).matches)
     }
 
     /**
      * List all files (but not directories), searching recursively through sub-directories.
      */
-    def listFilesRecursive: Set[File] = {
-      self.listFiles.flatMap { f =>
+    def listFilesRecursive(): Set[File] = {
+      self.ls.flatMap { f =>
+        if (f.isDirectory)
+          f.listFilesRecursive
+        else
+          Set(f)
+      }(breakOut)
+    }
+
+    /**
+     * List all files (but not directories), searching recursively through sub-directories.
+     */
+    def listFilesRecursive(regex: Regex, pathMatch: Boolean = false): Set[File] = {
+      self.ls(regex, pathMatch).flatMap { f =>
         if (f.isDirectory)
           f.listFilesRecursive
         else
