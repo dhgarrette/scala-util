@@ -21,6 +21,22 @@ object StringUtil {
       else
         back
     }
-  }
 
+    def wrap(width: Int = 80) = {
+      val (completeLines, lastLine) =
+        self.split("\\s+").foldLeft((Vector[String](), "")) {
+          case ((lines, currLine), tok) =>
+            if (currLine.size + tok.size + 1 > width)
+              (lines :+ currLine, tok)
+            else if (currLine.isEmpty)
+              (lines, tok)
+            else
+              (lines, currLine + " " + tok)
+        }
+      val lines = completeLines :+ lastLine
+      //lines.map(s => f"$s%-80s|").mkString("\n")
+      lines.mkString("\n")
+    }
+
+  }
 }
