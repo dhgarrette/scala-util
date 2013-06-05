@@ -246,6 +246,7 @@ object FileUtil {
    */
   implicit class WriterWithWriteLine(self: Writer) {
     def writeLine(line: String) { self.write(line + "\n") }
+    def writeLine() { self.write("\n") }
   }
 
 }
