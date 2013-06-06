@@ -244,9 +244,12 @@ object FileUtil {
   /**
    * Add a method `writeLine` to Writer classes
    */
-  implicit class WriterWithWriteLine(self: Writer) {
-    def writeLine(line: String) { self.write(line + "\n") }
+  implicit class WriterWithWriteLine(val self: Writer) extends AnyVal {
+    def writeLine(line: Any) { self.write(line + "\n") }
     def writeLine() { self.write("\n") }
+    
+    def wl(line: Any) = writeLine(line)
+    def wl() = writeLine()
   }
 
 }
