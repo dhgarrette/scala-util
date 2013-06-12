@@ -1,5 +1,6 @@
 package dhg.util.viz
 
+import dhg.util.CollectionUtil._
 import java.awt.Color
 import org.jfree.chart.ChartFactory
 import org.jfree.chart.ChartPanel
@@ -148,7 +149,7 @@ object BarChart {
     chartTitle: String = "",
     xaxisLabel: String = "",
     yaxisLabel: String = ""): Chart = {
-    make(data.zipWithIndex.map(_.swap))
+    make(data.zipWithIndex.map(_.swap), chartTitle, xaxisLabel, yaxisLabel)
   }
 }
 
@@ -203,5 +204,13 @@ object LineGraph {
         false // urls
         ),
       chartTitle)
+  }
+
+  def makeIndexed(
+    data: Vector[Double],
+    chartTitle: String = "",
+    xaxisLabel: String = "",
+    yaxisLabel: String = ""): Chart = {
+    make(data.zipWithIndex.map { case (y, x) => (x.toDouble, y) }, chartTitle, xaxisLabel, yaxisLabel)
   }
 }
