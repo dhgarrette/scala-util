@@ -1,7 +1,6 @@
 package dhg.util.viz
 
 import java.awt.Color
-
 import org.jfree.chart.ChartFactory
 import org.jfree.chart.ChartPanel
 import org.jfree.chart.JFreeChart
@@ -15,8 +14,13 @@ import org.jfree.chart.renderer.xy.StandardXYBarPainter
 import org.jfree.chart.renderer.xy.XYBarRenderer
 import org.jfree.data.category.DefaultCategoryDataset
 import org.jfree.data.statistics.HistogramDataset
-
 import javax.swing.JFrame
+import org.jfree.data.xy.XYSeriesCollection
+import org.jfree.data.xy.XYDataset
+import org.jfree.data.xy.XYSeries
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer
+import org.jfree.chart.axis.NumberAxis
+import org.jfree.chart.plot.CategoryPlot
 
 class Chart(frame: JFrame) {
   def draw(
@@ -46,11 +50,12 @@ trait ChartCustomizer[T <: Plot, Renderer <: AbstractRenderer] {
     val plot = chart.getPlot.asInstanceOf[T]
     plot.setForegroundAlpha(foregroundAlpha)
     plot.setBackgroundPaint(Color.WHITE)
+    // plot.setAxisOffset(new Spacer(Spacer.ABSOLUTE, 5.0, 5.0, 5.0, 5.0));
 
     setGridlinePaint(plot, new Color(150, 150, 150))
     setShadowVisible(plot, false)
     setSeriesPaint(plot, 0, Color.blue)
-    useStandardBarPainter(plot)
+    useStandardPainter(plot)
 
     val x = new JFrame(chartTitle)
     x.setContentPane(new ChartPanel(chart))
@@ -64,7 +69,18 @@ trait ChartCustomizer[T <: Plot, Renderer <: AbstractRenderer] {
   def getRenderer(plot: T): Renderer
   def setShadowVisible(plot: T, visible: Boolean)
   def setSeriesPaint(plot: T, series: Int, barColor: Color)
-  def useStandardBarPainter(plot: T)
+  def useStandardPainter(plot: T)
+}
+
+object BarChartChartCustomizer extends ChartCustomizer[CategoryPlot, BarRenderer] {
+  override def setGridlinePaint(plot: CategoryPlot, color: Color) {
+    plot.setDomainGridlinePaint(color)
+    plot.setRangeGridlinePaint(color)
+  }
+  override def getRenderer(plot: CategoryPlot): BarRenderer = plot.getRenderer.asInstanceOf[BarRenderer]
+  override def setShadowVisible(plot: CategoryPlot, visible: Boolean) { getRenderer(plot).setShadowVisible(visible) }
+  override def setSeriesPaint(plot: CategoryPlot, series: Int, barColor: Color) { getRenderer(plot).setSeriesPaint(series, barColor) }
+  override def useStandardPainter(plot: CategoryPlot) { getRenderer(plot).setBarPainter(new StandardBarPainter()) }
 }
 
 object HistogramChartCustomizer extends ChartCustomizer[XYPlot, XYBarRenderer] {
@@ -75,18 +91,27 @@ object HistogramChartCustomizer extends ChartCustomizer[XYPlot, XYBarRenderer] {
   override def getRenderer(plot: XYPlot): XYBarRenderer = plot.getRenderer.asInstanceOf[XYBarRenderer]
   override def setShadowVisible(plot: XYPlot, visible: Boolean) { getRenderer(plot).setShadowVisible(visible) }
   override def setSeriesPaint(plot: XYPlot, series: Int, barColor: Color) { getRenderer(plot).setSeriesPaint(series, barColor) }
-  override def useStandardBarPainter(plot: XYPlot) { getRenderer(plot).setBarPainter(new StandardXYBarPainter()) }
+  override def useStandardPainter(plot: XYPlot) { getRenderer(plot).setBarPainter(new StandardXYBarPainter()) }
 }
 
-object BarChartChartCustomizer extends ChartCustomizer[XYPlot, BarRenderer] {
+object LingGraphChartCustomizer extends ChartCustomizer[XYPlot, XYLineAndShapeRenderer] {
   override def setGridlinePaint(plot: XYPlot, color: Color) {
     plot.setDomainGridlinePaint(color)
     plot.setRangeGridlinePaint(color)
   }
-  override def getRenderer(plot: XYPlot): BarRenderer = plot.getRenderer.asInstanceOf[BarRenderer]
-  override def setShadowVisible(plot: XYPlot, visible: Boolean) { getRenderer(plot).setShadowVisible(visible) }
+  override def getRenderer(plot: XYPlot): XYLineAndShapeRenderer = plot.getRenderer.asInstanceOf[XYLineAndShapeRenderer]
+  override def setShadowVisible(plot: XYPlot, visible: Boolean) {}
   override def setSeriesPaint(plot: XYPlot, series: Int, barColor: Color) { getRenderer(plot).setSeriesPaint(series, barColor) }
-  override def useStandardBarPainter(plot: XYPlot) { getRenderer(plot).setBarPainter(new StandardBarPainter()) }
+  override def useStandardPainter(plot: XYPlot) {
+    val renderer = getRenderer(plot)
+    renderer.setSeriesLinesVisible(0, true)
+    renderer.setSeriesShapesVisible(0, true)
+    plot.setRenderer(renderer)
+    // renderer.setBarPainter(new XYLineAndShapeRenderer())
+
+    val rangeAxis: NumberAxis = plot.getRangeAxis().asInstanceOf[NumberAxis]
+    rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits())
+  }
 }
 
 //
@@ -148,6 +173,34 @@ object Histogram {
         false, // include legend
         false, // tooltips?
         false // URLs?
+        ),
+      chartTitle)
+  }
+}
+
+object LineGraph {
+  def make(
+    data: Vector[(Double, Double)],
+    chartTitle: String = "",
+    xaxisLabel: String = "",
+    yaxisLabel: String = ""): Chart = {
+
+    val series = new XYSeries(chartTitle)
+    for ((x, y) <- data)
+      series.add(x, y)
+    val dataset = new XYSeriesCollection()
+    dataset.addSeries(series)
+
+    LingGraphChartCustomizer.customizeChart(
+      ChartFactory.createXYLineChart(
+        chartTitle, // chart title
+        xaxisLabel, // x axis label
+        yaxisLabel, // y axis label
+        dataset, // data
+        PlotOrientation.VERTICAL,
+        false, // include legend
+        false, // tooltips
+        false // urls
         ),
       chartTitle)
   }
