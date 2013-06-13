@@ -105,8 +105,6 @@ object LingGraphChartCustomizer extends ChartCustomizer[XYPlot, XYLineAndShapeRe
   override def setSeriesPaint(plot: XYPlot, series: Int, barColor: Color) { getRenderer(plot).setSeriesPaint(series, barColor) }
   override def useStandardPainter(plot: XYPlot) {
     val renderer = getRenderer(plot)
-    renderer.setSeriesLinesVisible(0, true)
-    renderer.setSeriesShapesVisible(0, true)
     plot.setRenderer(renderer)
     // renderer.setBarPainter(new XYLineAndShapeRenderer())
 
@@ -182,9 +180,12 @@ object Histogram {
 object LineGraph {
   def make(
     data: Vector[(Double, Double)],
+    dots: Boolean = true,
+    lines: Boolean = true,
     chartTitle: String = "",
     xaxisLabel: String = "",
     yaxisLabel: String = ""): Chart = {
+    require(lines || dots)
 
     val series = new XYSeries(chartTitle)
     for ((x, y) <- data)
@@ -192,25 +193,30 @@ object LineGraph {
     val dataset = new XYSeriesCollection()
     dataset.addSeries(series)
 
-    LingGraphChartCustomizer.customizeChart(
-      ChartFactory.createXYLineChart(
-        chartTitle, // chart title
-        xaxisLabel, // x axis label
-        yaxisLabel, // y axis label
-        dataset, // data
-        PlotOrientation.VERTICAL,
-        false, // include legend
-        false, // tooltips
-        false // urls
-        ),
-      chartTitle)
+    val chart = ChartFactory.createXYLineChart(
+      chartTitle, // chart title
+      xaxisLabel, // x axis label
+      yaxisLabel, // y axis label
+      dataset, // data
+      PlotOrientation.VERTICAL,
+      false, // include legend
+      false, // tooltips
+      false // urls
+      )
+
+    val renderer = LingGraphChartCustomizer.getRenderer(chart.getPlot.asInstanceOf[XYPlot])
+    renderer.setSeriesShapesVisible(0, dots)
+    renderer.setSeriesLinesVisible(0, lines)
+    LingGraphChartCustomizer.customizeChart(chart, chartTitle)
   }
 
   def makeIndexed(
     data: Vector[Double],
+    dots: Boolean = true,
+    lines: Boolean = true,
     chartTitle: String = "",
     xaxisLabel: String = "",
     yaxisLabel: String = ""): Chart = {
-    make(data.zipWithIndex.map { case (y, x) => (x.toDouble, y) }, chartTitle, xaxisLabel, yaxisLabel)
+    make(data.zipWithIndex.map { case (y, x) => (x.toDouble, y) }, dots, lines, chartTitle, xaxisLabel, yaxisLabel)
   }
 }
