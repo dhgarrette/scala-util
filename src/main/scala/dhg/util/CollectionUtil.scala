@@ -703,8 +703,9 @@ object CollectionUtil {
 
   //////////////////////////////////////////////////////
   // foldLeftWhile[A,B](z: B)(p: (B, A) => Boolean)(op: (B, A) => B): B
-  //   - Folds while the condition `p` is true.  The failing `(z,x)`
-  //     pair will _not_ be folded into the final result.
+  //   - Folds while the condition `p` is true.
+  //   - If `p` operates on the item, then it behaves like `takeWhile`;
+  //     if it operates on the accumulator, then it behaves like `while`.
   //////////////////////////////////////////////////////
 
   implicit class Enriched_foldLeftWhile_GenTraversableOnce[A](val self: GenTraversableOnce[A]) extends AnyVal {
@@ -713,9 +714,8 @@ object CollectionUtil {
       val it = self.toIterator
       while (it.hasNext) {
         val x = it.next
-        val r = op(result, x)
-        if (!p(r, x)) return result
-        result = r
+        if (!p(result, x)) return result
+        result = op(result, x)
       }
       result
     }

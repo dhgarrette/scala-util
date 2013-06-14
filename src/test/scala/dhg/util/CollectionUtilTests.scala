@@ -360,13 +360,21 @@ class CollectionUtilTests {
     def p_z_8(z: List[Int]) = z.size < 3
     def op_8(z: List[Int], x: Int) = z :+ x
     val res_8: List[Int] = col_8.foldLeftWhile(z_8)((z, x) => p_z_8(z))(op_8)
-    val exp_8 = List(1, 2)
-    assertEquals(exp_8, col_8.scanLeft(z_8)(op_8).takeWhile(p_z_8).last)
+    val exp_8 = List(1, 2, 3)
+    assertEquals(exp_8, {
+      var z = z_8
+      val it = col_8.iterator
+      while (p_z_8(z)) {
+        val x = it.next
+        z = op_8(z, x)
+      }
+      z
+    })
     assertEquals(exp_8, res_8)
 
     val col_1 = (1 to 5)
     val res_1: Int = col_1.foldLeftWhile(0)((z, x) => z < 5)((z, x) => z + x)
-    assertEquals(3, res_1)
+    assertEquals(6, res_1)
 
     val col_2 = (1 to 5)
     val res_2: Int = col_2.foldLeftWhile(0)((z, x) => x < 3)((z, x) => z + x)
@@ -374,7 +382,7 @@ class CollectionUtilTests {
 
     val col_3 = (1 to 5)
     val res_3: Int = col_3.foldLeftWhile(0)((z, x) => z < 1)((z, x) => z + x)
-    assertEquals(0, res_3)
+    assertEquals(1, res_3)
 
     val col_4 = (1 to 5)
     val res_4: Int = col_4.foldLeftWhile(0)((z, x) => x < 1)((z, x) => z + x)
