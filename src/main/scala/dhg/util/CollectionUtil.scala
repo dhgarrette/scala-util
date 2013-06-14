@@ -702,6 +702,26 @@ object CollectionUtil {
   }
 
   //////////////////////////////////////////////////////
+  // foldLeftWhile[A,B](z: B)(p: (B, A) => Boolean)(op: (B, A) => B): B
+  //   - Folds while the condition `p` is true.  The failing `(z,x)`
+  //     pair will _not_ be folded into the final result.
+  //////////////////////////////////////////////////////
+
+  implicit class Enriched_foldLeftWhile_GenTraversableOnce[A](val self: GenTraversableOnce[A]) extends AnyVal {
+    def foldLeftWhile[B](z: B)(p: (B, A) => Boolean)(op: (B, A) => B): B = {
+      var result = z
+      val it = self.toIterator
+      while (it.hasNext) {
+        val x = it.next
+        val r = op(result, x)
+        if (!p(r, x)) return result
+        result = r
+      }
+      result
+    }
+  }
+
+  //////////////////////////////////////////////////////
   // avg(): A
   //   - Find the average (mean) of this collection of numbers
   //////////////////////////////////////////////////////
