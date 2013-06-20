@@ -5,6 +5,7 @@ import dhg.util.CollectionUtil._
 import dhg.util.math.LogDouble
 import dhg.util.math.LogDouble._
 import scala.math.log
+import java.lang.AssertionError
 
 /**
  * Test Utilities
@@ -19,6 +20,11 @@ object TestUtil {
 
   def assertException(block: => Unit)(handle: PartialFunction[Throwable, Unit]) {
     try { block; fail("no exception thrown") } catch (handle)
+  }
+
+  def assertEqualsArray[A](expected: Array[A], result: Array[A]) {
+    if (expected.size != result.size || (expected zip result).exists(p => p._1 != p._2))
+      throw new AssertionError(s"expected: Array(${expected.mkString(",")}) but was: Array(${result.mkString(",")})")
   }
 
   def assertEqualsIterator[A](expected: Iterator[A], result: Iterator[A]) {
