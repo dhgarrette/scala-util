@@ -1,5 +1,10 @@
 package dhg.util
 
+/**
+ * Timing Utilities
+ *
+ * @author Dan Garrette (dhgarrette@gmail.com)
+ */
 object Time {
 
   def time[T](name: String, block: => T): T = {

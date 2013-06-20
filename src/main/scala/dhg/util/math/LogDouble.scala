@@ -17,6 +17,8 @@ import scalaz.Scalaz._
  *
  * All to* methods return the (non-logarithmic) value stored.  The only
  * way to access the actual logarithmic value is by the 'logValue' field.
+ *
+ * @author Dan Garrette (dhgarrette@gmail.com)
  */
 class LogDouble(val logValue: Double) extends AnyVal with Ordered[LogDouble] {
   def +(other: LogDouble): LogDouble = {

@@ -12,7 +12,9 @@ import scala.collection.mutable.Builder
 import scala.util.Random
 
 /**
- * @author Dan Garrette (dhg@cs.utexas.edu)
+ * Enhancement methods for collections
+ * 
+ * @author Dan Garrette (dhgarrette@gmail.com)
  */
 object CollectionUtil {
 

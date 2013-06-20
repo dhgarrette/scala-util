@@ -2,6 +2,11 @@ package dhg.util
 
 import scala.collection.generic.CanBuildFrom
 
+/**
+ * Pattern-matching Utilities
+ *
+ * @author Dan Garrette (dhgarrette@gmail.com)
+ */
 object Pattern {
 
   object UInt {
@@ -62,6 +67,9 @@ object Pattern {
       })
   }
 
+  /**
+   * Make a succinct string that describes the given sequence.
+   */
   def makeRangeString(seq: Seq[Int]): String = {
     assert(seq.nonEmpty, "cannot make empty sequence into a range string")
     assert(seq.exists(_ >= 0), s"negative numbers are not permitted: $seq")

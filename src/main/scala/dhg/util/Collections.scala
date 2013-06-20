@@ -3,8 +3,16 @@ package dhg.util
 import scala.collection.GenTraversableOnce
 import scala.collection.mutable
 
+/**
+ * Collections
+ *
+ * @author Dan Garrette (dhgarrette@gmail.com)
+ */
 object Collections {
 
+  /**
+   * A set for which `contains` always returns `true`.
+   */
   class UniversalSet[A] extends Set[A] {
     override def contains(key: A): Boolean = true
     override def iterator: Iterator[A] = throw new NotImplementedError("UniversalSet cannot be iterated over")
@@ -20,6 +28,11 @@ object Collections {
   //
   //
 
+  /**
+   * A `Map` implementation that generates values for a `default` function 
+   * when keys are requested, but that remembers the calculated value for 
+   * for future requests
+   */
   class MemoMap[A, B](startEntries: Map[A, B], default: A => B) extends (A => B) with Iterable[(A, B)] { //mutable.Map[A, B] {
     private[this] val cache = mutable.Map[A, B]() ++ startEntries
     override def apply(key: A): B =
@@ -34,6 +47,10 @@ object Collections {
   //
   //
 
+  /**
+   * A list that drops elements off the tail when the length is exceeded.  
+   * Also allows for skipping elements during iteration.
+   */
   class History[T] private (length: Int, lag: Int) {
     private[this] val q = scala.collection.mutable.Queue[T]()
     def ::=(t: T) = { q.enqueue(t); if (q.length > length) q.dequeue(); this }

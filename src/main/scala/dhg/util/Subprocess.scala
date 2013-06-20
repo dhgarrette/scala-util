@@ -12,6 +12,8 @@ import dhg.util.Subprocess._
  * e.g.
  *   val cmd = Subprocess.findBinary("tr")
  *   cmd.args("l", "L").call("hello")   // "heLLo"
+ *
+ * @author Dan Garrette (dhgarrette@gmail.com)
  */
 case class Subprocess(binary: String, args: Seq[String] = Nil) {
 
@@ -108,10 +110,9 @@ case class Subprocess(binary: String, args: Seq[String] = Nil) {
 
 object Subprocess {
 
-  /*
+  /**
    * Trait for Appendable classes that can serve as `out` or `err` streams.
    */
-
   trait Appendable[T, A] {
     def self: T
     def append(a: A): this.type

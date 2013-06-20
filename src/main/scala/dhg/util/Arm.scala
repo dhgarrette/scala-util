@@ -6,6 +6,11 @@ import java.io.Writer
 import scala.io.Source
 import java.io.Closeable
 
+/**
+ * Automatic Resource Management (ARM) utility.
+ * 
+ * @author Dan Garrette (dhgarrette@gmail.com)
+ */ 
 object Arm {
 
   trait Managed[T] {

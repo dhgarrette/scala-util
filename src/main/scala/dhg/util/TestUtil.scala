@@ -6,6 +6,11 @@ import dhg.util.math.LogDouble
 import dhg.util.math.LogDouble._
 import scala.math.log
 
+/**
+ * Test Utilities
+ *
+ * @author Dan Garrette (dhgarrette@gmail.com)
+ */
 object TestUtil {
 
   def assertEqualsDouble(expected: Double, actual: Double) {

@@ -23,6 +23,11 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer
 import org.jfree.chart.axis.NumberAxis
 import org.jfree.chart.plot.CategoryPlot
 
+/**
+ * A chart for visualizing data
+ *
+ * @author Dan Garrette (dhgarrette@gmail.com)
+ */
 class Chart(frame: JFrame) {
   def draw(
     a: Int = 10, b: Int = 10,

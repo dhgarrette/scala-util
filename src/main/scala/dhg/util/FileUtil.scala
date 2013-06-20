@@ -19,6 +19,11 @@ import java.util.zip.GZIPInputStream
 import java.io.FileInputStream
 import scala.util.matching.Regex
 
+/**
+ * File Utilities
+ *
+ * @author Dan Garrette (dhgarrette@gmail.com)
+ */
 object FileUtil {
 
   object File {
@@ -247,7 +252,7 @@ object FileUtil {
   implicit class WriterWithWriteLine(val self: Writer) extends AnyVal {
     def writeLine(line: Any) { self.write(line + "\n") }
     def writeLine() { self.write("\n") }
-    
+
     def wl(line: Any) = writeLine(line)
     def wl() = writeLine()
   }
