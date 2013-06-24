@@ -14,33 +14,34 @@ import org.jfree.chart.renderer.category.StandardBarPainter
 import org.jfree.chart.renderer.xy.StandardXYBarPainter
 import org.jfree.chart.renderer.xy.XYBarRenderer
 import org.jfree.data.category.DefaultCategoryDataset
-import org.jfree.data.statistics.HistogramDataset
 import javax.swing.JFrame
 import org.jfree.data.xy.XYSeriesCollection
-import org.jfree.data.xy.XYDataset
 import org.jfree.data.xy.XYSeries
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer
 import org.jfree.chart.axis.NumberAxis
 import org.jfree.chart.plot.CategoryPlot
+import org.jfree.data.general.Dataset
+import org.jfree.chart.LegendItemSource
+import org.jfree.chart.renderer.xy.XYItemRenderer
 
 /**
  * A chart for visualizing data
  *
  * @author Dan Garrette (dhgarrette@gmail.com)
  */
-class Chart(frame: JFrame) {
+trait Chart {
   def draw(
     a: Int = 10, b: Int = 10,
-    width: Int = 800, height: Int = 500) {
+    width: Int = 800, height: Int = 500)
+}
 
+class SimpleChart(frame: JFrame) extends Chart {
+  override def draw(a: Int, b: Int, width: Int, height: Int) {
     //frame.pack()
     frame.setBounds(a, b, width, height)
     frame.setVisible(true)
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
   }
-}
-
-object Chart {
 }
 
 //
@@ -65,11 +66,13 @@ trait ChartCustomizer[T <: Plot, Renderer <: AbstractRenderer] {
 
     val x = new JFrame(chartTitle)
     x.setContentPane(new ChartPanel(chart))
-    new Chart(x)
+    makeChart(x)
 
     //    val cpanel: ChartPanel = new ChartPanel(chart);
     //    getContentPane().add(cpanel, BorderLayout.CENTER);
   }
+
+  def makeChart(frame: JFrame): Chart
 
   def setGridlinePaint(plot: T, color: Color)
   def getRenderer(plot: T): Renderer
@@ -79,6 +82,7 @@ trait ChartCustomizer[T <: Plot, Renderer <: AbstractRenderer] {
 }
 
 object BarChartChartCustomizer extends ChartCustomizer[CategoryPlot, BarRenderer] {
+  override def makeChart(frame: JFrame) = new SimpleChart(frame)
   override def setGridlinePaint(plot: CategoryPlot, color: Color) {
     plot.setDomainGridlinePaint(color)
     plot.setRangeGridlinePaint(color)
@@ -90,6 +94,7 @@ object BarChartChartCustomizer extends ChartCustomizer[CategoryPlot, BarRenderer
 }
 
 object HistogramChartCustomizer extends ChartCustomizer[XYPlot, XYBarRenderer] {
+  override def makeChart(frame: JFrame) = new SimpleChart(frame)
   override def setGridlinePaint(plot: XYPlot, color: Color) {
     plot.setDomainGridlinePaint(color)
     plot.setRangeGridlinePaint(color)
@@ -100,7 +105,8 @@ object HistogramChartCustomizer extends ChartCustomizer[XYPlot, XYBarRenderer] {
   override def useStandardPainter(plot: XYPlot) { getRenderer(plot).setBarPainter(new StandardXYBarPainter()) }
 }
 
-object LingGraphChartCustomizer extends ChartCustomizer[XYPlot, XYLineAndShapeRenderer] {
+object LineGraphChartCustomizer extends ChartCustomizer[XYPlot, XYLineAndShapeRenderer] {
+  override def makeChart(frame: JFrame) = new SimpleChart(frame)
   override def setGridlinePaint(plot: XYPlot, color: Color) {
     plot.setDomainGridlinePaint(color)
     plot.setRangeGridlinePaint(color)
@@ -127,18 +133,15 @@ object BarChart {
     data: Vector[(A, Double)],
     chartTitle: String = "",
     xaxisLabel: String = "",
-    yaxisLabel: String = ""): Chart = {
-
-    val dataset: DefaultCategoryDataset = new DefaultCategoryDataset()
-    for ((key, value) <- data)
-      dataset.addValue(value, "<none>", key.toString)
+    yaxisLabel: String = "")(
+      implicit a2Comparable: A => Comparable[_]): Chart = {
 
     BarChartChartCustomizer.customizeChart(
       ChartFactory.createBarChart(
         chartTitle,
         xaxisLabel,
         yaxisLabel,
-        dataset, // data
+        BarChartDataset(data.mapKeys(a2Comparable)), // data
         PlotOrientation.VERTICAL, // orientation
         false, // include legend
         false, // tooltips?
@@ -164,15 +167,12 @@ object Histogram {
     xaxisLabel: String = "",
     yaxisLabel: String = ""): Chart = {
 
-    val dataset = new HistogramDataset
-    dataset.addSeries("", data.toArray, bins, 0, 1);
-
     HistogramChartCustomizer.customizeChart(
       ChartFactory.createHistogram(
         chartTitle,
         xaxisLabel,
         yaxisLabel,
-        dataset, // data
+        HistogramDataset(data, bins), // data
         PlotOrientation.VERTICAL, // orientation
         false, // include legend
         false, // tooltips?
@@ -180,6 +180,36 @@ object Histogram {
         ),
       chartTitle)
   }
+}
+
+object FakeHistogram {
+  def make(
+    data: Vector[Double],
+    bins: Int,
+    chartTitle: String = "",
+    xaxisLabel: String = "",
+    yaxisLabel: String = ""): FakeHistogram = {
+
+    val dataset = FakeHistogramDataset(data, bins)
+    val chart =
+      BarChartChartCustomizer.customizeChart(
+        ChartFactory.createBarChart(
+          chartTitle,
+          xaxisLabel,
+          yaxisLabel,
+          dataset, // data
+          PlotOrientation.VERTICAL, // orientation
+          false, // include legend
+          false, // tooltips?
+          false // URLs?
+          ),
+        chartTitle)
+    new FakeHistogram(chart, dataset.binArray.max)
+  }
+}
+
+class FakeHistogram(chart: Chart, val maxBarHeight: Int) extends Chart {
+  override def draw(a: Int, b: Int, width: Int, height: Int) { chart.draw(a, b, width, height) }
 }
 
 object LineGraph {
@@ -192,27 +222,21 @@ object LineGraph {
     yaxisLabel: String = ""): Chart = {
     require(lines || dots)
 
-    val series = new XYSeries(chartTitle)
-    for ((x, y) <- data)
-      series.add(x, y)
-    val dataset = new XYSeriesCollection()
-    dataset.addSeries(series)
-
     val chart = ChartFactory.createXYLineChart(
       chartTitle, // chart title
       xaxisLabel, // x axis label
       yaxisLabel, // y axis label
-      dataset, // data
+      XYDataset(data), // data
       PlotOrientation.VERTICAL,
       false, // include legend
       false, // tooltips
       false // urls
       )
 
-    val renderer = LingGraphChartCustomizer.getRenderer(chart.getPlot.asInstanceOf[XYPlot])
+    val renderer = LineGraphChartCustomizer.getRenderer(chart.getPlot.asInstanceOf[XYPlot])
     renderer.setSeriesShapesVisible(0, dots)
     renderer.setSeriesLinesVisible(0, lines)
-    LingGraphChartCustomizer.customizeChart(chart, chartTitle)
+    LineGraphChartCustomizer.customizeChart(chart, chartTitle)
   }
 
   def makeIndexed(
@@ -223,5 +247,39 @@ object LineGraph {
     xaxisLabel: String = "",
     yaxisLabel: String = ""): Chart = {
     make(data.zipWithIndex.map { case (y, x) => (x.toDouble, y) }, dots, lines, chartTitle, xaxisLabel, yaxisLabel)
+  }
+}
+
+object MultiChart {
+  def make(
+    primaryDataset: XYSeriesCollection,
+    primaryRenderer: XYItemRenderer,
+    chartData: Vector[(XYSeriesCollection, XYItemRenderer)] = Vector(),
+    title: String = "",
+    xaxisLabel: String = "",
+    yaxisLabel: String = "",
+    showLegend: Boolean = false) = {
+
+    val plot = new XYPlot()
+
+    plot.setDomainAxis(0, new NumberAxis(xaxisLabel))
+    plot.setRangeAxis(0, new NumberAxis(yaxisLabel))
+
+    for (((dataset, renderer), i) <- ((primaryDataset, primaryRenderer) +: chartData).zipWithIndex) {
+      plot.setDataset(i, dataset)
+      plot.setRenderer(i, renderer)
+      plot.mapDatasetToDomainAxis(i, 0)
+      plot.mapDatasetToRangeAxis(i, 0)
+    }
+
+    val chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, showLegend)
+
+    val frame = new JFrame(title)
+    frame.setContentPane(new ChartPanel(chart))
+//    frame.setBounds(10, 10, 800, 500)
+//    frame.setVisible(true)
+//    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
+
+    new SimpleChart(frame)
   }
 }
