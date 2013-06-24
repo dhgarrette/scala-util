@@ -29,32 +29,22 @@ import org.jfree.chart.renderer.xy.XYItemRenderer
  * @author Dan Garrette (dhgarrette@gmail.com)
  */
 trait Chart {
+  def charts: Vector[SingleChart]
+
   def draw(
     a: Int = 10, b: Int = 10,
-    width: Int = 800, height: Int = 500)
-}
+    width: Int = 800, height: Int = 500,
+    title: String = "",
+    xaxisLabel: String = "",
+    yaxisLabel: String = "",
+    showLegend: Boolean = false) {
 
-case class SimpleChart(
-  title: String = "",
-  xaxisLabel: String = "",
-  yaxisLabel: String = "",
-  showLegend: Boolean = false,
-  primaryChart: (XYSeriesCollection, XYItemRenderer),
-  additionalCharts: Vector[(XYSeriesCollection, XYItemRenderer)])
-  extends Chart {
-
-  def withTitle(title: String) = this.copy(title = title)
-  def withXaxisLabel(xaxisLabel: String) = this.copy(xaxisLabel = xaxisLabel)
-  def withYaxisLabel(yaxisLabel: String) = this.copy(yaxisLabel = yaxisLabel)
-  def withShowLegend(showLegend: Boolean) = this.copy(showLegend = showLegend)
-
-  override def draw(a: Int, b: Int, width: Int, height: Int) {
     val plot = new XYPlot()
 
     plot.setDomainAxis(0, new NumberAxis(xaxisLabel))
     plot.setRangeAxis(0, new NumberAxis(yaxisLabel))
 
-    for (((dataset, renderer), i) <- (primaryChart +: additionalCharts).zipWithIndex) {
+    for ((SingleChart(dataset, renderer), i) <- charts.zipWithIndex) {
       plot.setDataset(i, dataset)
       plot.setRenderer(i, renderer)
       plot.mapDatasetToDomainAxis(i, 0)
@@ -73,11 +63,31 @@ case class SimpleChart(
   }
 }
 
+case class SingleChart(
+  dataset: XYSeriesCollection,
+  renderer: XYItemRenderer)
+  extends Chart {
+  def charts = Vector(this)
+}
+
+case class MultiChart(
+  primaryChart: Chart,
+  additionalCharts: Vector[Chart])
+  extends Chart {
+  def charts = primaryChart.charts ++ additionalCharts.flatMap(_.charts)
+}
+
 object Chart {
+  def apply(
+    dataset: XYSeriesCollection,
+    renderer: XYItemRenderer) = {
+    SingleChart(dataset, renderer)
+  }
+
   def make(
-    primaryChart: (XYSeriesCollection, XYItemRenderer),
-    additionalCharts: (XYSeriesCollection, XYItemRenderer)*) = {
-    new SimpleChart(primaryChart = primaryChart, additionalCharts = additionalCharts.toVector)
+    primaryChart: Chart,
+    additionalCharts: Chart*) = {
+    MultiChart(primaryChart, additionalCharts.toVector)
   }
 }
 
@@ -86,40 +96,21 @@ object Chart {
 //
 
 object BarChart {
-  def make[A](
-    data: Vector[(A, Double)],
-    chartTitle: String = "",
-    xaxisLabel: String = "",
-    yaxisLabel: String = ""): Chart = {
+  def make[A](data: Vector[(A, Double)]): Chart = {
     ???
   }
 
   def makeIndexed(
-    data: Vector[Double],
-    chartTitle: String = "",
-    xaxisLabel: String = "",
-    yaxisLabel: String = ""): Chart = {
-    Chart.make(
-      (XYDataset(data.zipWithIndex.map { case (x, i) => (i.toDouble, x) }), BarRenderer()))
-      .withTitle(chartTitle)
-      .withXaxisLabel(xaxisLabel)
-      .withYaxisLabel(yaxisLabel)
+    data: Vector[Double]): Chart = {
+    SingleChart(XYDataset(data.zipWithIndex.map { case (x, i) => (i.toDouble, x) }), BarRenderer())
   }
 }
 
 object Histogram {
   def make(
     data: Vector[Double],
-    bins: Int,
-    chartTitle: String = "",
-    xaxisLabel: String = "",
-    yaxisLabel: String = ""): Chart = {
-
-    Chart.make(
-      (HistogramDataset(data, bins), BarRenderer()))
-      .withTitle(chartTitle)
-      .withXaxisLabel(xaxisLabel)
-      .withYaxisLabel(yaxisLabel)
+    bins: Int): Chart = {
+    SingleChart(HistogramDataset(data, bins), BarRenderer())
   }
 }
 
@@ -127,26 +118,14 @@ object LineGraph {
   def make(
     data: Vector[(Double, Double)],
     dots: Boolean = true,
-    lines: Boolean = true,
-    chartTitle: String = "",
-    xaxisLabel: String = "",
-    yaxisLabel: String = ""): Chart = {
-    require(lines || dots)
-
-    Chart.make(
-      (XYDataset(data), LineRenderer(lines = lines, shapes = dots)))
-      .withTitle(chartTitle)
-      .withXaxisLabel(xaxisLabel)
-      .withYaxisLabel(yaxisLabel)
+    lines: Boolean = true): Chart = {
+    SingleChart(XYDataset(data), LineRenderer(lines = lines, shapes = dots))
   }
 
   def makeIndexed(
     data: Vector[Double],
     dots: Boolean = true,
-    lines: Boolean = true,
-    chartTitle: String = "",
-    xaxisLabel: String = "",
-    yaxisLabel: String = ""): Chart = {
-    make(data.zipWithIndex.map { case (y, x) => (x.toDouble, y) }, dots, lines, chartTitle, xaxisLabel, yaxisLabel)
+    lines: Boolean = true): Chart = {
+    make(data.zipWithIndex.map { case (y, x) => (x.toDouble, y) }, dots, lines)
   }
 }

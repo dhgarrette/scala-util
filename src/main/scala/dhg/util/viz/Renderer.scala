@@ -21,6 +21,7 @@ object LineRenderer {
     color: Color = Color.blue,
     lines: Boolean = true,
     shapes: Boolean = false) = {
+    require(lines || shapes)
     val r = new XYLineAndShapeRenderer(lines, shapes)
     r.setSeriesPaint(0, color)
     r
