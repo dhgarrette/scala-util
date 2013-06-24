@@ -19,13 +19,13 @@ object XYDataset {
 }
 
 object LineGraphDataset {
-  def apply(xyPairs: TraversableOnce[(Double, Double)], name: String) = XYDataset(xyPairs, name)
+  def apply(xyPairs: TraversableOnce[(Double, Double)], name: String = "") = XYDataset(xyPairs, name)
 }
 
 object HistogramDataset {
   def apply(data: TraversableOnce[Double], numBins: Int, name: String = "") = {
     val (binArray, binSize) = makeBinArray(data, numBins)
-    XYDataset(binArray.zipWithIndex.map { case (count, i) => (i * binSize, count.toDouble) })
+    new HistogramDataset(binArray, numBins, binSize)
   }
 
   def makeBinArray(data: TraversableOnce[Double], numBins: Int) = {
@@ -40,4 +40,11 @@ object HistogramDataset {
     //for ((count, i) <- binArray.zipWithIndex) println(f"$i%4d: $count")
     (binArray, binSize)
   }
+
+  implicit def toDataset(hd: HistogramDataset) = hd.dataset
+}
+
+class HistogramDataset(val binArray: Array[Int], val numBins: Int, val binSize: Double) {
+
+  def dataset = XYDataset(binArray.zipWithIndex.map { case (count, i) => (i * binSize, count.toDouble) })
 }

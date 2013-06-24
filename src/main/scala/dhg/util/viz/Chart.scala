@@ -22,6 +22,7 @@ import org.jfree.chart.plot.CategoryPlot
 import org.jfree.data.general.Dataset
 import org.jfree.chart.LegendItemSource
 import org.jfree.chart.renderer.xy.XYItemRenderer
+import org.jfree.chart.plot.DatasetRenderingOrder
 
 /**
  * A chart for visualizing data
@@ -43,6 +44,7 @@ trait Chart {
 
     plot.setDomainAxis(0, new NumberAxis(xaxisLabel))
     plot.setRangeAxis(0, new NumberAxis(yaxisLabel))
+    plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD)
 
     for ((SingleChart(dataset, renderer), i) <- charts.zipWithIndex) {
       plot.setDataset(i, dataset)
