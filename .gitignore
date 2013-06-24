@@ -15,4 +15,5 @@ project/plugins/project/
 .classpath
 .cache
 .settings/
+.worksheet
 
