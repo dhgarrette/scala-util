@@ -6,6 +6,9 @@ import org.jfree.data.xy.XYSeriesCollection
 import org.jfree.data.xy.XYSeries
 import org.jfree.data.category.DefaultCategoryDataset
 import org.jfree.data.statistics.{ HistogramDataset => JfcHistogramDataset }
+import org.jfree.data.xy.XYIntervalSeries
+import org.jfree.data.xy.IntervalXYDataset
+import org.jfree.data.xy.XYIntervalSeriesCollection
 
 object XYDataset {
   def apply(xyPairs: TraversableOnce[(Double, Double)], name: String = "") = {
@@ -46,5 +49,16 @@ object HistogramDataset {
 
 class HistogramDataset(val binArray: Array[Int], val numBins: Int, val binSize: Double) {
 
-  def dataset = XYDataset(binArray.zipWithIndex.map { case (count, i) => (i * binSize, count.toDouble) })
+  def dataset = {
+    val halfBinSize = binSize / 2
+    val xyPairs = binArray.zipWithIndex.map { case (count, i) => (i * binSize, count.toDouble) }
+
+    val series1 = new XYIntervalSeries("")
+    for ((x, y) <- xyPairs)
+      series1.add(x, x - halfBinSize, x + halfBinSize, y, 0, 0)
+    val collection1 = new XYIntervalSeriesCollection()
+    collection1.addSeries(series1)
+    collection1
+  }
+
 }

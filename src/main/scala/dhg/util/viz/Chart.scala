@@ -23,6 +23,7 @@ import org.jfree.data.general.Dataset
 import org.jfree.chart.LegendItemSource
 import org.jfree.chart.renderer.xy.XYItemRenderer
 import org.jfree.chart.plot.DatasetRenderingOrder
+import org.jfree.data.xy.{XYDataset => JXYDataset}
 
 /**
  * A chart for visualizing data
@@ -66,7 +67,7 @@ trait Chart {
 }
 
 case class SingleChart(
-  dataset: XYSeriesCollection,
+  dataset: JXYDataset,
   renderer: XYItemRenderer)
   extends Chart {
   def charts = Vector(this)
@@ -81,7 +82,7 @@ case class MultiChart(
 
 object Chart {
   def apply(
-    dataset: XYSeriesCollection,
+    dataset: JXYDataset,
     renderer: XYItemRenderer) = {
     SingleChart(dataset, renderer)
   }
