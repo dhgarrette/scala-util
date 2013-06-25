@@ -47,6 +47,6 @@ object ScatterRenderer {
 //
 
 object Shape {
-  def circle: JShape = circle(4)
-  def circle(size: Int) = new Ellipse2D.Double(0, 0, size, size)
+  def circle: JShape = circle(5)
+  def circle(size: Double) = new Ellipse2D.Double(-size / 2, -size / 2, size, size)
 }
