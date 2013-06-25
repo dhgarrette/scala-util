@@ -4,6 +4,7 @@ import java.awt.Color
 import org.jfree.chart.renderer.xy.StandardXYBarPainter
 import org.jfree.chart.renderer.xy.XYBarRenderer
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer
+import java.awt.BasicStroke
 
 object BarRenderer {
   def apply(
@@ -19,11 +20,12 @@ object BarRenderer {
 object LineRenderer {
   def apply(
     color: Color = Color.blue,
-    lines: Boolean = true,
+    lineThickness: Int = 2,
     shapes: Boolean = false) = {
-    require(lines || shapes)
-    val r = new XYLineAndShapeRenderer(lines, shapes)
+    require(lineThickness > 0 || shapes)
+    val r = new XYLineAndShapeRenderer(lineThickness > 0, shapes)
     r.setSeriesPaint(0, color)
+    r.setSeriesStroke(0, new BasicStroke(lineThickness))
     r
   }
 }
@@ -31,6 +33,6 @@ object LineRenderer {
 object ScatterRenderer {
   def apply(
     color: Color = Color.blue) = {
-    LineRenderer(color, false, true)
+    LineRenderer(color, 0, true)
   }
 }
