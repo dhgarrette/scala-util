@@ -5,6 +5,9 @@ import org.jfree.chart.renderer.xy.StandardXYBarPainter
 import org.jfree.chart.renderer.xy.XYBarRenderer
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer
 import java.awt.BasicStroke
+import java.awt.{ Shape => JShape }
+import org.jfree.util.ShapeUtilities
+import java.awt.geom.Ellipse2D
 
 object BarRenderer {
   def apply(
@@ -21,18 +24,29 @@ object LineRenderer {
   def apply(
     color: Color = Color.blue,
     lineThickness: Int = 2,
-    shapes: Boolean = false) = {
-    require(lineThickness > 0 || shapes)
-    val r = new XYLineAndShapeRenderer(lineThickness > 0, shapes)
+    shape: Option[JShape] = None) = {
+    require(lineThickness > 0 || shape.isDefined)
+    val r = new XYLineAndShapeRenderer(lineThickness > 0, shape.isDefined)
     r.setSeriesPaint(0, color)
     r.setSeriesStroke(0, new BasicStroke(lineThickness))
+    shape.foreach(s => r.setSeriesShape(0, s))
     r
   }
 }
 
 object ScatterRenderer {
   def apply(
-    color: Color = Color.blue) = {
-    LineRenderer(color, 0, true)
+    color: Color = Color.blue,
+    shape: Option[JShape] = Some(Shape.circle)) = {
+    LineRenderer(color, 0, shape)
   }
+}
+
+//
+//
+//
+
+object Shape {
+  def circle: JShape = circle(4)
+  def circle(size: Int) = new Ellipse2D.Double(0, 0, size, size)
 }

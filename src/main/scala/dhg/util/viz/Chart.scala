@@ -119,15 +119,13 @@ object Histogram {
 object LineGraph {
   def make(
     data: Vector[(Double, Double)],
-    lineThickness: Int = 2,
-    dots: Boolean = true): Chart = {
-    SingleChart(XYDataset(data), LineRenderer(lineThickness = lineThickness, shapes = dots))
+    lineThickness: Int = 2): Chart = {
+    SingleChart(XYDataset(data), LineRenderer(lineThickness = lineThickness))
   }
 
   def makeIndexed(
     data: Vector[Double],
-    lineThickness: Int = 2,
-    dots: Boolean = true): Chart = {
-    make(data.zipWithIndex.map { case (y, x) => (x.toDouble, y) }, lineThickness, dots)
+    lineThickness: Int = 2): Chart = {
+    make(data.zipWithIndex.map { case (y, x) => (x.toDouble, y) }, lineThickness)
   }
 }
