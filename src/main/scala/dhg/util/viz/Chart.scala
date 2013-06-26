@@ -23,7 +23,9 @@ import org.jfree.data.general.Dataset
 import org.jfree.chart.LegendItemSource
 import org.jfree.chart.renderer.xy.XYItemRenderer
 import org.jfree.chart.plot.DatasetRenderingOrder
-import org.jfree.data.xy.{XYDataset => JXYDataset}
+import org.jfree.data.xy.{ XYDataset => JXYDataset }
+import org.jfree.chart.axis.ValueAxis
+import org.jfree.chart.axis.DateAxis
 
 /**
  * A chart for visualizing data
@@ -39,12 +41,27 @@ trait Chart {
     title: String = "",
     xaxisLabel: String = "",
     yaxisLabel: String = "",
-    showLegend: Boolean = false) {
+    showLegend: Boolean = false,
+    includeXZero: Boolean = true,
+    includeYZero: Boolean = true,
+    xaxisDates: Boolean = false) {
 
     val plot = new XYPlot()
 
-    plot.setDomainAxis(0, new NumberAxis(xaxisLabel))
-    plot.setRangeAxis(0, new NumberAxis(yaxisLabel))
+    val xaxis = if (xaxisDates) {
+      new DateAxis(xaxisLabel)
+    }
+    else {
+      val a = new NumberAxis(xaxisLabel)
+      a.setAutoRangeIncludesZero(includeXZero)
+      a
+    }
+
+    val yaxis = new NumberAxis(yaxisLabel)
+    yaxis.setAutoRangeIncludesZero(includeYZero)
+
+    plot.setDomainAxis(0, xaxis)
+    plot.setRangeAxis(0, yaxis)
     plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD)
 
     for ((SingleChart(dataset, renderer), i) <- charts.zipWithIndex) {
