@@ -96,10 +96,14 @@ object FileUtil {
     }
 
     def ls() = {
+      assert(self.exists, s"'$self' does not exist")
+      assert(self.isDirectory, s"'$self' is not a directory")
       self.listFiles
     }
 
     def ls(regex: Regex, pathMatch: Boolean = false) = {
+      assert(self.exists, s"'$self' does not exist")
+      assert(self.isDirectory, s"'$self' is not a directory")
       val files = self.listFiles
       def getName(f: File) =
         if (pathMatch) f.getAbsolutePath
@@ -111,6 +115,8 @@ object FileUtil {
      * List all files (but not directories), searching recursively through sub-directories.
      */
     def listFilesRecursive(): Set[File] = {
+      assert(self.exists, s"'$self' does not exist")
+      assert(self.isDirectory, s"'$self' is not a directory")
       self.ls.flatMap { f =>
         if (f.isDirectory)
           f.listFilesRecursive
@@ -123,6 +129,8 @@ object FileUtil {
      * List all files (but not directories), searching recursively through sub-directories.
      */
     def listFilesRecursive(regex: Regex, pathMatch: Boolean = false): Set[File] = {
+      assert(self.exists, s"'$self' does not exist")
+      assert(self.isDirectory, s"'$self' is not a directory")
       self.ls(regex, pathMatch).flatMap { f =>
         if (f.isDirectory)
           f.listFilesRecursive
