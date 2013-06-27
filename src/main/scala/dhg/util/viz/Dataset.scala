@@ -28,8 +28,10 @@ object LineGraphDataset {
 
 object HistogramDataset {
   def apply(data: GenTraversable[Double], numBins: Int, name: String = ""): HistogramDataset = {
-    val (binArray, startValue, binSize) = makeBinArrayByNum(data, numBins)
-    new HistogramDataset(binArray, numBins, startValue, binSize)
+    val min = data.min
+    val binSize = (data.max - min) / numBins
+    val binArray = makeBinArray(data, numBins, min, binSize)
+    new HistogramDataset(binArray, numBins, min, binSize)
   }
 
   def ints(data: GenTraversable[Int], numBins: Int, name: String = ""): HistogramDataset = {
@@ -40,29 +42,19 @@ object HistogramDataset {
     apply(data.map(_.toDouble), numBins, name)
   }
 
-  def makeBinArrayByNum(data: GenTraversable[Double], numBins: Int) = {
-    val min = data.min
-    val binSize = (data.max - min) / numBins
-    (makeBinArray(data, numBins, binSize), min, binSize)
-  }
-
   def bySize(data: GenTraversable[Double], binSize: Double, name: String = ""): HistogramDataset = {
-    val (binArray, startValue, numBins) = makeBinArrayBySize(data, binSize)
-    new HistogramDataset(binArray, numBins, startValue, binSize)
-  }
-
-  def makeBinArrayBySize(data: GenTraversable[Double], binSize: Double) = {
     val min = data.min
     val max = data.max
     val numBins = ((max - min) / binSize).toInt + 1
-    (makeBinArray(data, numBins, binSize), min, numBins)
+    val binArray = makeBinArray(data, numBins, min, binSize)
+    new HistogramDataset(binArray, numBins, min, binSize)
   }
 
-  def makeBinArray(data: GenTraversable[Double], numBins: Int, binSize: Double) = {
+  def makeBinArray(data: GenTraversable[Double], numBins: Int, binStart: Double, binSize: Double) = {
     val min = data.min
     val binArray = Array.fill(numBins)(0)
     for (t <- data) {
-      val b = ((t - min) / binSize).toInt
+      val b = ((t - binStart) / binSize).toInt
       val bin = if (b == numBins) b - 1 else b
       binArray(bin) += 1
     }
