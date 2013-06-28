@@ -81,7 +81,7 @@ object CollectionUtil {
     def counts(): Map[A, Int] = {
       val m = mutable.Map.empty[A, Int]
       for (item <- self) {
-        val count = m.getOrElseUpdate(item, 0)
+        val count = m.getOrElse(item, 0)
         m(item) = count + 1
       }
       m.toMap
