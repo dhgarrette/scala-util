@@ -26,35 +26,78 @@ object LineGraphDataset {
   def apply(xyPairs: TraversableOnce[(Double, Double)], name: String = "") = XYDataset(xyPairs, name)
 }
 
+case class HistogramDatasetBuilder(
+  data: Option[GenTraversable[Double]] = None,
+  numBins: Option[Int] = None,
+  rangeStart: Option[Double] = None,
+  rangeEnd: Option[Double] = None,
+  binWidth: Option[Double] = None) {
+
+  def withData(data: GenTraversable[Double]) = this.copy(data = Some(data))
+  def withNumBins(numBins: Int) = this.copy(numBins = Some(numBins))
+  def withRangeStart(rangeStart: Double) = this.copy(rangeStart = Some(rangeStart))
+  def withRangeEnd(rangeEnd: Double) = this.copy(rangeEnd = Some(rangeEnd))
+  def withBinWidth(binWidth: Double) = this.copy(binWidth = Some(binWidth))
+
+  def d(data: GenTraversable[Double]) = withData(data)
+  def n(numBins: Int) = withNumBins(numBins)
+  def s(rangeStart: Double) = withRangeStart(rangeStart)
+  def e(rangeEnd: Double) = withRangeEnd(rangeEnd)
+  def w(binWidth: Double) = withBinWidth(binWidth)
+
+  def build: HistogramDataset = {
+    assert(data.isDefined)
+    this match {
+      case HistogramDatasetBuilder(Some(data), Some(numBins), None, None, None) => this.withRangeStart(data.min).withRangeEnd(data.max).build
+      case HistogramDatasetBuilder(Some(data), Some(numBins), Some(rangeStart), None, None) => this.withRangeEnd(data.max).build
+      case HistogramDatasetBuilder(Some(data), Some(numBins), None, Some(rangeEnd), None) => this.withRangeStart(data.min).build
+      case HistogramDatasetBuilder(Some(data), Some(numBins), Some(rangeStart), Some(rangeEnd), None) =>
+        val binWidth = (rangeEnd - rangeStart) / numBins
+        HistogramDataset.make(data, numBins, rangeStart, binWidth)
+      case HistogramDatasetBuilder(Some(data), None, None, None, Some(binWidth)) => this.withRangeStart(data.min).withRangeEnd(data.max).build
+      case HistogramDatasetBuilder(Some(data), None, Some(rangeStart), None, Some(binWidth)) => this.withRangeEnd(data.max).build
+      case HistogramDatasetBuilder(Some(data), None, None, Some(rangeEnd), Some(binWidth)) => this.withRangeStart(data.min).build
+      case HistogramDatasetBuilder(Some(data), None, Some(rangeStart), Some(rangeEnd), Some(binWidth)) =>
+        val numBins = ((rangeEnd - rangeStart) / binWidth).toInt + 1
+        HistogramDataset.make(data, numBins, rangeStart, binWidth)
+      case HistogramDatasetBuilder(Some(data), Some(numBins), None, Some(rangeEnd), Some(binWidth)) =>
+        val rangeStart = rangeEnd - (numBins * binWidth)
+        HistogramDataset.make(data, numBins, rangeStart, binWidth)
+      case HistogramDatasetBuilder(Some(data), Some(numBins), Some(rangeStart), None, Some(binWidth)) =>
+        HistogramDataset.make(data, numBins, rangeStart, binWidth)
+      case HistogramDatasetBuilder(Some(data), Some(numBins), Some(rangeStart), Some(rangeEnd), Some(binWidth)) =>
+        sys.error("Cannot specify numBins, rangeStart, rangeEnd, and binWidth together.")
+    }
+  }
+
+  implicit def toDataset(hdb: HistogramDatasetBuilder) = hdb.build.dataset
+}
+
 object HistogramDataset {
-  def apply(data: GenTraversable[Double], numBins: Int, name: String = ""): HistogramDataset = {
-    val min = data.min
-    val binSize = (data.max - min) / numBins
-    val binArray = makeBinArray(data, numBins, min, binSize)
-    new HistogramDataset(binArray, numBins, min, binSize)
-  }
-
-  def ints(data: GenTraversable[Int], numBins: Int, name: String = ""): HistogramDataset = {
-    apply(data.map(_.toDouble), numBins, name)
-  }
-
-  def longs(data: GenTraversable[Long], numBins: Int, name: String = ""): HistogramDataset = {
-    apply(data.map(_.toDouble), numBins, name)
-  }
-
-  def bySize(data: GenTraversable[Double], binSize: Double, name: String = ""): HistogramDataset = {
+  def apply(data: GenTraversable[Double], numBins: Int): HistogramDataset = {
     val min = data.min
     val max = data.max
-    val numBins = ((max - min) / binSize).toInt + 1
-    val binArray = makeBinArray(data, numBins, min, binSize)
-    new HistogramDataset(binArray, numBins, min, binSize)
+    val binWidth = (max - min) / numBins
+    make(data, numBins, min, binWidth)
   }
 
-  def makeBinArray(data: GenTraversable[Double], numBins: Int, binStart: Double, binSize: Double) = {
+  def byWidth(data: GenTraversable[Double], binWidth: Double): HistogramDataset = {
+    val min = data.min
+    val max = data.max
+    val numBins = ((max - min) / binWidth).toInt + 1
+    make(data, numBins, min, binWidth)
+  }
+
+  def make(data: GenTraversable[Double], numBins: Int, rangeStart: Double, binWidth: Double) = {
+    val binArray = makeBinArray(data, numBins, rangeStart, binWidth)
+    new HistogramDataset(binArray, numBins, rangeStart, binWidth)
+  }
+
+  def makeBinArray(data: GenTraversable[Double], numBins: Int, rangeStart: Double, binWidth: Double) = {
     val min = data.min
     val binArray = Array.fill(numBins)(0)
     for (t <- data) {
-      val b = ((t - binStart) / binSize).toInt
+      val b = ((t - rangeStart) / binWidth).toInt
       val bin = if (b == numBins) b - 1 else b
       binArray(bin) += 1
     }
@@ -65,15 +108,15 @@ object HistogramDataset {
   implicit def toDataset(hd: HistogramDataset) = hd.dataset
 }
 
-class HistogramDataset(val binArray: Array[Int], val numBins: Int, val startValue: Double, val binSize: Double) {
+class HistogramDataset(val binArray: Array[Int], val numBins: Int, val rangeStart: Double, val binWidth: Double) {
 
   def dataset = {
-    val halfBinSize = binSize / 2
-    val xyPairs = binArray.zipWithIndex.map { case (count, i) => (startValue + i * binSize, count.toDouble) }
+    val halfBinWidth = binWidth / 2
+    val xyPairs = binArray.zipWithIndex.map { case (count, i) => (rangeStart + i * binWidth, count.toDouble) }
 
     val series1 = new XYIntervalSeries("")
     for ((x, y) <- xyPairs)
-      series1.add(x, x - halfBinSize, x + halfBinSize, y, 0, 0)
+      series1.add(x, x - halfBinWidth, x + halfBinWidth, y, 0, 0)
     val collection1 = new XYIntervalSeriesCollection()
     collection1.addSeries(series1)
     collection1
