@@ -3,7 +3,7 @@ package dhg.util
 import scala.collection.generic.CanBuildFrom
 
 /**
- * Pattern-matching Utilities
+ * Pattern-matching utilities
  *
  * @author Dan Garrette (dhgarrette@gmail.com)
  */

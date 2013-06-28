@@ -9,6 +9,12 @@ import java.awt.{ Shape => JShape }
 import org.jfree.util.ShapeUtilities
 import java.awt.geom.Ellipse2D
 
+/**
+ * Factories for constructing renderers for charts
+ *
+ * @author Dan Garrette (dhgarrette@gmail.com)
+ */
+
 object BarRenderer {
   def apply(
     color: Color = Color.blue) = {

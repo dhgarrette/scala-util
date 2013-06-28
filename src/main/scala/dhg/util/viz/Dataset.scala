@@ -11,6 +11,12 @@ import org.jfree.data.xy.IntervalXYDataset
 import org.jfree.data.xy.XYIntervalSeriesCollection
 import scala.collection.GenTraversable
 
+/**
+ * Factories for constructing datasets for charts
+ *
+ * @author Dan Garrette (dhgarrette@gmail.com)
+ */
+
 object XYDataset {
   def apply(xyPairs: TraversableOnce[(Double, Double)], name: String = "") = {
     val series1 = new XYSeries(name)

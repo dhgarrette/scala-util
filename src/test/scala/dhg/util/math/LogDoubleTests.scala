@@ -5,6 +5,9 @@ import org.junit.Assert._
 import org.junit.Test
 import dhg.util.math.LogDouble._
 
+/**
+ * @author Dan Garrette (dhgarrette@gmail.com)
+ */
 class LogDoubleTests {
 
   @Test

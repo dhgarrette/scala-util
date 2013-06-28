@@ -8,6 +8,9 @@ import dhg.util.Collections._
 import dhg.util.TestUtil._
 import dhg.util.StringUtil._
 
+/**
+ * @author Dan Garrette (dhgarrette@gmail.com)
+ */
 class StringUtilTests {
 
   @Test

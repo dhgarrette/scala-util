@@ -6,7 +6,7 @@ import org.junit.Test
 import dhg.util.FileUtil._
 
 /**
- * @author Dan Garrette (dhg@cs.utexas.edu)
+ * @author Dan Garrette (dhgarrette@gmail.com)
  */
 class FileUtilTests {
 

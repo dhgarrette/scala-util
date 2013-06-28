@@ -7,6 +7,9 @@ import dhg.util.CollectionUtil._
 import dhg.util.Collections._
 import dhg.util.TestUtil._
 
+/**
+ * @author Dan Garrette (dhgarrette@gmail.com)
+ */
 class CollectionsTests {
 
   @Test

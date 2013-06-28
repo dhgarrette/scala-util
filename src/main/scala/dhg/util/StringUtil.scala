@@ -1,7 +1,7 @@
 package dhg.util
 
 /**
- * String Utilities
+ * Enhancement methods for Strings
  *
  * @author Dan Garrette (dhgarrette@gmail.com)
  */

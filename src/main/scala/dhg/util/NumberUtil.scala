@@ -1,7 +1,9 @@
 package dhg.util
 
 /**
- * @author Dan Garrette (dhg@cs.utexas.edu)
+ * Enhancement methods for numbers
+ * 
+ * @author Dan Garrette (dhgarrette@gmail.com)
  */
 object NumberUtil {
 

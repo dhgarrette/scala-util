@@ -8,7 +8,7 @@ import scala.math.log
 import java.lang.AssertionError
 
 /**
- * Test Utilities
+ * Test utilities
  *
  * @author Dan Garrette (dhgarrette@gmail.com)
  */

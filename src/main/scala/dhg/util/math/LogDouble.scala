@@ -13,7 +13,7 @@ import scalaz.Scalaz._
  * resulting from the inadvertent mixing of logarithmic and non-logarithmic
  * Double representations of probabilities.  Additionally, it is possible to
  * use the `sum` and `product` collection methods on collections of
- * Probabilities, and get the expected results.
+ * LogDoubles, and get the expected results.
  *
  * All to* methods return the (non-logarithmic) value stored.  The only
  * way to access the actual logarithmic value is by the 'logValue' field.

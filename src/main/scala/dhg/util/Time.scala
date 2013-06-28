@@ -1,7 +1,7 @@
 package dhg.util
 
 /**
- * Timing Utilities
+ * Timing utilities
  *
  * @author Dan Garrette (dhgarrette@gmail.com)
  */

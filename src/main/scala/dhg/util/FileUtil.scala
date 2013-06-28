@@ -20,7 +20,7 @@ import java.io.FileInputStream
 import scala.util.matching.Regex
 
 /**
- * File Utilities
+ * File utilities and enhancement methods for Files
  *
  * @author Dan Garrette (dhgarrette@gmail.com)
  */
