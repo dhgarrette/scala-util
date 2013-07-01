@@ -48,23 +48,31 @@ object StringUtil {
      * is longer than `width`, the newline will simply be inserted after the
      * word.
      */
-    def wrap(width: Int = 80): String = {
-      val lines =
-        self.split("\n").flatMap { line =>
-          val (completeLines, lastLine) =
-            line.split("\\s+").foldLeft((Vector[String](), "")) {
-              case ((lines, currLine), tok) =>
-                if (currLine.size + tok.size + 1 > width)
-                  (lines :+ currLine, tok)
-                else if (currLine.isEmpty)
-                  (lines, tok)
-                else
-                  (lines, currLine + " " + tok)
-            }
-          completeLines :+ lastLine
-        }
+    def wrapToLines(width: Int = 80): Vector[String] = {
+      self.split("\n").toVector.flatMap { line =>
+        val (completeLines, lastLine) =
+          line.split("\\s+").foldLeft((Vector[String](), "")) {
+            case ((lines, currLine), tok) =>
+              if (currLine.size + tok.size + 1 > width)
+                (lines :+ currLine, tok)
+              else if (currLine.isEmpty)
+                (lines, tok)
+              else
+                (lines, currLine + " " + tok)
+          }
+        completeLines :+ lastLine
+      }
       //lines.map(s => f"$s%-80s|").mkString("\n")
-      lines.mkString("\n")
+    }
+
+    /**
+     * Add newlines to a string such that each line is `width` or less.  Line
+     * splits happen only on whitespace.  In the case where a single 'word'
+     * is longer than `width`, the newline will simply be inserted after the
+     * word.
+     */
+    def wrap(width: Int = 80): String = {
+      this.wrapToLines(width).mkString("\n")
     }
 
     /**
@@ -82,4 +90,27 @@ object StringUtil {
     }
 
   }
+
+  def sideBySideStrings(spaceBuffer: Int, columns: String*) = {
+    sideBySide(spaceBuffer, columns.map(_.split("\n").toVector): _*).mkString("\n")
+  }
+
+  def sideBySide(spaceBuffer: Int, columns: Vector[String]*) = {
+    val maxHeight = columns.map(_.size).max
+    val vertBuffered =
+      for (c <- columns) yield {
+        c ++ Vector.fill(maxHeight - c.size)("")
+      }
+    val horizBuffered =
+      (for (c <- vertBuffered.dropRight(1)) yield {
+        val maxLineLength = c.map(_.length).max
+        for (line <- c) yield {
+          line + (" " * (maxLineLength - line.length))
+        }
+      }) :+ vertBuffered.last
+    for (columnLines <- horizBuffered.transpose) yield {
+      columnLines.mkString(" " * spaceBuffer)
+    }
+  }
+
 }
