@@ -13,7 +13,7 @@ import scala.util.Random
 
 /**
  * Enhancement methods for collections
- * 
+ *
  * @author Dan Garrette (dhgarrette@gmail.com)
  */
 object CollectionUtil {
@@ -661,7 +661,7 @@ object CollectionUtil {
      */
     def submap[R, That](f: T => R)(implicit bf: CanBuildFrom[Repr, R, That]) = new Iterator[That] {
       def hasNext = self.hasNext
-      def next() = self.next().map(f)(bf)
+      def next() = self.next().map(f)
     }
   }
 
@@ -811,6 +811,132 @@ object CollectionUtil {
     def normalizeValues[That](implicit bf: CanBuildFrom[Repr, (T, Double), That]) = {
       val total = self.foldLeft(0)((z, a) => z + a._2).toDouble
       self.map(x => x._1 -> (x._2 / total))
+    }
+  }
+
+  //////////////////////////////////////////////////////
+  // maxByN(f: A => B, n: Int): Repr[A]
+  //   - Equivalent to, but faster than self.sortBy(f).takeRight(n).reverse
+  //////////////////////////////////////////////////////
+
+  implicit class Enriched_maxByN_GenTraversable[A, Repr](val self: GenTraversableLike[A, Repr]) extends AnyVal {
+    /**
+     * Find the N maximum entries in the collection.
+     *
+     * @return a collection containing the N maximum entries, sorted so the max is first
+     */
+    def maxByN[B, That](f: A => B, n: Int)(implicit ord: Ordering[B], bf: CanBuildFrom[Repr, A, That]): That = {
+      val r = new Array[(A, B)](n min self.size)
+      val it = self.toIterator
+      var i = 0
+      while (it.hasNext) {
+        val x = it.next
+        val b = f(x)
+        var j = 0
+        while (j < (i min n) && ord.gteq(r(j)._2, b)) { // while the thing at position j is greater than f(x)
+          j += 1 // keep looking for the insertion position
+        }
+        if (j < n) { // if the insertion position is in the array
+          for (j2 <- (i min (n - 1) until j by -1)) { // move each lower value down one array position
+            r(j2) = r(j2 - 1)
+          }
+          r(j) = (x -> b) // insert x in the correct place
+        }
+        i += 1
+      }
+      (bf(self.asInstanceOf[Repr]) ++= r.map(_._1)).result
+    }
+  }
+
+  implicit class Enriched_maxByN_Iterator[A](val self: Iterator[A]) extends AnyVal {
+    /**
+     * Find the N maximum entries in the collection.
+     *
+     * @return a collection containing the N maximum entries, sorted so the max is first
+     */
+    def maxByN[B](f: A => B, n: Int)(implicit ord: Ordering[B]): Vector[A] = {
+      val r = new Array[(A, B)](n)
+      val it = self.toIterator
+      var i = 0
+      while (it.hasNext) {
+        val x = it.next
+        val b = f(x)
+        var j = 0
+        while (j < (i min n) && ord.gteq(r(j)._2, b)) { // while the thing at position j is greater than f(x)
+          j += 1 // keep looking for the insertion position
+        }
+        if (j < n) { // if the insertion position is in the array
+          for (j2 <- (i min (n - 1) until j by -1)) { // move each lower value down one array position
+            r(j2) = r(j2 - 1)
+          }
+          r(j) = (x -> b) // insert x in the correct place
+        }
+        i += 1
+      }
+      (Vector.newBuilder ++= r.take(i min n).map(_._1)).result
+    }
+  }
+
+  //////////////////////////////////////////////////////
+  // minByN(f: A => B, n: Int): Repr[A]
+  //   - Equivalent to, but faster than self.sortBy(f).take(n)
+  //////////////////////////////////////////////////////
+
+  implicit class Enriched_minByN_GenTraversable[A, Repr](val self: GenTraversableLike[A, Repr]) extends AnyVal {
+    /**
+     * Find the N minimum entries in the collection.
+     *
+     * @return a collection containing the N minimum entries, sorted so the min is first
+     */
+    def minByN[B, That](f: A => B, n: Int)(implicit ord: Ordering[B], bf: CanBuildFrom[Repr, A, That]): That = {
+      val r = new Array[(A, B)](n min self.size)
+      val it = self.toIterator
+      var i = 0
+      while (it.hasNext) {
+        val x = it.next
+        val b = f(x)
+        var j = 0
+        while (j < (i min n) && ord.lteq(r(j)._2, b)) { // while the thing at position j is greater than f(x)
+          j += 1 // keep looking for the insertion position
+        }
+        if (j < n) { // if the insertion position is in the array
+          for (j2 <- (i min (n - 1) until j by -1)) { // move each lower value down one array position
+            r(j2) = r(j2 - 1)
+          }
+          r(j) = (x -> b) // insert x in the correct place
+        }
+        i += 1
+      }
+      (bf(self.asInstanceOf[Repr]) ++= r.map(_._1)).result
+    }
+  }
+
+  implicit class Enriched_minByN_Iterator[A](val self: Iterator[A]) extends AnyVal {
+    /**
+     * Find the N minimum entries in the collection.
+     *
+     * @return a collection containing the N minimum entries, sorted so the min is first
+     */
+    def minByN[B](f: A => B, n: Int)(implicit ord: Ordering[B]): Vector[A] = {
+      val r = new Array[(A, B)](n)
+      val it = self.toIterator
+      var i = 0
+      while (it.hasNext) {
+        val x = it.next
+        val b = f(x)
+        var j = 0
+        while (j < (i min n) && ord.lteq(r(j)._2, b)) { // while the thing at position j is greater than f(x)
+          j += 1 // keep looking for the insertion position
+        }
+        if (j < n) { // if the insertion position is in the array
+          for (j2 <- (i min (n - 1) until j by -1)) { // move each lower value down one array position
+            r(j2) = r(j2 - 1)
+          }
+          r(j) = (x -> b) // insert x in the correct place
+        }
+        i += 1
+      }
+      (Vector.newBuilder ++= r.take(i min n).map(_._1)).result
     }
   }
 

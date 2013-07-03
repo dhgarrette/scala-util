@@ -434,4 +434,42 @@ class CollectionUtilTests {
     assertEquals(Map('a -> 0.1, 'b -> 0.15, 'c -> 0.25, 'd -> 0.5), avg3)
   }
 
+  @Test
+  def test_maxByN() {
+    val col0 = Vector("a", "three")
+    val col1 = Vector("a", "three", "to", "cheese", "bird", "big")
+    val col2 = Vector("a", "dog", "i", "to", "as", "big")
+
+    assertEquals(Vector("three", "a"), col0.maxByN(_.length, 3))
+    assertEquals(Vector("cheese", "three", "bird"), col1.maxByN(_.length, 3))
+    assertEquals(Vector("dog", "big", "to"), col2.maxByN(_.length, 3))
+
+    assertEquals(Set("three", "a"), col0.toSet.maxByN(_.length, 3))
+    assertEquals(Set("cheese", "three", "bird"), col1.toSet.maxByN(_.length, 3))
+    assertEquals(Set("dog", "big", "as"), col2.toSet.maxByN(_.length, 3))
+
+    assertEquals(Vector("three", "a"), col0.iterator.maxByN(_.length, 3))
+    assertEquals(Vector("cheese", "three", "bird"), col1.iterator.maxByN(_.length, 3))
+    assertEquals(Vector("dog", "big", "to"), col2.iterator.maxByN(_.length, 3))
+  }
+
+  @Test
+  def test_minByN() {
+    val col0 = Vector("a", "three")
+    val col1 = Vector("a", "three", "to", "cheese", "bird", "big")
+    val col2 = Vector("a", "dog", "i", "to", "as", "big")
+
+    assertEquals(Vector("a", "three"), col0.minByN(_.length, 3))
+    assertEquals(Vector("a", "to", "big"), col1.minByN(_.length, 3))
+    assertEquals(Vector("a", "i", "to"), col2.minByN(_.length, 3))
+
+    assertEquals(Set("a", "three"), col0.toSet.minByN(_.length, 3))
+    assertEquals(Set("a", "to", "big"), col1.toSet.minByN(_.length, 3))
+    assertEquals(Set("a", "i", "as"), col2.toSet.minByN(_.length, 3))
+
+    assertEquals(Vector("a", "three"), col0.iterator.minByN(_.length, 3))
+    assertEquals(Vector("a", "to", "big"), col1.iterator.minByN(_.length, 3))
+    assertEquals(Vector("a", "i", "to"), col2.iterator.minByN(_.length, 3))
+  }
+
 }
