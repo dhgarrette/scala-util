@@ -10,6 +10,7 @@ import scala.collection.immutable
 import scala.collection.mutable
 import scala.collection.mutable.Builder
 import scala.util.Random
+import scala.collection.immutable.BitSet
 
 /**
  * Enhancement methods for collections
@@ -957,6 +958,14 @@ object CollectionUtil {
 
   implicit class Enriched_shuffle_Iterator[A](val self: Iterator[A]) extends AnyVal {
     def shuffle: Iterator[A] = Random.shuffle(self)
+  }
+
+  //////////////////////////////////////////////////////
+  // toBitSet
+  //////////////////////////////////////////////////////
+
+  implicit class Enriched_toBitSet_GenTraversableOnce(val self: GenTraversableOnce[Int]) extends AnyVal {
+    def toBitSet: BitSet = BitSet() ++ self
   }
 
 }
