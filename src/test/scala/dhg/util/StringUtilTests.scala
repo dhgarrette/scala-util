@@ -47,6 +47,7 @@ class StringUtilTests {
     assertEqualsArray(Array("thisxandxxthat", "and", "stuff"), "thisxandxxthatxandxstuff".rsplit("x", 3))
     assertEqualsArray(Array("thisxandxxthatxand", "", "stuff"), "thisxandxxthatxandxxstuff".rsplit("x", 3))
     assertEqualsArray(Array("thisxandxxthat", "and", "stuff"), "thisxandxxthatxandxxstuff".rsplit("x+", 3))
+    assertEqualsArray(Array("thisabcandabcccthat", "and", "stuff"), "thisabcandabccthatxabcndabcccstuff".rsplit("abc+", 3))
   }
 
   @Test

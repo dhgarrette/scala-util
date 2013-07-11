@@ -34,12 +34,7 @@ object StringUtil {
      * Split a string into `n` pieces, starting from the right side.
      */
     def rsplit(str: String, n: Int): Array[String] = {
-      val parts = self.split(str)
-      val (front, back) = parts.splitAt(parts.size - n + 1)
-      if (front.nonEmpty)
-        front.mkString(str) +: back
-      else
-        back
+      self.reverse.split(str, n).map(_.reverse).reverse
     }
 
     /**
