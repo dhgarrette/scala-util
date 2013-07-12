@@ -42,12 +42,23 @@ class StringUtilTests {
   }
 
   @Test
+  def test_lsplit() {
+    assertEquals("".split("x", 3).toVector, "".lsplit("x", 3))
+    assertEquals("thisxthat".split("x", 3).toVector, "thisxthat".lsplit("x", 3))
+    assertEquals("thisxandxxthatxandxstuff".split("x", 3).toVector, "thisxandxxthatxandxstuff".lsplit("x", 3))
+    assertEquals("thisxandxxthatxandxxstuff".split("x", 3).toVector, "thisxandxxthatxandxxstuff".lsplit("x", 3))
+    assertEquals("thisxandxxthatxandxxstuff".split("x+", 3).toVector, "thisxandxxthatxandxxstuff".lsplit("x+", 3))
+    assertEquals("thisabcandabccthatabcandabcccstuff".split("abc+", 3).toVector, "thisabcandabccthatabcandabcccstuff".lsplit("abc+", 3))
+  }
+
+  @Test
   def test_rsplit() {
-    assertEqualsArray(Array(""), "".rsplit("x", 3))
-    assertEqualsArray(Array("thisxandxxthat", "and", "stuff"), "thisxandxxthatxandxstuff".rsplit("x", 3))
-    assertEqualsArray(Array("thisxandxxthatxand", "", "stuff"), "thisxandxxthatxandxxstuff".rsplit("x", 3))
-    assertEqualsArray(Array("thisxandxxthat", "and", "stuff"), "thisxandxxthatxandxxstuff".rsplit("x+", 3))
-    assertEqualsArray(Array("thisabcandabcccthat", "and", "stuff"), "thisabcandabccthatxabcndabcccstuff".rsplit("abc+", 3))
+    assertEquals(Vector(""), "".rsplit("x", 3))
+    assertEquals(Vector("this", "that"), "thisxthat".rsplit("x", 3))
+    assertEquals(Vector("thisxandxxthat", "and", "stuff"), "thisxandxxthatxandxstuff".rsplit("x", 3))
+    assertEquals(Vector("thisxandxxthatxand", "", "stuff"), "thisxandxxthatxandxxstuff".rsplit("x", 3))
+    assertEquals(Vector("thisxandxxthat", "and", "stuff"), "thisxandxxthatxandxxstuff".rsplit("x+", 3))
+    assertEquals(Vector("thisabcandabccthat", "and", "stuff"), "thisabcandabccthatabcandabcccstuff".rsplit("abc+", 3))
   }
 
   @Test

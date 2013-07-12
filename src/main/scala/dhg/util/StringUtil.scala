@@ -31,10 +31,33 @@ object StringUtil {
     def splitWhitespace: Array[String] = self.split("\\s+")
 
     /**
-     * Split a string into `n` pieces, starting from the right side.
+     * Split a string into `limit` pieces, starting from the left side.
      */
-    def rsplit(str: String, n: Int): Array[String] = {
-      self.reverse.split(str, n).map(_.reverse).reverse
+    def lsplit(str: String, limit: Int = Int.MaxValue): Vector[String] = {
+      val allSpans = new RegexMatcherSplitIterator(self, str).toVector
+      val spans =
+        if (allSpans.size > limit) {
+          val leftSpans :+ h = allSpans.take(limit)
+          leftSpans :+ (h._1 -> self.length())
+        }
+        else
+          allSpans
+      spans.map { case (b, e) => self.substring(b, e) }
+    }
+
+    /**
+     * Split a string into `limit` pieces, starting from the right side.
+     */
+    def rsplit(str: String, limit: Int): Vector[String] = {
+      val allSpans = new RegexMatcherSplitIterator(self, str).toVector
+      val spans =
+        if (allSpans.size > limit) {
+          val h +: rightSpans = allSpans.takeRight(limit)
+          (0 -> h._2) +: rightSpans
+        }
+        else
+          allSpans
+      spans.map { case (b, e) => self.substring(b, e) }
     }
 
     /**
@@ -106,6 +129,43 @@ object StringUtil {
     for (columnLines <- horizBuffered.transpose) yield {
       columnLines.mkString(" " * spaceBuffer)
     }
+  }
+
+  private class RegexMatcherSplitIterator(str: String, pattern: String) extends Iterator[(Int, Int)] {
+    val m = pattern.r.pattern.matcher(str)
+    var prevE: Int = 0
+    var queued: Option[(Int, Int)] = None
+    var nextE: Option[Int] = Some(0)
+
+    def hasNext() =
+      if (queued.isDefined) {
+        true
+      }
+      else if (m.find()) {
+        queued = Some(prevE -> m.start)
+        nextE = Some(m.end)
+        true
+      }
+      else if (nextE.isDefined) {
+        queued = Some(nextE.get -> str.length())
+        nextE = None
+        true
+      }
+      else {
+        false
+      }
+
+    def next() =
+      if (hasNext) {
+        val n = queued.get
+        prevE = nextE.getOrElse(-1)
+        queued = None
+        n
+      }
+      else
+        Iterator().next()
+
+    override def toString = s"RegexMatcherSplitIterator(prevE=$prevE, queued=$queued, nextE=$nextE)"
   }
 
 }
