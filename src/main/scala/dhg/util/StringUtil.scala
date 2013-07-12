@@ -1,5 +1,7 @@
 package dhg.util
 
+import dhg.util.CollectionUtil._
+
 /**
  * Enhancement methods for Strings
  *
@@ -33,16 +35,31 @@ object StringUtil {
     /**
      * Split a string into `limit` pieces, starting from the left side.
      */
-    def lsplit(str: String, limit: Int = Int.MaxValue): Vector[String] = {
-      val allSpans = new RegexMatcherSplitIterator(self, str).toVector
-      val spans =
-        if (allSpans.size > limit) {
-          val leftSpans :+ h = allSpans.take(limit)
-          leftSpans :+ (h._1 -> self.length())
-        }
-        else
-          allSpans
+    def lsplit(str: String): Vector[String] = {
+      new RegexMatcherSplitIterator(self, str)
+        .toVector
+        .dropRightWhile { case (b, e) => b == e && b > 0 }
+        .map { case (b, e) => self.substring(b, e) }
+    }
+
+    /**
+     * Split a string into `limit` pieces, starting from the left side.
+     */
+    def lsplit(str: String, limit: Int): Vector[String] = {
+      val allSpans = new RegexMatcherSplitIterator(self, str).take(limit).toVector
+      val leftSpans :+ h = allSpans
+      val spans = leftSpans :+ (h._1 -> self.length())
       spans.map { case (b, e) => self.substring(b, e) }
+    }
+
+    /**
+     * Split a string into `limit` pieces, starting from the right side.
+     */
+    def rsplit(str: String): Vector[String] = {
+      new RegexMatcherSplitIterator(self, str)
+        .toVector
+        .dropWhile { case (b, e) => b == e}
+        .map { case (b, e) => self.substring(b, e) }
     }
 
     /**

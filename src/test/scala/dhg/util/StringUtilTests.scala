@@ -45,6 +45,11 @@ class StringUtilTests {
   def test_lsplit() {
     assertEquals("".split("x", 3).toVector, "".lsplit("x", 3))
     assertEquals("thisxthat".split("x", 3).toVector, "thisxthat".lsplit("x", 3))
+    assertEquals("xxthisxxthatxxxstuffx".split("x").toVector, "xxthisxxthatxxxstuffx".lsplit("x"))
+    assertEquals("xxthisxxthatxxxstuffx".split("x",100).toVector, "xxthisxxthatxxxstuffx".lsplit("x",100))
+    assertEquals("xxthisxxthatxxxstuffxxxx".split("x").toVector, "xxthisxxthatxxxstuffxxxx".lsplit("x"))
+    assertEquals("xxthisxxthatxxxstuffxxxx".split("x",100).toVector, "xxthisxxthatxxxstuffxxxx".lsplit("x",100))
+    assertEquals("xxthisxxthatxxxstuffxxxx".split("x", 10).toVector, "xxthisxxthatxxxstuffxxxx".lsplit("x", 10))
     assertEquals("thisxandxxthatxandxstuff".split("x", 3).toVector, "thisxandxxthatxandxstuff".lsplit("x", 3))
     assertEquals("thisxandxxthatxandxxstuff".split("x", 3).toVector, "thisxandxxthatxandxxstuff".lsplit("x", 3))
     assertEquals("thisxandxxthatxandxxstuff".split("x+", 3).toVector, "thisxandxxthatxandxxstuff".lsplit("x+", 3))
@@ -53,11 +58,16 @@ class StringUtilTests {
 
   @Test
   def test_rsplit() {
-    assertEquals(Vector(""), "".rsplit("x", 3))
-    assertEquals(Vector("this", "that"), "thisxthat".rsplit("x", 3))
-    assertEquals(Vector("thisxandxxthat", "and", "stuff"), "thisxandxxthatxandxstuff".rsplit("x", 3))
-    assertEquals(Vector("thisxandxxthatxand", "", "stuff"), "thisxandxxthatxandxxstuff".rsplit("x", 3))
-    assertEquals(Vector("thisxandxxthat", "and", "stuff"), "thisxandxxthatxandxxstuff".rsplit("x+", 3))
+    assertEquals("".reverse.split("x", 3).map(_.reverse).reverse.toVector, "".rsplit("x", 3))
+    assertEquals("thisxthat".reverse.split("x", 3).map(_.reverse).reverse.toVector, "thisxthat".rsplit("x", 3))
+    assertEquals("xthisxxthatxxxstuffxx".reverse.split("x").map(_.reverse).reverse.toVector, "xthisxxthatxxxstuffxx".rsplit("x"))
+    assertEquals("xthisxxthatxxxstuffxx".reverse.split("x", 100).map(_.reverse).reverse.toVector, "xthisxxthatxxxstuffxx".rsplit("x", 100))
+    assertEquals("xxxxthisxxthatxxxstuffxx".reverse.split("x").map(_.reverse).reverse.toVector, "xxxxthisxxthatxxxstuffxx".rsplit("x"))
+    assertEquals("xxxxthisxxthatxxxstuffxx".reverse.split("x", 100).map(_.reverse).reverse.toVector, "xxxxthisxxthatxxxstuffxx".rsplit("x", 100))
+    assertEquals("xxxxthisxxthatxxxstuffxx".reverse.split("x", 10).map(_.reverse).reverse.toVector, "xxxxthisxxthatxxxstuffxx".rsplit("x", 10))
+    assertEquals("thisxandxxthatxandxstuff".reverse.split("x", 3).map(_.reverse).reverse.toVector, "thisxandxxthatxandxstuff".rsplit("x", 3))
+    assertEquals("thisxandxxthatxandxxstuff".reverse.split("x", 3).map(_.reverse).reverse.toVector, "thisxandxxthatxandxxstuff".rsplit("x", 3))
+    assertEquals("thisxandxxthatxandxxstuff".reverse.split("x+", 3).map(_.reverse).reverse.toVector, "thisxandxxthatxandxxstuff".rsplit("x+", 3))
     assertEquals(Vector("thisabcandabccthat", "and", "stuff"), "thisabcandabccthatabcandabcccstuff".rsplit("abc+", 3))
   }
 
