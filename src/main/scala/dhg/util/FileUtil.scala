@@ -158,7 +158,7 @@ object FileUtil {
      * lines have been read.
      */
     def readLines: Iterator[String] = {
-      Arm.readLines(self)
+      Arm.readLines(self, "UTF-8")
     }
 
     /**
@@ -177,24 +177,18 @@ object FileUtil {
   }
 
   object GzFileIterator {
-    def apply(file: File, encoding: String) = {
+    def apply(file: File, encoding: String = "UTF-8"): Iterator[String] = {
       new BufferedReaderIterator(
         new BufferedReader(
           new InputStreamReader(
             new GZIPInputStream(
               new FileInputStream(file)), encoding)))
     }
-    def apply(file: File) = {
-      new BufferedReaderIterator(
-        new BufferedReader(
-          new InputStreamReader(
-            new GZIPInputStream(
-              new FileInputStream(file)))))
-    }
   }
 
-  def bufferedWriter(file: File) = new BufferedWriter(new FileWriter(file))
-  def bufferedWriter(file: File, encoding: String) = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), encoding))
+  def bufferedWriter(file: File, encoding: String = "UTF-8") = {
+    new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), encoding))
+  }
 
   def findBinary(name: String, binDir: Option[String] = None, envar: Option[String] = None): String = {
     val checked = collection.mutable.Buffer[String]()
@@ -230,8 +224,8 @@ object FileUtil {
    * Open a file for reading, execute a block of code, and ensure that the
    * file is closed when finished.
    */
-  def readUsing[R](file: File)(block: BufferedSource => R): R = {
-    using(Source.fromFile(file))(block)
+  def readUsing[R](file: File, encoding: String = "UTF-8")(block: BufferedSource => R): R = {
+    using(Source.fromFile(file, encoding))(block)
   }
 
   /**
@@ -239,17 +233,7 @@ object FileUtil {
    * necessary), execute a block of code, and ensure that the file is closed
    * when finished.
    */
-  def writeUsing[R](file: File)(block: BufferedWriter => R): R = {
-    file.mkParentDir()
-    using(bufferedWriter(file))(block)
-  }
-
-  /**
-   * Open a file for writing (creating the containing directory structure if
-   * necessary), execute a block of code, and ensure that the file is closed
-   * when finished.
-   */
-  def writeUsing[R](file: File, encoding: String)(block: BufferedWriter => R): R = {
+  def writeUsing[R](file: File, encoding: String = "UTF-8")(block: BufferedWriter => R): R = {
     file.mkParentDir()
     using(bufferedWriter(file, encoding))(block)
   }
