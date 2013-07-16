@@ -286,8 +286,8 @@ object CollectionUtil {
      *
      * @param delim	The delimiter upon which to split.
      */
-    def split(delim: A): Iterator[Vector[A]] =
-      split(delim, Vector.newBuilder[A])
+    def split(delim: A, keepDelimiter: Boolean = false, delimiterFirst: Boolean = true): Iterator[Vector[A]] =
+      split(delim, Vector.newBuilder[A], keepDelimiter, delimiterFirst)
 
     /**
      * Split this collection on each occurrence of the delimiter.  Delimiters
@@ -297,8 +297,8 @@ object CollectionUtil {
      *
      * @param delim	The delimiter upon which to split.
      */
-    def split[That](delim: A, builder: => Builder[A, That]): Iterator[That] =
-      self.splitWhere(_ == delim, builder)
+    def split[That](delim: A, builder: => Builder[A, That], keepDelimiter: Boolean, delimiterFirst: Boolean): Iterator[That] =
+      self.splitWhere(_ == delim, builder, keepDelimiter, delimiterFirst)
   }
 
   implicit class Enriched_split_Traversable[A, Repr](val self: TraversableLike[A, Repr]) extends AnyVal {
@@ -310,8 +310,8 @@ object CollectionUtil {
      *
      * @param delim	The delimiter upon which to split.
      */
-    def split[That](delim: A)(implicit bf: CanBuildFrom[Repr, A, That]): Iterator[That] =
-      self.toIterator.split(delim, bf(self.asInstanceOf[Repr]))
+    def split[That](delim: A, keepDelimiter: Boolean = false, delimiterFirst: Boolean = true)(implicit bf: CanBuildFrom[Repr, A, That]): Iterator[That] =
+      self.toIterator.split(delim, bf(self.asInstanceOf[Repr]), keepDelimiter, delimiterFirst)
   }
 
   //////////////////////////////////////////////////////
@@ -326,8 +326,8 @@ object CollectionUtil {
      *
      * @param delim	The delimiter upon which to split.
      */
-    def splitWhere(p: A => Boolean): Iterator[Vector[A]] =
-      splitWhere(p, Vector.newBuilder[A])
+    def splitWhere(p: A => Boolean, keepDelimiter: Boolean = false, delimiterFirst: Boolean = true): Iterator[Vector[A]] =
+      splitWhere(p, Vector.newBuilder[A], keepDelimiter, delimiterFirst)
 
     /**
      * Split this on items for which the predicate is true.  Delimiters
@@ -335,45 +335,75 @@ object CollectionUtil {
      *
      * @param delim	The delimiter upon which to split.
      */
-    def splitWhere[That](p: A => Boolean, builder: => Builder[A, That]): Iterator[That] =
+    def splitWhere[That](p: A => Boolean, builder: => Builder[A, That], keepDelimiter: Boolean, delimiterFirst: Boolean): Iterator[That] =
       new Iterator[That] {
-        var buffer = mutable.Queue[That]()
+        var queued: Option[That] = None
+        val bldr = new BuilderHolder(builder)
+
         def next(): That = {
           assert(this.hasNext, "next on empty iterator")
-          buffer.dequeue
+          val group = queued.get
+          queued = None
+          group
         }
 
         def hasNext() = {
-          if (buffer.isEmpty && self.hasNext) {
-            takeUntilNext(builder)
+          if (queued.isEmpty) {
+            takeUntilDelim()
           }
-          buffer.nonEmpty
+          if (queued.isEmpty && bldr.nonEmpty) {
+            queued = Some(bldr.result)
+            bldr.clear()
+          }
+          queued.nonEmpty
         }
 
         @tailrec
-        private def takeUntilNext(builder: => Builder[A, That]): Unit = {
-          val (empty, item) = takeUntilDelim(builder)
-          buffer.enqueue(item)
-          if (empty)
-            if (self.hasNext)
-              takeUntilNext(builder)
-            else
-              buffer.clear()
-        }
-
-        @tailrec
-        private def takeUntilDelim(b: Builder[A, That], empty: Boolean = true): (Boolean, That) = {
+        private def takeUntilDelim() {
           if (self.hasNext) {
             val x = self.next
-            if (p(x))
-              (empty, b.result)
-            else
-              takeUntilDelim(b += x, false)
+            if (p(x)) {
+              if (keepDelimiter && !delimiterFirst) {
+                bldr += x
+              }
+              queued = Some(bldr.result)
+              bldr.clear()
+              if (keepDelimiter && delimiterFirst) {
+                bldr += x
+              }
+            }
+            else {
+              bldr += x
+              takeUntilDelim()
+            }
           }
-          else
-            (empty, b.result)
         }
       }
+  }
+
+  class BuilderHolder[A, That](builder: => Builder[A, That]) {
+    private val b = builder
+    private var bEmpty = true
+
+    def +=(a: A) = {
+      b += a
+      bEmpty = false
+      this
+    }
+
+    def result() = {
+      b.result
+    }
+
+    def clear() {
+      b.clear()
+      bEmpty = true
+    }
+
+    def isEmpty = bEmpty
+    def nonEmpty = !isEmpty
+
+    override def toString() = s"BuilderHolder(${b.result}, isEmpty=$isEmpty)"
   }
 
   implicit class Enriched_splitWhere_Traversable[A, Repr](val self: TraversableLike[A, Repr]) extends AnyVal {
@@ -383,8 +413,8 @@ object CollectionUtil {
      *
      * @param delim	The delimiter upon which to split.
      */
-    def splitWhere[That](p: A => Boolean)(implicit bf: CanBuildFrom[Repr, A, That]): Iterator[That] =
-      self.toIterator.splitWhere(p, bf(self.asInstanceOf[Repr]))
+    def splitWhere[That](p: A => Boolean, keepDelimiter: Boolean = false, delimiterFirst: Boolean = true)(implicit bf: CanBuildFrom[Repr, A, That]): Iterator[That] =
+      self.toIterator.splitWhere(p, bf(self.asInstanceOf[Repr]), keepDelimiter, delimiterFirst)
   }
 
   //////////////////////////////////////////////////////
@@ -944,12 +974,6 @@ object CollectionUtil {
   //////////////////////////////////////////////////////
   // shuffle
   //////////////////////////////////////////////////////
-
-  //  implicit class Enriched_shuffle_TraversableOnce[T, CC[X] <: TraversableOnce[X]](xs: CC[T]) {
-  //    def shuffle(implicit bf: CanBuildFrom[CC[T], T, CC[T]]): CC[T] = {
-  //      (bf(xs) ++= Random.shuffle(xs)).result
-  //    }
-  //  }
 
   implicit class Enriched_shuffle_Seq[A, Repr](val self: SeqLike[A, Repr]) extends AnyVal {
     def shuffle[That](implicit bf: CanBuildFrom[Repr, A, That]): That =
