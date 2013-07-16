@@ -1,6 +1,7 @@
 package dhg.util
 
 import dhg.util.CollectionUtil._
+import scala.util.matching.Regex
 
 /**
  * Enhancement methods for Strings
@@ -58,7 +59,7 @@ object StringUtil {
     def rsplit(str: String): Vector[String] = {
       new RegexMatcherSplitIterator(self, str)
         .toVector
-        .dropWhile { case (b, e) => b == e}
+        .dropWhile { case (b, e) => b == e }
         .map { case (b, e) => self.substring(b, e) }
     }
 
@@ -183,6 +184,12 @@ object StringUtil {
         Iterator().next()
 
     override def toString = s"RegexMatcherSplitIterator(prevE=$prevE, queued=$queued, nextE=$nextE)"
+  }
+
+  implicit class EnrichedRegex(val self: Regex) extends AnyVal {
+	  def matches(s: String): Boolean = {
+	    self.pattern.matcher(s).matches
+	  }
   }
 
 }
