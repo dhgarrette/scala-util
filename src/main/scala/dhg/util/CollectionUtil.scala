@@ -271,6 +271,16 @@ object CollectionUtil {
     }
   }
 
+  /**
+   * The KeepDelimiter enumeration is used to specify behavior for the `split` methods.
+   */
+  sealed trait KeepDelimiter
+  object KeepDelimiter {
+    case object RemoveDelimiter extends KeepDelimiter
+    case object KeepDelimiterAsFirst extends KeepDelimiter
+    case object KeepDelimiterAsLast extends KeepDelimiter
+  }
+
   //////////////////////////////////////////////////////
   // split(delim: A): Iterator[Repr[A]]
   //   - Split this collection on each occurrence of the delimiter 
@@ -286,8 +296,8 @@ object CollectionUtil {
      *
      * @param delim	The delimiter upon which to split.
      */
-    def split(delim: A, keepDelimiter: Boolean = false, delimiterFirst: Boolean = true): Iterator[Vector[A]] =
-      split(delim, Vector.newBuilder[A], keepDelimiter, delimiterFirst)
+    def split(delim: A, keepDelimiter: KeepDelimiter = KeepDelimiter.RemoveDelimiter): Iterator[Vector[A]] =
+      split(delim, Vector.newBuilder[A], keepDelimiter)
 
     /**
      * Split this collection on each occurrence of the delimiter.  Delimiters
@@ -297,8 +307,8 @@ object CollectionUtil {
      *
      * @param delim	The delimiter upon which to split.
      */
-    def split[That](delim: A, builder: => Builder[A, That], keepDelimiter: Boolean, delimiterFirst: Boolean): Iterator[That] =
-      self.splitWhere(_ == delim, builder, keepDelimiter, delimiterFirst)
+    def split[That](delim: A, builder: => Builder[A, That], keepDelimiter: KeepDelimiter): Iterator[That] =
+      self.splitWhere(_ == delim, builder, keepDelimiter)
   }
 
   implicit class Enriched_split_Traversable[A, Repr](val self: TraversableLike[A, Repr]) extends AnyVal {
@@ -310,8 +320,8 @@ object CollectionUtil {
      *
      * @param delim	The delimiter upon which to split.
      */
-    def split[That](delim: A, keepDelimiter: Boolean = false, delimiterFirst: Boolean = true)(implicit bf: CanBuildFrom[Repr, A, That]): Iterator[That] =
-      self.toIterator.split(delim, bf(self.asInstanceOf[Repr]), keepDelimiter, delimiterFirst)
+    def split[That](delim: A, keepDelimiter: KeepDelimiter = KeepDelimiter.RemoveDelimiter)(implicit bf: CanBuildFrom[Repr, A, That]): Iterator[That] =
+      self.toIterator.split(delim, bf(self.asInstanceOf[Repr]), keepDelimiter)
   }
 
   //////////////////////////////////////////////////////
@@ -326,8 +336,8 @@ object CollectionUtil {
      *
      * @param delim	The delimiter upon which to split.
      */
-    def splitWhere(p: A => Boolean, keepDelimiter: Boolean = false, delimiterFirst: Boolean = true): Iterator[Vector[A]] =
-      splitWhere(p, Vector.newBuilder[A], keepDelimiter, delimiterFirst)
+    def splitWhere(p: A => Boolean, keepDelimiter: KeepDelimiter = KeepDelimiter.RemoveDelimiter): Iterator[Vector[A]] =
+      splitWhere(p, Vector.newBuilder[A], keepDelimiter)
 
     /**
      * Split this on items for which the predicate is true.  Delimiters
@@ -335,7 +345,7 @@ object CollectionUtil {
      *
      * @param delim	The delimiter upon which to split.
      */
-    def splitWhere[That](p: A => Boolean, builder: => Builder[A, That], keepDelimiter: Boolean, delimiterFirst: Boolean): Iterator[That] =
+    def splitWhere[That](p: A => Boolean, builder: => Builder[A, That], keepDelimiter: KeepDelimiter): Iterator[That] =
       new Iterator[That] {
         var queued: Option[That] = None
         val bldr = new BuilderHolder(builder)
@@ -363,12 +373,12 @@ object CollectionUtil {
           if (self.hasNext) {
             val x = self.next
             if (p(x)) {
-              if (keepDelimiter && !delimiterFirst) {
+              if (keepDelimiter == KeepDelimiter.KeepDelimiterAsLast) {
                 bldr += x
               }
               queued = Some(bldr.result)
               bldr.clear()
-              if (keepDelimiter && delimiterFirst) {
+              if (keepDelimiter == KeepDelimiter.KeepDelimiterAsFirst) {
                 bldr += x
               }
             }
@@ -413,8 +423,8 @@ object CollectionUtil {
      *
      * @param delim	The delimiter upon which to split.
      */
-    def splitWhere[That](p: A => Boolean, keepDelimiter: Boolean = false, delimiterFirst: Boolean = true)(implicit bf: CanBuildFrom[Repr, A, That]): Iterator[That] =
-      self.toIterator.splitWhere(p, bf(self.asInstanceOf[Repr]), keepDelimiter, delimiterFirst)
+    def splitWhere[That](p: A => Boolean, keepDelimiter: KeepDelimiter = KeepDelimiter.RemoveDelimiter)(implicit bf: CanBuildFrom[Repr, A, That]): Iterator[That] =
+      self.toIterator.splitWhere(p, bf(self.asInstanceOf[Repr]), keepDelimiter)
   }
 
   //////////////////////////////////////////////////////
