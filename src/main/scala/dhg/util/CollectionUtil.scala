@@ -276,7 +276,7 @@ object CollectionUtil {
    */
   sealed trait KeepDelimiter
   object KeepDelimiter {
-    case object RemoveDelimiter extends KeepDelimiter
+    case object DropDelimiter extends KeepDelimiter
     case object KeepDelimiterAsFirst extends KeepDelimiter
     case object KeepDelimiterAsLast extends KeepDelimiter
   }
@@ -296,7 +296,7 @@ object CollectionUtil {
      *
      * @param delim	The delimiter upon which to split.
      */
-    def split(delim: A, keepDelimiter: KeepDelimiter = KeepDelimiter.RemoveDelimiter): Iterator[Vector[A]] =
+    def split(delim: A, keepDelimiter: KeepDelimiter = KeepDelimiter.DropDelimiter): Iterator[Vector[A]] =
       split(delim, Vector.newBuilder[A], keepDelimiter)
 
     /**
@@ -320,7 +320,7 @@ object CollectionUtil {
      *
      * @param delim	The delimiter upon which to split.
      */
-    def split[That](delim: A, keepDelimiter: KeepDelimiter = KeepDelimiter.RemoveDelimiter)(implicit bf: CanBuildFrom[Repr, A, That]): Iterator[That] =
+    def split[That](delim: A, keepDelimiter: KeepDelimiter = KeepDelimiter.DropDelimiter)(implicit bf: CanBuildFrom[Repr, A, That]): Iterator[That] =
       self.toIterator.split(delim, bf(self.asInstanceOf[Repr]), keepDelimiter)
   }
 
@@ -336,7 +336,7 @@ object CollectionUtil {
      *
      * @param delim	The delimiter upon which to split.
      */
-    def splitWhere(p: A => Boolean, keepDelimiter: KeepDelimiter = KeepDelimiter.RemoveDelimiter): Iterator[Vector[A]] =
+    def splitWhere(p: A => Boolean, keepDelimiter: KeepDelimiter = KeepDelimiter.DropDelimiter): Iterator[Vector[A]] =
       splitWhere(p, Vector.newBuilder[A], keepDelimiter)
 
     /**
@@ -423,7 +423,7 @@ object CollectionUtil {
      *
      * @param delim	The delimiter upon which to split.
      */
-    def splitWhere[That](p: A => Boolean, keepDelimiter: KeepDelimiter = KeepDelimiter.RemoveDelimiter)(implicit bf: CanBuildFrom[Repr, A, That]): Iterator[That] =
+    def splitWhere[That](p: A => Boolean, keepDelimiter: KeepDelimiter = KeepDelimiter.DropDelimiter)(implicit bf: CanBuildFrom[Repr, A, That]): Iterator[That] =
       self.toIterator.splitWhere(p, bf(self.asInstanceOf[Repr]), keepDelimiter)
   }
 

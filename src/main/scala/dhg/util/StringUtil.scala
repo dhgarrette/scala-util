@@ -149,7 +149,7 @@ object StringUtil {
     }
   }
 
-  private class RegexMatcherSplitIterator(str: String, pattern: String) extends Iterator[(Int, Int)] {
+  private class RegexMatcherSplitIterator(str: String, pattern: String, keepDelimiter: KeepDelimiter = KeepDelimiter.DropDelimiter) extends Iterator[(Int, Int)] {
     val m = pattern.r.pattern.matcher(str)
     var prevE: Int = 0
     var queued: Option[(Int, Int)] = None
@@ -160,8 +160,16 @@ object StringUtil {
         true
       }
       else if (m.find()) {
-        queued = Some(prevE -> m.start)
-        nextE = Some(m.end)
+        queued =
+          if (keepDelimiter == KeepDelimiter.KeepDelimiterAsLast)
+            Some(prevE -> m.end)
+          else
+            Some(prevE -> m.start)
+        nextE =
+          if (keepDelimiter == KeepDelimiter.KeepDelimiterAsFirst)
+            Some(m.start)
+          else
+            Some(m.end)
         true
       }
       else if (nextE.isDefined) {
@@ -183,13 +191,13 @@ object StringUtil {
       else
         Iterator().next()
 
-    override def toString = s"RegexMatcherSplitIterator(prevE=$prevE, queued=$queued, nextE=$nextE)"
+    override def toString = s"RegexMatcherSplitIterator(string=$str, pattern=$pattern, keepDelimiter=$keepDelimiter, prevE=$prevE, queued=$queued, nextE=$nextE, hasNext=$hasNext)"
   }
 
   implicit class EnrichedRegex(val self: Regex) extends AnyVal {
-	  def matches(s: String): Boolean = {
-	    self.pattern.matcher(s).matches
-	  }
+    def matches(s: String): Boolean = {
+      self.pattern.matcher(s).matches
+    }
   }
 
 }
