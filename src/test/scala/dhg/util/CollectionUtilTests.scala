@@ -145,6 +145,7 @@ class CollectionUtilTests {
 
     // "12345".split('3')  -->  Array(12, 45)
     assertEqualsIterator(Iterator(List(1, 2), List(4, 5)), List(1, 2, 3, 4, 5).split(3))
+    assertEqualsIterator(Iterator(Set(1, 2), Set(4, 5)), Iterator(1, 2, 3, 4, 5).split(3, Set.newBuilder[Int]))
     assertEqualsIterator(Iterator(Set(1, 2), Set(4, 5)), Iterator(1, 2, 3, 4, 5).split(3, Set.newBuilder[Int], DropDelimiter))
     assertEqualsIterator(Iterator(List(1, 2), List(3, 4, 5)), List(1, 2, 3, 4, 5).split(3, KeepDelimiterAsFirst))
     assertEqualsIterator(Iterator(Set(1, 2), Set(3, 4, 5)), Iterator(1, 2, 3, 4, 5).split(3, Set.newBuilder[Int], KeepDelimiterAsFirst))

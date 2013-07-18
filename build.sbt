@@ -16,4 +16,4 @@ libraryDependencies ++= Seq(
 
 scalacOptions ++= Seq("-deprecation")
 
-initialCommands in console := "import dhg.util.CollectionUtil._, dhg.util.Pattern._"
+initialCommands in console := "import dhg.util.CollectionUtil._, import dhg.util.StringUtil._, import dhg.util.FileUtil._, dhg.util.Pattern._"

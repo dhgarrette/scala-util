@@ -289,8 +289,7 @@ object CollectionUtil {
 
   implicit class Enriched_split_Iterator[A](val self: Iterator[A]) extends AnyVal {
     /**
-     * Split this collection on each occurrence of the delimiter.  Delimiters
-     * do not appear in the output.
+     * Split this collection on each occurrence of the delimiter.
      *
      * Inspired by String.split
      *
@@ -300,8 +299,17 @@ object CollectionUtil {
       split(delim, Vector.newBuilder[A], keepDelimiter)
 
     /**
-     * Split this collection on each occurrence of the delimiter.  Delimiters
-     * do not appear in the output.
+     * Split this collection on each occurrence of the delimiter.
+     *
+     * Inspired by String.split
+     *
+     * @param delim	The delimiter upon which to split.
+     */
+    def split[That](delim: A, builder: => Builder[A, That]): Iterator[That] =
+      self.splitWhere(_ == delim, builder, KeepDelimiter.DropDelimiter)
+
+    /**
+     * Split this collection on each occurrence of the delimiter.
      *
      * Inspired by String.split
      *
@@ -313,8 +321,7 @@ object CollectionUtil {
 
   implicit class Enriched_split_Traversable[A, Repr](val self: TraversableLike[A, Repr]) extends AnyVal {
     /**
-     * Split this collection on each occurrence of the delimiter.  Delimiters
-     * do not appear in the output.
+     * Split this collection on each occurrence of the delimiter.
      *
      * Inspired by String.split
      *
@@ -331,8 +338,7 @@ object CollectionUtil {
 
   implicit class Enriched_splitWhere_Iterator[A](val self: Iterator[A]) { // extends AnyVal {
     /**
-     * Split this on items for which the predicate is true.  Delimiters
-     * do not appear in the output.
+     * Split this on items for which the predicate is true.
      *
      * @param delim	The delimiter upon which to split.
      */
@@ -340,8 +346,15 @@ object CollectionUtil {
       splitWhere(p, Vector.newBuilder[A], keepDelimiter)
 
     /**
-     * Split this on items for which the predicate is true.  Delimiters
-     * do not appear in the output.
+     * Split this on items for which the predicate is true.
+     *
+     * @param delim	The delimiter upon which to split.
+     */
+    def splitWhere[That](p: A => Boolean, builder: => Builder[A, That]): Iterator[That] =
+      splitWhere(p, builder, KeepDelimiter.DropDelimiter)
+
+    /**
+     * Split this on items for which the predicate is true.
      *
      * @param delim	The delimiter upon which to split.
      */

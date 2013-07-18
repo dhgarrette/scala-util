@@ -36,9 +36,8 @@ object StringUtil {
     /**
      * Split a string into `limit` pieces, starting from the left side.
      */
-    def lsplit(str: String): Vector[String] = {
-      new RegexMatcherSplitIterator(self, str)
-        .toVector
+    def lsplit(str: String, keepDelimiter: KeepDelimiter = KeepDelimiter.DropDelimiter): Vector[String] = {
+      new RegexMatcherSplitIterator(self, str, keepDelimiter).toVector
         .dropRightWhile { case (b, e) => b == e && b > 0 }
         .map { case (b, e) => self.substring(b, e) }
     }
@@ -47,7 +46,14 @@ object StringUtil {
      * Split a string into `limit` pieces, starting from the left side.
      */
     def lsplit(str: String, limit: Int): Vector[String] = {
-      val allSpans = new RegexMatcherSplitIterator(self, str).take(limit).toVector
+      lsplit(str, limit, KeepDelimiter.DropDelimiter)
+    }
+
+    /**
+     * Split a string into `limit` pieces, starting from the left side.
+     */
+    def lsplit(str: String, limit: Int, keepDelimiter: KeepDelimiter): Vector[String] = {
+      val allSpans = new RegexMatcherSplitIterator(self, str, keepDelimiter).take(limit).toVector
       val leftSpans :+ h = allSpans
       val spans = leftSpans :+ (h._1 -> self.length())
       spans.map { case (b, e) => self.substring(b, e) }
@@ -56,9 +62,8 @@ object StringUtil {
     /**
      * Split a string into `limit` pieces, starting from the right side.
      */
-    def rsplit(str: String): Vector[String] = {
-      new RegexMatcherSplitIterator(self, str)
-        .toVector
+    def rsplit(str: String, keepDelimiter: KeepDelimiter = KeepDelimiter.DropDelimiter): Vector[String] = {
+      new RegexMatcherSplitIterator(self, str, keepDelimiter).toVector
         .dropWhile { case (b, e) => b == e }
         .map { case (b, e) => self.substring(b, e) }
     }
@@ -67,7 +72,14 @@ object StringUtil {
      * Split a string into `limit` pieces, starting from the right side.
      */
     def rsplit(str: String, limit: Int): Vector[String] = {
-      val allSpans = new RegexMatcherSplitIterator(self, str).toVector
+      rsplit(str, limit, KeepDelimiter.DropDelimiter)
+    }
+
+    /**
+     * Split a string into `limit` pieces, starting from the right side.
+     */
+    def rsplit(str: String, limit: Int, keepDelimiter: KeepDelimiter): Vector[String] = {
+      val allSpans = new RegexMatcherSplitIterator(self, str, keepDelimiter).toVector
       val spans =
         if (allSpans.size > limit) {
           val h +: rightSpans = allSpans.takeRight(limit)
