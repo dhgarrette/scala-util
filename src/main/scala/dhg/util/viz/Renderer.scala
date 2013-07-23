@@ -43,9 +43,13 @@ object LineRenderer {
 object ScatterRenderer {
   def apply(
     color: Color = Color.blue,
-    shape: Option[JShape] = Some(Shape.circle)) = {
-    LineRenderer(color, 0, shape)
+    shape: JShape = Shape.circle) = {
+    LineRenderer(color, 0, Some(shape))
   }
+}
+
+object InvisibleXyRenderer {
+  def apply() = new XYLineAndShapeRenderer(false, false)
 }
 
 //
