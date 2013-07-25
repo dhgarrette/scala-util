@@ -158,7 +158,7 @@ object FileUtil {
      * lines have been read.
      */
     def readLines: Iterator[String] = {
-      Arm.readLines(self, "UTF-8")
+      readLines("UTF-8")
     }
 
     /**
@@ -166,23 +166,61 @@ object FileUtil {
      * lines have been read.
      */
     def readLines(encoding: String): Iterator[String] = {
-      Arm.readLines(self, encoding)
+      SelfClosingBufferedReaderIterator(bufferedReader(self, encoding))
     }
 
   }
 
+  def bufferedReader(file: File, encoding: String = "UTF-8") = {
+    new BufferedReader(new InputStreamReader(new FileInputStream(file), encoding))
+  }
+
+  /**
+   * Get an Iterator over the lines in the BufferedReader.
+   */
   case class BufferedReaderIterator(reader: BufferedReader) extends Iterator[String] {
     override def hasNext() = reader.ready
     override def next() = reader.readLine()
   }
 
-  object GzFileIterator {
-    def apply(file: File, encoding: String = "UTF-8"): Iterator[String] = {
-      new BufferedReaderIterator(
-        new BufferedReader(
-          new InputStreamReader(
-            new GZIPInputStream(
-              new FileInputStream(file)), encoding)))
+  /**
+   * Get a BufferedReader for GZIP files
+   */
+  object GzFileBufferedReader {
+    def apply(file: File, encoding: String = "UTF-8"): BufferedReader = {
+      new BufferedReader(
+        new InputStreamReader(
+          new GZIPInputStream(
+            new FileInputStream(file)), encoding))
+    }
+  }
+
+  /**
+   * Iterator over the lines in the BufferedReader.  The reader will
+   * automatically close itself when the end is reached.  This gets around the
+   * problem of having to all of your processing inside the `using` block.
+   */
+  case class SelfClosingBufferedReaderIterator(bufferedReader: BufferedReader) extends Iterator[String] {
+    private[this] val blockItr = BufferedReaderIterator(bufferedReader)
+    private[this] var finished = false
+    override def next() = {
+      hasNext()
+      if (finished) throw new NoSuchElementException("next on empty iterator")
+      val n = blockItr.next
+      hasNext()
+      n
+    }
+    override def hasNext() = {
+      if (finished)
+        false
+      else {
+        val hn = blockItr.hasNext
+        if (!hn) {
+          finished = true
+          bufferedReader.close()
+        }
+        hn
+      }
     }
   }
 
