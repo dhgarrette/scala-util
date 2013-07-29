@@ -789,6 +789,7 @@ object CollectionUtil {
      * @return the average (mean)
      */
     def avg = {
+      assert(self.nonEmpty, "cannot average an empty collection")
       val (total, count) = self.foldLeft((num.zero, num.zero)) {
         case ((total, count), x) => (num.plus(total, x), num.plus(count, num.one))
       }
@@ -803,6 +804,7 @@ object CollectionUtil {
      * @return the average (mean)
      */
     def avg = {
+      assert(self.nonEmpty, "cannot average an empty collection")
       val (total, count) = self.foldLeft((0, 0)) {
         case ((total, count), x) => (total + x, count + 1)
       }
@@ -822,6 +824,7 @@ object CollectionUtil {
      * @return normalized values
      */
     def normalize[That](implicit num: Fractional[A], bf: CanBuildFrom[Repr, A, That]) = {
+      assert(self.nonEmpty, "cannot normalize an empty collection")
       val total = self.sum
       self.map(num.div(_, total))
     }
@@ -834,6 +837,7 @@ object CollectionUtil {
      * @return normalized values
      */
     def normalize[That](implicit bf: CanBuildFrom[Repr, Double, That]) = {
+      assert(self.nonEmpty, "cannot average an empty collection")
       val total = self.sum.toDouble
       self.map(_ / total)
     }

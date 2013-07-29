@@ -101,14 +101,14 @@ object HistogramDataset {
 
   def makeBinArray(data: GenTraversable[Double], numBins: Int, rangeStart: Double, binWidth: Double) = {
     val min = data.min
-    val binArray = Array.fill(numBins)(0)
+    val countsBinArray = Array.fill(numBins)(0)
     for (t <- data) {
       val b = ((t - rangeStart) / binWidth).toInt
       val bin = if (b == numBins) b - 1 else b
-      binArray(bin) += 1
+      countsBinArray(bin) += 1
     }
     //for ((count, i) <- binArray.zipWithIndex) println(f"$i%4d: $count")
-    binArray
+    countsBinArray
   }
 
   implicit def toDataset(hd: HistogramDataset) = hd.dataset
