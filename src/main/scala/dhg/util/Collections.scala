@@ -26,16 +26,17 @@ object Collections {
   }
 
   /**
-   * An Iterator-ish class that returns a vector of next items up until the
-   * condition is met.
+   * An Iterator-ish class that returns a vector of next items while the
+   * condition is met, but updates the underlying iterator correctly so that
+   * the method can be called repeatedly to get subsequent elements.
    */
-  class NextUntilIteratorish[A](stuff: Iterator[A]) {
+  class NextWhileIteratorish[A](stuff: Iterator[A]) {
     private[this] var itr = stuff
-    def nextUntil(p: A => Boolean): Vector[A] = {
+    def nextWhile(p: A => Boolean): Vector[A] = {
       if (itr.hasNext) {
         var a = itr.next()
         if (p(a)) {
-          a +: nextUntil(p)
+          a +: nextWhile(p)
         }
         else {
           itr = a +: itr
