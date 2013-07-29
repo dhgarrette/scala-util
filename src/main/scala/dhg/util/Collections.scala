@@ -26,6 +26,36 @@ object Collections {
   }
 
   /**
+   * Data structure that moves an arbitrarily growing/shrinking window over 
+   * an iterator, preserving the underlying iterator for future method calls.
+   */
+  class WindowIteratorish[A](stuff: Iterator[A]) {
+    def visible: Vector[A] = window.toVector
+    private[this] val window = mutable.Queue[A]()
+    private[this] var itr = stuff
+
+    def advanceFrontWhile(p: A => Boolean): WindowIteratorish[A] = {
+      if (itr.hasNext) {
+        val a = itr.next()
+        if (p(a)) {
+          window += a
+          advanceFrontWhile(p)
+        }
+        else {
+          itr = a +: itr
+        }
+      }
+      this
+    }
+
+    def advanceRearWhile(p: A => Boolean): WindowIteratorish[A] = {
+      while (window.nonEmpty && p(window.front))
+        window.dequeue()
+      this
+    }
+  }
+
+  /**
    * An Iterator-ish class that returns a vector of next items while the
    * condition is met, but updates the underlying iterator correctly so that
    * the method can be called repeatedly to get subsequent elements.

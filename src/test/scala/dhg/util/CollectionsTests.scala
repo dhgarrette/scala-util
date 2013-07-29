@@ -22,6 +22,44 @@ class CollectionsTests {
   }
 
   @Test
+  def test_WindowIteratorish() {
+    val i = new WindowIteratorish(Iterator[(Int, Symbol)](2 -> 'a, 3 -> 'b, 3 -> 'c, 5 -> 'd, 8 -> 'e, 9 -> 'f, 10 -> 'g, 11 -> 'h))
+    assertEquals(Vector(), i.visible)
+    i.advanceFrontWhile(_._1 <= 1)
+    assertEquals(Vector(), i.visible)
+    i.advanceFrontWhile(_._1 <= 2)
+    assertEquals(Vector(2 -> 'a), i.visible)
+    i.advanceFrontWhile(_._1 <= 3)
+    assertEquals(Vector(2 -> 'a, 3 -> 'b, 3 -> 'c), i.visible)
+    i.advanceFrontWhile(_._1 <= 4)
+    assertEquals(Vector(2 -> 'a, 3 -> 'b, 3 -> 'c), i.visible)
+    i.advanceFrontWhile(_._1 <= 6)
+    assertEquals(Vector(2 -> 'a, 3 -> 'b, 3 -> 'c, 5 -> 'd), i.visible)
+    i.advanceRearWhile(_._1 < 3)
+    assertEquals(Vector(3 -> 'b, 3 -> 'c, 5 -> 'd), i.visible)
+    i.advanceRearWhile(_._1 < 4)
+    assertEquals(Vector(5 -> 'd), i.visible)
+    i.advanceFrontWhile(_._1 <= 10).advanceRearWhile(_._1 < 9)
+    assertEquals(Vector(9 -> 'f, 10 -> 'g), i.visible)
+    i.advanceRearWhile(_._1 < 100)
+    assertEquals(Vector(), i.visible)
+    i.advanceFrontWhile(_._1 <= 9)
+    assertEquals(Vector(), i.visible)
+    i.advanceFrontWhile(_._1 <= 13)
+    assertEquals(Vector(11 -> 'h), i.visible)
+    i.advanceFrontWhile(_._1 <= 9)
+    assertEquals(Vector(11 -> 'h), i.visible)
+    i.advanceFrontWhile(_._1 <= 15)
+    assertEquals(Vector(11 -> 'h), i.visible)
+    i.advanceFrontWhile(_._1 <= 17)
+    assertEquals(Vector(11 -> 'h), i.visible)
+    i.advanceRearWhile(_._1 < 100)
+    assertEquals(Vector(), i.visible)
+    i.advanceRearWhile(_._1 < 100)
+    assertEquals(Vector(), i.visible)
+  }
+
+  @Test
   def test_NextWhileIteratorish() {
     val i = new NextWhileIteratorish(Iterator[(Int, Symbol)](2 -> 'a, 3 -> 'b, 3 -> 'c, 5 -> 'd, 8 -> 'e, 9 -> 'f, 10 -> 'g))
     assertEquals(Vector(), i.nextWhile(_._1 <= 0))
