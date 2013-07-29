@@ -10,6 +10,8 @@ import org.jfree.data.xy.XYIntervalSeries
 import org.jfree.data.xy.IntervalXYDataset
 import org.jfree.data.xy.XYIntervalSeriesCollection
 import scala.collection.GenTraversable
+import scala.collection.mutable
+import scala.collection.GenTraversableOnce
 
 /**
  * Factories for constructing datasets for charts
@@ -81,40 +83,47 @@ case class HistogramDatasetBuilder(
 
 object HistogramDataset {
   def apply(data: GenTraversable[Double], numBins: Int): HistogramDataset = {
-    val min = data.min
-    val max = data.max
-    val binWidth = (max - min) / numBins
-    make(data, numBins, min, binWidth)
+    val rangeStart = data.min
+    val rangeEnd = data.max
+    make(data, numBins, rangeStart, binWidth(numBins, rangeStart, rangeEnd))
   }
 
   def byWidth(data: GenTraversable[Double], binWidth: Double): HistogramDataset = {
-    val min = data.min
-    val max = data.max
-    val numBins = ((max - min) / binWidth).toInt + 1
-    make(data, numBins, min, binWidth)
+    val rangeStart = data.min
+    val rangeEnd = data.max
+    val numBins = ((rangeEnd - rangeStart) / binWidth).toInt + 1
+    make(data, numBins, rangeStart, binWidth)
   }
 
-  def make(data: GenTraversable[Double], numBins: Int, rangeStart: Double, binWidth: Double) = {
+  def make(data: GenTraversableOnce[Double], numBins: Int, rangeStart: Double, binWidth: Double) = {
     val binArray = makeBinArray(data, numBins, rangeStart, binWidth)
-    new HistogramDataset(binArray, numBins, rangeStart, binWidth)
+    HistogramDataset(binArray, rangeStart, binWidth)
   }
 
-  def makeBinArray(data: GenTraversable[Double], numBins: Int, rangeStart: Double, binWidth: Double) = {
-    val min = data.min
-    val countsBinArray = Array.fill(numBins)(0)
-    for (t <- data) {
-      val b = ((t - rangeStart) / binWidth).toInt
-      val bin = if (b == numBins) b - 1 else b
-      countsBinArray(bin) += 1
+  def binWidth(numBins: Int, rangeStart: Double, rangeEnd: Double) = (rangeEnd - rangeStart) / numBins
+
+  def binData[A](data: GenTraversableOnce[(A, Double)], numBins: Int, rangeStart: Double, binWidth: Double): Vector[Vector[A]] = {
+    val bins = Vector.fill(numBins)(Vector.newBuilder[A])
+    data.foreach {
+      case (a, t) =>
+        val b = ((t - rangeStart) / binWidth).toInt
+        val bin = if (b == numBins) b - 1 else b
+        bins(bin) += a
     }
-    //for ((count, i) <- binArray.zipWithIndex) println(f"$i%4d: $count")
-    countsBinArray
+    bins.map(_.result)
+  }
+
+  def makeBinArray(data: GenTraversableOnce[Double], numBins: Int, rangeStart: Double, binWidth: Double): Vector[Int] = {
+    binData(data.toIterator.map(t => (t, t)), numBins, rangeStart, binWidth).map(_.size)
   }
 
   implicit def toDataset(hd: HistogramDataset) = hd.dataset
 }
 
-class HistogramDataset(val binArray: Array[Int], val numBins: Int, val rangeStart: Double, val binWidth: Double) {
+case class HistogramDataset(binArray: Vector[Int], rangeStart: Double, binWidth: Double) {
+
+  val numBins = binArray.size
+  val rangeEnd = rangeStart + numBins * binWidth
 
   def dataset = {
     val halfBinWidth = binWidth / 2
@@ -129,7 +138,7 @@ class HistogramDataset(val binArray: Array[Int], val numBins: Int, val rangeStar
 
 }
 
-class SingleHistogramBarDataset(val count: Int, val binNumber: Int, val numBins: Int, val rangeStart: Double, val binWidth: Double) {
+case class SingleHistogramBarDataset(count: Int, binNumber: Int, numBins: Int, rangeStart: Double, binWidth: Double) {
 
   def dataset = {
     val halfBinWidth = binWidth / 2

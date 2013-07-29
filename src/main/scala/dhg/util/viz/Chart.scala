@@ -148,13 +148,22 @@ object ShadedHistogram {
     darkness: Vector[Double], // values 0.0 to 1.0, one for each bin
     color: Color = Color.blue): Chart = {
     val numBins = darkness.size
-    val histData = HistogramDataset(data, numBins)
-    val countsBinArray = histData.binArray
-    Chart((countsBinArray zip darkness).zipWithIndex.map {
+    fromHistDataset(HistogramDataset(data, numBins), darkness, color)
+  }
+
+  def fromHistDataset(
+    histData: HistogramDataset,
+    darkness: Vector[Double], // values 0.0 to 1.0, one for each bin
+    color: Color = Color.blue) = {
+    val numBins = histData.numBins
+    assert(numBins == darkness.size, "histogram data and darkness vector are not the same size.")
+    Chart((histData.binArray zip darkness).zipWithIndex.map {
       case ((count, dark), binNumber) =>
         val dataset = new SingleHistogramBarDataset(count, binNumber, numBins, histData.rangeStart, histData.binWidth)
-        val colorScale = 1 - dark.toFloat
-        val Array(r, g, b) = color.getRGBColorComponents(null).map(v => v + ((1 - v) * colorScale))
+        println(s"color = ${color.getRGBColorComponents(null).toVector}")
+        println(s"dark = $dark")
+        val Array(r, g, b) = color.getRGBColorComponents(null).map(v => v + (1 - v) * (1 - dark.toFloat))
+        println(s"r=$r, g=$g, b=$b")
         val newColor = new Color(r, g, b)
         SingleChart(dataset.dataset, BarRenderer(newColor))
     })
