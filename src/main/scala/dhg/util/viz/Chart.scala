@@ -26,6 +26,8 @@ import org.jfree.chart.plot.DatasetRenderingOrder
 import org.jfree.data.xy.{ XYDataset => JXYDataset }
 import org.jfree.chart.axis.ValueAxis
 import org.jfree.chart.axis.DateAxis
+import scala.collection.GenTraversable
+import java.awt.{ Shape => JShape }
 
 /**
  * A chart for visualizing data
@@ -33,7 +35,7 @@ import org.jfree.chart.axis.DateAxis
  * @author Dan Garrette (dhgarrette@gmail.com)
  */
 trait Chart {
-  def charts: Vector[SingleChart]
+  def allCharts: Vector[SingleChart]
 
   def draw(
     a: Int = 10, b: Int = 10,
@@ -64,7 +66,7 @@ trait Chart {
     plot.setRangeAxis(0, yaxis)
     plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD)
 
-    for ((SingleChart(dataset, renderer), i) <- charts.zipWithIndex) {
+    for ((SingleChart(dataset, renderer), i) <- allCharts.zipWithIndex) {
       plot.setDataset(i, dataset)
       plot.setRenderer(i, renderer)
       plot.mapDatasetToDomainAxis(i, 0)
@@ -87,14 +89,13 @@ case class SingleChart(
   dataset: JXYDataset,
   renderer: XYItemRenderer)
   extends Chart {
-  def charts = Vector(this)
+  def allCharts = Vector(this)
 }
 
 case class MultiChart(
-  primaryChart: Chart,
-  additionalCharts: Vector[Chart])
+  charts: Vector[Chart])
   extends Chart {
-  def charts = primaryChart.charts ++ additionalCharts.flatMap(_.charts)
+  def allCharts = charts.flatMap(_.allCharts)
 }
 
 object Chart {
@@ -104,10 +105,14 @@ object Chart {
     SingleChart(dataset, renderer)
   }
 
-  def make(
-    primaryChart: Chart,
-    additionalCharts: Chart*) = {
-    MultiChart(primaryChart, additionalCharts.toVector)
+  def apply(
+    charts: Chart*) = {
+    MultiChart(charts.toVector)
+  }
+
+  def apply(
+    charts: GenTraversable[Chart]) = {
+    MultiChart(charts.toVector)
   }
 }
 
@@ -116,34 +121,76 @@ object Chart {
 //
 
 object BarChart {
-  def make[A](data: Vector[(A, Double)]): Chart = {
+  def make[A](data: Vector[(A, Double)],
+    color: Color = Color.blue): Chart = {
     ???
   }
 
   def makeIndexed(
-    data: Vector[Double]): Chart = {
-    SingleChart(XYDataset(data.zipWithIndex.map { case (x, i) => (i.toDouble, x) }), BarRenderer())
+    data: Vector[Double],
+    color: Color = Color.blue): Chart = {
+    SingleChart(XYDataset(data.zipWithIndex.map { case (x, i) => (i.toDouble, x) }), BarRenderer(color))
   }
 }
 
 object Histogram {
   def make(
     data: Vector[Double],
-    bins: Int): Chart = {
-    SingleChart(HistogramDataset(data, bins), BarRenderer())
+    numBins: Int,
+    color: Color = Color.blue): Chart = {
+    SingleChart(HistogramDataset(data, numBins), BarRenderer(color))
+  }
+}
+
+object ShadedHistogram {
+  def make(
+    data: Vector[Double],
+    darkness: Vector[Double], // values 0.0 to 1.0, one for each bin
+    color: Color = Color.blue): Chart = {
+    val numBins = darkness.size
+    val histData = HistogramDataset(data, numBins)
+    val countsBinArray = histData.binArray
+    Chart((countsBinArray zip darkness).zipWithIndex.map {
+      case ((count, dark), binNumber) =>
+        val dataset = new SingleHistogramBarDataset(count, binNumber, numBins, histData.rangeStart, histData.binWidth)
+        val colorScale = 1 - dark.toFloat
+        val Array(r, g, b) = color.getRGBColorComponents(null).map(v => v + ((1 - v) * colorScale))
+        val newColor = new Color(r, g, b)
+        SingleChart(dataset.dataset, BarRenderer(newColor))
+    })
   }
 }
 
 object LineGraph {
   def make(
     data: Vector[(Double, Double)],
-    lineThickness: Int = 2): Chart = {
-    SingleChart(XYDataset(data), LineRenderer(lineThickness = lineThickness))
+    color: Color = Color.blue,
+    lineThickness: Int = 2,
+    shape: Option[JShape] = None): Chart = {
+    SingleChart(LineGraphDataset(data), LineRenderer(color = color, lineThickness = lineThickness))
   }
 
   def makeIndexed(
     data: Vector[Double],
-    lineThickness: Int = 2): Chart = {
-    make(data.zipWithIndex.map { case (y, x) => (x.toDouble, y) }, lineThickness)
+    color: Color = Color.blue,
+    lineThickness: Int = 2,
+    shape: Option[JShape] = None): Chart = {
+    make(data.zipWithIndex.map { case (y, x) => (x.toDouble, y) }, color, lineThickness)
+  }
+}
+
+object ScatterGraph {
+  def make(
+    data: Vector[(Double, Double)],
+    color: Color = Color.blue,
+    shape: JShape = Shape.circle): Chart = {
+    SingleChart(XYDataset(data), ScatterRenderer(color = color, shape = shape))
+  }
+
+  def makeIndexed(
+    data: Vector[Double],
+    color: Color = Color.blue,
+    shape: JShape = Shape.circle): Chart = {
+    make(data.zipWithIndex.map { case (y, x) => (x.toDouble, y) }, color, shape)
   }
 }

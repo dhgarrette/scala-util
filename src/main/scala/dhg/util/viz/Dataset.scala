@@ -119,10 +119,24 @@ class HistogramDataset(val binArray: Array[Int], val numBins: Int, val rangeStar
   def dataset = {
     val halfBinWidth = binWidth / 2
     val xyPairs = binArray.zipWithIndex.map { case (count, i) => (rangeStart + i * binWidth, count.toDouble) }
-
     val series1 = new XYIntervalSeries("")
     for ((x, y) <- xyPairs)
-      series1.add(x, x - halfBinWidth, x + halfBinWidth, y, 0, 0)
+      series1.add(x + halfBinWidth, x, x + binWidth, y, 0, y)
+    val collection1 = new XYIntervalSeriesCollection()
+    collection1.addSeries(series1)
+    collection1
+  }
+
+}
+
+class SingleHistogramBarDataset(val count: Int, val binNumber: Int, val numBins: Int, val rangeStart: Double, val binWidth: Double) {
+
+  def dataset = {
+    val halfBinWidth = binWidth / 2
+    val x = rangeStart + binNumber * binWidth
+    val y = count.toDouble
+    val series1 = new XYIntervalSeries("")
+    series1.add(x + halfBinWidth, x, x + binWidth, y, 0, y)
     val collection1 = new XYIntervalSeriesCollection()
     collection1.addSeries(series1)
     collection1
