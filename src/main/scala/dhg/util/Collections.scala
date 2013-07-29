@@ -1,5 +1,6 @@
 package dhg.util
 
+import dhg.util.CollectionUtil._
 import scala.collection.GenTraversableOnce
 import scala.collection.mutable
 
@@ -24,13 +25,36 @@ object Collections {
     def apply[A]() = new UniversalSet[A]
   }
 
+  /**
+   * An Iterator-ish class that returns a vector of next items up until the
+   * condition is met.
+   */
+  class NextUntilIteratorish[A](stuff: Iterator[A]) {
+    private[this] var itr = stuff
+    def nextUntil(p: A => Boolean): Vector[A] = {
+      if (itr.hasNext) {
+        var a = itr.next()
+        if (p(a)) {
+          a +: nextUntil(p)
+        }
+        else {
+          itr = a +: itr
+          Vector()
+        }
+      }
+      else {
+        Vector()
+      }
+    }
+  }
+
   //
   //
   //
 
   /**
-   * A `Map` implementation that generates values for a `default` function 
-   * when keys are requested, but that remembers the calculated value for 
+   * A `Map` implementation that generates values for a `default` function
+   * when keys are requested, but that remembers the calculated value for
    * for future requests
    */
   class MemoMap[A, B](startEntries: Map[A, B], default: A => B) extends (A => B) with Iterable[(A, B)] { //mutable.Map[A, B] {
@@ -48,7 +72,7 @@ object Collections {
   //
 
   /**
-   * A list that drops elements off the tail when the length is exceeded.  
+   * A list that drops elements off the tail when the length is exceeded.
    * Also allows for skipping elements during iteration.
    */
   class History[T] private (length: Int, lag: Int) {

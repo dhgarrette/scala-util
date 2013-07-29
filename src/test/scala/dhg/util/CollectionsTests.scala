@@ -22,6 +22,22 @@ class CollectionsTests {
   }
 
   @Test
+  def test_NextUntilIteratorish() {
+    val i = new NextUntilIteratorish(Iterator[(Int, Symbol)](2 -> 'a, 3 -> 'b, 3 -> 'c, 5 -> 'd, 8 -> 'e, 9 -> 'f, 10 -> 'g))
+    assertEquals(Vector(), i.nextUntil(_._1 <= 0))
+    assertEquals(Vector(), i.nextUntil(_._1 <= 1))
+    assertEquals(Vector(2 -> 'a), i.nextUntil(_._1 <= 2))
+    assertEquals(Vector(3 -> 'b, 3 -> 'c), i.nextUntil(_._1 <= 3))
+    assertEquals(Vector(), i.nextUntil(_._1 <= 4))
+    assertEquals(Vector(5 -> 'd), i.nextUntil(_._1 <= 6))
+    assertEquals(Vector(8 -> 'e, 9 -> 'f), i.nextUntil(_._1 <= 9))
+    assertEquals(Vector(), i.nextUntil(_._1 <= 9))
+    assertEquals(Vector(10 -> 'g), i.nextUntil(_._1 <= 12))
+    assertEquals(Vector(), i.nextUntil(_._1 <= 14))
+    assertEquals(Vector(), i.nextUntil(_._1 <= 16))
+  }
+
+  @Test
   def test_MemoMap() {
 
     val calculated = Buffer[String]()

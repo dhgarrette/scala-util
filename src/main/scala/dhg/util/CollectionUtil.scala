@@ -48,7 +48,7 @@ object CollectionUtil {
   //   - Append an element to the end of the iterator
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_prependAppend_Iterator[A](val self: Iterator[A]) { // extends AnyVal {
+  implicit class Enriched_prependAppend_Iterator[A](val self: Iterator[A]) extends AnyVal {
     /**
      * Prepend an item to the front of the iterator
      *
