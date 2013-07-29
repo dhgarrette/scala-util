@@ -160,10 +160,7 @@ object ShadedHistogram {
     Chart((histData.binArray zip darkness).zipWithIndex.map {
       case ((count, dark), binNumber) =>
         val dataset = new SingleHistogramBarDataset(count, binNumber, numBins, histData.rangeStart, histData.binWidth)
-        println(s"color = ${color.getRGBColorComponents(null).toVector}")
-        println(s"dark = $dark")
         val Array(r, g, b) = color.getRGBColorComponents(null).map(v => v + (1 - v) * (1 - dark.toFloat))
-        println(s"r=$r, g=$g, b=$b")
         val newColor = new Color(r, g, b)
         SingleChart(dataset.dataset, BarRenderer(newColor))
     })
