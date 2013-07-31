@@ -3,6 +3,7 @@ package dhg.util
 import dhg.util.CollectionUtil._
 import scala.collection.GenTraversableOnce
 import scala.collection.mutable
+import scala.annotation.tailrec
 
 /**
  * Collections
@@ -26,7 +27,7 @@ object Collections {
   }
 
   /**
-   * Data structure that moves an arbitrarily growing/shrinking window over 
+   * Data structure that moves an arbitrarily growing/shrinking window over
    * an iterator, preserving the underlying iterator for future method calls.
    */
   class WindowIteratorish[A](stuff: Iterator[A]) {
@@ -35,16 +36,19 @@ object Collections {
     private[this] var itr = stuff
 
     def advanceFrontWhile(p: A => Boolean): WindowIteratorish[A] = {
-      if (itr.hasNext) {
-        val a = itr.next()
-        if (p(a)) {
-          window += a
-          advanceFrontWhile(p)
-        }
-        else {
-          itr = a +: itr
+      @tailrec def inner() {
+        if (itr.hasNext) {
+          val a = itr.next()
+          if (p(a)) {
+            window += a
+            inner()
+          }
+          else {
+            itr = a +: itr
+          }
         }
       }
+      inner()
       this
     }
 
