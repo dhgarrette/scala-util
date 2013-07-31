@@ -11,6 +11,8 @@ import scala.collection.mutable
 import scala.collection.mutable.Builder
 import scala.util.Random
 import scala.collection.immutable.BitSet
+import scala.collection.Parallelizable
+import scala.collection.Parallel
 
 /**
  * Enhancement methods for collections
@@ -458,13 +460,13 @@ object CollectionUtil {
     def zipSafe[B](that: GenTraversableOnce[B]) = {
       val thatItr = that.toIterator
       new Iterator[(A, B)] {
-        def hasNext = {
+        def hasNext() = {
           val hn = self.hasNext
-          assert(hn == thatItr.hasNext, "Attempting to zipSafe collections of different lengths.")
+          assert(hn == thatItr.hasNext, s"Attempting to zipSafe collections of different lengths.  ${if (hn) "First" else "Second"} ran out.")
           hn
         }
         def next() = {
-          assert(self.hasNext == thatItr.hasNext, "Attempting to zipSafe collections of different lengths.")
+          hasNext()
           (self.next, thatItr.next)
         }
       }
@@ -1017,6 +1019,18 @@ object CollectionUtil {
 
   implicit class Enriched_toBitSet_GenTraversableOnce(val self: GenTraversableOnce[Int]) extends AnyVal {
     def toBitSet: BitSet = BitSet() ++ self
+  }
+
+  //////////////////////////////////////////////////////
+  // PARALLEL / SEQUENTIAL
+  //   - obnoxious versions of the .par and .seq methods 
+  //////////////////////////////////////////////////////
+
+  implicit class Enriched_PARALLEL_Parallelizable[+A, +ParRepr <: Parallel](val self: Parallelizable[A, ParRepr]) extends AnyVal {
+    def PARALLEL = self.par
+  }
+  implicit class Enriched_SEQUENTIAL_GenTraversableOnce[+A](val self: GenTraversableOnce[A]) extends AnyVal {
+    def SEQUENTIAL = self.seq
   }
 
 }
