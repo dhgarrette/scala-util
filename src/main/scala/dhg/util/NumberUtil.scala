@@ -13,6 +13,7 @@ object NumberUtil {
      * Shorthand for a range from this Int to the max integer value.
      */
     def up: Range = self to Int.MaxValue
+    def upi: Iterator[Int] = Iterator.from(self)
   }
 
 }
