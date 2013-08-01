@@ -100,6 +100,12 @@ object HistogramDataset {
     HistogramDataset(binArray, rangeStart, binWidth)
   }
 
+  def byStartEnd(data: GenTraversableOnce[Double], numBins: Int, rangeStart: Double, rangeEnd: Double) = {
+    val binwidth = binWidth(numBins, rangeStart, rangeEnd)
+    val binArray = makeBinArray(data, numBins, rangeStart, binwidth)
+    HistogramDataset(binArray, rangeStart, binwidth)
+  }
+  
   def binWidth(numBins: Int, rangeStart: Double, rangeEnd: Double) = (rangeEnd - rangeStart) / numBins
 
   def binData[A](data: GenTraversableOnce[(A, Double)], numBins: Int, rangeStart: Double, binWidth: Double): Vector[Vector[A]] = {
