@@ -462,7 +462,7 @@ object CollectionUtil {
       new Iterator[(A, B)] {
         def hasNext() = {
           val hn = self.hasNext
-          assert(hn == thatItr.hasNext, s"Attempting to zipSafe collections of different lengths.  ${if (hn) "First" else "Second"} ran out.")
+          assert(hn == thatItr.hasNext, s"Attempting to zipSafe collections of different lengths.  ${if (hn) "Second" else "First"} ran out.")
           hn
         }
         def next() = {
@@ -517,22 +517,25 @@ object CollectionUtil {
   }
 
   //////////////////////////////////////////////////////
-  // unzip(): (Iterator[A], Iterator[B])
-  //   - Extend unzip functionality to Iterator
+  // unzip 
+  //   - Unzip this iterator of pairs into two iterators.
+  //   - The new iterators coordinate to maintain laziness.
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_unzip_Iterator[T, U](val self: Iterator[(T, U)]) extends AnyVal {
-    def unzip(): (Vector[T], Vector[U]) =
-      unzip(Vector.newBuilder[T], Vector.newBuilder[U])
-
-    def unzip[ThatT <: Iterable[T], ThatU <: Iterable[U]](tBuilder: => Builder[T, ThatT], uBuilder: => Builder[U, ThatU]): (ThatT, ThatU) = {
-      val tBldr = tBuilder
-      val uBldr = uBuilder
-      for ((t, u) <- self) {
-        tBldr += t
-        uBldr += u
-      }
-      (tBldr.result, uBldr.result)
+  implicit class Enriched_unzip2_Iterator[A, B](val self: Iterator[(A, B)]) { // extends AnyVal {
+    abstract class QueuedPairIterator[T, O](thisQueue: mutable.Queue[T], otherQueue: mutable.Queue[O]) extends Iterator[T] {
+      protected[this] def swapOrNot(p: (A, B)): (T, O)
+      override def hasNext = thisQueue.nonEmpty || self.hasNext
+      override def next =
+        if (thisQueue.nonEmpty) thisQueue.dequeue()
+        else { val (t, o) = swapOrNot(self.next()); otherQueue.enqueue(o); t }
+    }
+    def unzip(): (Iterator[A], Iterator[B]) = {
+      val aQueue = mutable.Queue[A]()
+      val bQueue = mutable.Queue[B]()
+      val aItr = new QueuedPairIterator(aQueue, bQueue) { override def swapOrNot(p: (A, B)) = p }
+      val bItr = new QueuedPairIterator(bQueue, aQueue) { override def swapOrNot(p: (A, B)) = p.swap }
+      (aItr, bItr)
     }
   }
 

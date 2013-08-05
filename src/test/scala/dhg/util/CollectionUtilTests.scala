@@ -1,5 +1,7 @@
 package dhg.util
 
+import scala.collection.mutable
+import scala.collection.mutable.Buffer
 import scala.collection.mutable.SetBuilder
 
 import org.junit.Assert._
@@ -225,7 +227,7 @@ class CollectionUtilTests {
     assertEquals(('b, 2), res5.next)
     assertEquals(('c, 3), res5.next)
     assertException(res5.next) {
-      case e: AssertionError => assertEquals("assertion failed: Attempting to zipSafe collections of different lengths.", e.getMessage)
+      case e: AssertionError => assertEquals("assertion failed: Attempting to zipSafe collections of different lengths.  First ran out.", e.getMessage)
     }
 
     val res6: Iterator[(Int, Symbol)] = c.iterator zipSafe b
@@ -233,15 +235,15 @@ class CollectionUtilTests {
     assertEquals((2, 'b), res6.next)
     assertEquals((3, 'c), res6.next)
     assertException(res6.next) {
-      case e: AssertionError => assertEquals("assertion failed: Attempting to zipSafe collections of different lengths.", e.getMessage)
+      case e: AssertionError => assertEquals("assertion failed: Attempting to zipSafe collections of different lengths.  Second ran out.", e.getMessage)
     }
 
     assertException(b zipSafe c) {
-      case e: AssertionError => assertEquals("assertion failed: Attempting to zipSafe collections of different lengths.", e.getMessage)
+      case e: AssertionError => assertEquals("assertion failed: Attempting to zipSafe collections of different lengths.  First ran out.", e.getMessage)
     }
 
     assertException(c zipSafe b) {
-      case e: AssertionError => assertEquals("assertion failed: Attempting to zipSafe collections of different lengths.", e.getMessage)
+      case e: AssertionError => assertEquals("assertion failed: Attempting to zipSafe collections of different lengths.  Second ran out.", e.getMessage)
     }
 
     val res7: Iterator[(Symbol, Int)] = (b.iterator, c).zipSafe
@@ -249,7 +251,7 @@ class CollectionUtilTests {
     assertEquals(('b, 2), res7.next)
     assertEquals(('c, 3), res7.next)
     assertException(res7.next) {
-      case e: AssertionError => assertEquals("assertion failed: Attempting to zipSafe collections of different lengths.", e.getMessage)
+      case e: AssertionError => assertEquals("assertion failed: Attempting to zipSafe collections of different lengths.  First ran out.", e.getMessage)
     }
 
     val res8: Iterator[(Int, Symbol)] = (c.iterator, b).zipSafe
@@ -257,30 +259,82 @@ class CollectionUtilTests {
     assertEquals((2, 'b), res8.next)
     assertEquals((3, 'c), res8.next)
     assertException(res8.next) {
-      case e: AssertionError => assertEquals("assertion failed: Attempting to zipSafe collections of different lengths.", e.getMessage)
+      case e: AssertionError => assertEquals("assertion failed: Attempting to zipSafe collections of different lengths.  Second ran out.", e.getMessage)
     }
 
     assertException((b, c).zipSafe) {
-      case e: AssertionError => assertEquals("assertion failed: Attempting to zipSafe collections of different lengths.", e.getMessage)
+      case e: AssertionError => assertEquals("assertion failed: Attempting to zipSafe collections of different lengths.  First ran out.", e.getMessage)
     }
 
     assertException((c, b).zipSafe) {
-      case e: AssertionError => assertEquals("assertion failed: Attempting to zipSafe collections of different lengths.", e.getMessage)
+      case e: AssertionError => assertEquals("assertion failed: Attempting to zipSafe collections of different lengths.  Second ran out.", e.getMessage)
     }
   }
 
   @Test
   def test_unzip() {
-    val itr1 = Iterator(1 -> 'a, 2 -> 'b, 3 -> 'c)
-    val (a1: Vector[Int], b1: Vector[Symbol]) = itr1.unzip
-    assertEquals(Vector(1, 2, 3), a1)
-    assertEquals(Vector('a, 'b, 'c), b1)
+    val aBuf = Buffer[Int]()
+    val bBuf = Buffer[Char]()
 
-    import collection.mutable.{ ListBuffer, SetBuilder }
-    val itr2 = Iterator(1 -> 'a, 2 -> 'b, 3 -> 'c)
-    val (a2: List[Int], b2: Set[Symbol]) = itr2.unzip(ListBuffer(), new SetBuilder(Set[Symbol]()))
-    assertEquals(List(1, 2, 3), a2)
-    assertEquals(Set('a, 'b, 'c), b2)
+    def stuff = Iterator(1 -> 'a', 2 -> 'b', 3 -> 'c').map { case (a, b) => aBuf += a; bBuf += b; (a, b) }
+
+    assertEquals(Buffer(), aBuf)
+    assertEquals(Buffer(), bBuf)
+
+    val (a1, b1) = stuff.unzip
+    assertEquals(true, a1.hasNext)
+    assertEquals(true, b1.hasNext)
+    assertEquals(Buffer(), aBuf)
+    assertEquals(Buffer(), bBuf)
+    assertEquals(1, a1.next())
+    assertEquals(true, a1.hasNext)
+    assertEquals(true, b1.hasNext)
+    assertEquals(Buffer(1), aBuf)
+    assertEquals(Buffer('a'), bBuf)
+    assertEquals('a', b1.next())
+    assertEquals(true, a1.hasNext)
+    assertEquals(true, b1.hasNext)
+    assertEquals(Buffer(1), aBuf)
+    assertEquals(Buffer('a'), bBuf)
+    assertEquals('b', b1.next())
+    assertEquals(true, a1.hasNext)
+    assertEquals(true, b1.hasNext)
+    assertEquals(Buffer(1, 2), aBuf)
+    assertEquals(Buffer('a', 'b'), bBuf)
+    assertEquals(2, a1.next())
+    assertEquals(true, a1.hasNext)
+    assertEquals(true, b1.hasNext)
+    assertEquals(Buffer(1, 2), aBuf)
+    assertEquals(Buffer('a', 'b'), bBuf)
+    assertEquals(3, a1.next())
+    assertEquals(false, a1.hasNext)
+    assertEquals(true, b1.hasNext)
+    assertEquals(Buffer(1, 2, 3), aBuf)
+    assertEquals(Buffer('a', 'b', 'c'), bBuf)
+    assertEquals('c', b1.next())
+    assertEquals(false, a1.hasNext)
+    assertEquals(false, b1.hasNext)
+    assertEquals(Buffer(1, 2, 3), aBuf)
+    assertEquals(Buffer('a', 'b', 'c'), bBuf)
+
+    aBuf.clear()
+    bBuf.clear()
+
+    val (a2, b2) = stuff.unzip
+    assertEquals(true, a2.hasNext)
+    assertEquals(true, b2.hasNext)
+    assertEquals(Buffer(), aBuf)
+    assertEquals(Buffer(), bBuf)
+    assertEquals(Vector('a', 'b', 'c'), b2.toVector)
+    assertEquals(true, a2.hasNext)
+    assertEquals(false, b2.hasNext)
+    assertEquals(Buffer(1, 2, 3), aBuf)
+    assertEquals(Buffer('a', 'b', 'c'), bBuf)
+    assertEquals(Vector(1, 2, 3), a2.toVector)
+    assertEquals(false, a2.hasNext)
+    assertEquals(false, b2.hasNext)
+    assertEquals(Buffer(1, 2, 3), aBuf)
+    assertEquals(Buffer('a', 'b', 'c'), bBuf)
   }
 
   @Test
