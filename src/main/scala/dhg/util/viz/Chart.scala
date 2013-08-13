@@ -122,7 +122,7 @@ object Chart {
 //
 
 object BarChart {
-  def apply[A](data: Vector[(A, Double)],
+  def apply[A](data: TraversableOnce[(A, Double)],
     color: Color = Color.blue): Chart = {
     ???
   }
