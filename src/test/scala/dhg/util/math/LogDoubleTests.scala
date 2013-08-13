@@ -20,11 +20,11 @@ class LogDoubleTests {
 
   @Test
   def test_operators() {
-    val a: LogDouble = 3.toLogDouble
-    val b: LogDouble = 5.toLogDouble
-    val c: LogDouble = 6.toLogDouble
-    val d: LogDouble = 2.toLogDouble
-    val e: LogDouble = 8.toLogDouble
+    val a: LogDouble = LogDouble(3)
+    val b: LogDouble = LogDouble(5)
+    val c: LogDouble = LogDouble(6)
+    val d: LogDouble = LogDouble(2)
+    val e: LogDouble = LogDouble(8)
 
     assertEquals(log(3.0), (a.logValue: Double), 0.0000001)
     assertEquals(3.0, (a.toDouble: Double), 0.0000001)
@@ -56,11 +56,11 @@ class LogDoubleTests {
 
   @Test
   def test_numeric() {
-    val a: LogDouble = 3.toLogDouble
-    val b: LogDouble = 5.toLogDouble
-    val c: LogDouble = 6.toLogDouble
-    val d: LogDouble = 2.toLogDouble
-    val e: LogDouble = 8.toLogDouble
+    val a: LogDouble = LogDouble(3)
+    val b: LogDouble = LogDouble(5)
+    val c: LogDouble = LogDouble(6)
+    val d: LogDouble = LogDouble(2)
+    val e: LogDouble = LogDouble(8)
 
     def stuff[N](a: N, b: N, c: N, d: N, e: N)(implicit num: Fractional[N]) = {
       assertEqualsNumericLog(b, num.plus(d, a))

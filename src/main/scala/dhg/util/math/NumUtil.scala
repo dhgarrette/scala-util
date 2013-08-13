@@ -7,11 +7,22 @@ object NumUtil {
     def **(e: Int): Int = pow(e)
     def pow(e: Double): Double = math.pow(self, e)
     def **(e: Double): Double = math.pow(self, e)
+
+    def toLogDouble: LogDouble = new LogDouble(math.log(self))
+    def log: LogDouble = toLogDouble
   }
 
   implicit class EnrichedDouble(val self: Double) extends AnyVal {
     def pow(e: Double): Double = math.pow(self, e)
     def **(e: Double): Double = math.pow(self, e)
+
+    def toLogDouble: LogDouble = new LogDouble(math.log(self))
+    def log: LogDouble = toLogDouble
   }
+
+  //  implicit class NumericWithToLogDouble[N](self: N)(implicit num: Numeric[N]) {
+  //    def toLogDouble = new LogDouble(math.log(num.toDouble(self)))
+  //    def log = toLogDouble
+  //  }
 
 }
