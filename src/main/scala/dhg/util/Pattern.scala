@@ -9,6 +9,10 @@ import scala.collection.generic.CanBuildFrom
  */
 object Pattern {
 
+  /**
+   * Make it possible to do:
+   *   val UInt(x) = "-15"
+   */
   object UInt {
     val IntRE = """^(-?\d+)$""".r
     def unapply(v: String): Option[Int] = v match {
@@ -16,8 +20,11 @@ object Pattern {
       case _ => None
     }
   }
-  //  implicit def int2unapplyInt(objA: Int.type) = UInt
 
+  /**
+   * Make it possible to do:
+   *   val UDouble(x) = "-15.0"
+   */
   object UDouble {
     val DoubleRE = """^(-?\d+\.?\d*|-?\d*\.?\d+)$""".r
     def unapply(v: String): Option[Double] = v match {
@@ -25,22 +32,17 @@ object Pattern {
       case _ => None
     }
   }
-  //  implicit def double2unapplyDouble(objA: Double.type) = UDouble
 
+  /**
+   * Make it possible to do:
+   *   val UBoolean(x) = "true"
+   */
   object UBoolean {
     val booleanRE = """([Tt][Rr][Uu][Ee]|[Ff][Aa][Ll][Ss][Ee])""".r
     def unapply(v: String): Option[Boolean] = v match {
       case booleanRE(s) => Some(s.toBoolean)
       case _ => None
     }
-  }
-
-  object UMap {
-    def unapplySeq[A, B](m: Map[A, B]): Option[Seq[(A, B)]] = Some(m.toIndexedSeq)
-  }
-
-  object USet {
-    def unapplySeq[A](s: Set[A]): Option[Seq[A]] = Some(s.toIndexedSeq)
   }
 
   /**
@@ -52,15 +54,27 @@ object Pattern {
   }
 
   /**
-   *
+   * Make it possible to do:
+   *   val Coll(a, b, c @ _*) = Set(1,2,3,4,5)
+   *   val Coll(d -> e) = Map(6 -> 'g)
+   */
+  object Coll {
+    def unapplySeq[T](s: Iterable[T]): Option[Vector[T]] = Some(s.toVector)
+  }
+
+  /**
+   * Make it possible to interpret and create range strings:
+   * val RangeString(s) = 
    */
   object RangeString {
     val RangeRE = """^(\d+)-(\d+)$""".r
-    def apply(s: String): Seq[Int] = {
+    val OpenRangeRE = """^(\d+)-$""".r
+
+    def apply(s: String): Vector[Int] = {
       s.replaceAll("\\s+", "").split(",").flatMap {
         case UInt(i) => i to i
         case RangeRE(UInt(b), UInt(e)) if b <= e => b to e
-      }
+      }.toVector
     }
 
     /**
@@ -85,25 +99,19 @@ object Pattern {
         }.mkString(",")
     }
 
-    def unapply(s: String): Option[Seq[Int]] = Some(apply(s))
+    def unapply(s: String): Option[Vector[Int]] = Some(apply(s))
     def unapply(seq: Seq[Int]): Option[String] = Some(apply(seq))
   }
 
   class RangeString(max: Int) {
-    val OpenRangeRE = """^(\d+)-$""".r
-    def apply(s: String): Seq[Int] = {
+    def apply(s: String): Vector[Int] = {
       s.replaceAll("\\s+", "").split(",").flatMap {
-        case OpenRangeRE(UInt(b)) => b to max
         case UInt(i) => i to i
         case RangeString.RangeRE(UInt(b), UInt(e)) if b <= e => b to e
-      }
+        case RangeString.OpenRangeRE(UInt(b)) => b to max
+      }.toVector
     }
-    def unapply(s: String): Option[Seq[Int]] = Some(apply(s))
-  }
-
-  object Iterable {
-    def unapplySeq[T](s: Iterable[T]): Option[Seq[T]] =
-      Some(s.toIndexedSeq)
+    def unapply(s: String): Option[Vector[Int]] = Some(apply(s))
   }
 
 }
