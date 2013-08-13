@@ -4,6 +4,7 @@ import scala.collection.mutable.Buffer
 import org.junit.Assert._
 import org.junit.Test
 import dhg.util.CollectionUtil._
+import dhg.util.CollectionUtil.KeepDelimiter._
 import dhg.util.Collections._
 import dhg.util.TestUtil._
 import dhg.util.StringUtil._
@@ -17,11 +18,11 @@ class StringUtilTests {
   def test_rtrim() {
     assertEquals("", "".rtrim)
     assertEquals("this", "this".rtrim)
-    assertEquals("this and that", "this and that".rtrim)
-    assertEquals("this and that", "this and that ".rtrim)
-    assertEquals("this and that", "this and that\t".rtrim)
-    assertEquals("this and that", "this and that\n".rtrim)
-    assertEquals("this and that", "this and that    \t \n  \t  ".rtrim)
+    assertEquals("this and  that", "this and  that".rtrim)
+    assertEquals("this and  that", "this and  that ".rtrim)
+    assertEquals("this and  that", "this and  that\t".rtrim)
+    assertEquals("this and  that", "this and  that\n".rtrim)
+    assertEquals("this and  that", "this and  that    \t \n  \t  ".rtrim)
   }
 
   @Test
@@ -46,14 +47,19 @@ class StringUtilTests {
     assertEquals("".split("x", 3).toVector, "".lsplit("x", 3))
     assertEquals("thisxthat".split("x", 3).toVector, "thisxthat".lsplit("x", 3))
     assertEquals("xxthisxxthatxxxstuffx".split("x").toVector, "xxthisxxthatxxxstuffx".lsplit("x"))
-    assertEquals("xxthisxxthatxxxstuffx".split("x",100).toVector, "xxthisxxthatxxxstuffx".lsplit("x",100))
+    assertEquals("xxthisxxthatxxxstuffx".split("x", 100).toVector, "xxthisxxthatxxxstuffx".lsplit("x", 100))
     assertEquals("xxthisxxthatxxxstuffxxxx".split("x").toVector, "xxthisxxthatxxxstuffxxxx".lsplit("x"))
-    assertEquals("xxthisxxthatxxxstuffxxxx".split("x",100).toVector, "xxthisxxthatxxxstuffxxxx".lsplit("x",100))
+    assertEquals("xxthisxxthatxxxstuffxxxx".split("x", 100).toVector, "xxthisxxthatxxxstuffxxxx".lsplit("x", 100))
     assertEquals("xxthisxxthatxxxstuffxxxx".split("x", 10).toVector, "xxthisxxthatxxxstuffxxxx".lsplit("x", 10))
     assertEquals("thisxandxxthatxandxstuff".split("x", 3).toVector, "thisxandxxthatxandxstuff".lsplit("x", 3))
     assertEquals("thisxandxxthatxandxxstuff".split("x", 3).toVector, "thisxandxxthatxandxxstuff".lsplit("x", 3))
     assertEquals("thisxandxxthatxandxxstuff".split("x+", 3).toVector, "thisxandxxthatxandxxstuff".lsplit("x+", 3))
     assertEquals("thisabcandabccthatabcandabcccstuff".split("abc+", 3).toVector, "thisabcandabccthatabcandabcccstuff".lsplit("abc+", 3))
+
+    assertEquals(Vector("", "xxthis", "xxthat", "xxxstuff", "x"), "xxthisxxthatxxxstuffx".lsplit("x+", KeepDelimiterAsFirst))
+    assertEquals(Vector("xx", "thisxx", "thatxxx", "stuffx"), "xxthisxxthatxxxstuffx".lsplit("x+", KeepDelimiterAsLast))
+    assertEquals(Vector("", "xxthis", "xxthatxxxstuffx"), "xxthisxxthatxxxstuffx".lsplit("x+", 3, KeepDelimiterAsFirst))
+    assertEquals(Vector("xx", "thisxx", "thatxxxstuffx"), "xxthisxxthatxxxstuffx".lsplit("x+", 3, KeepDelimiterAsLast))
   }
 
   @Test
@@ -69,6 +75,18 @@ class StringUtilTests {
     assertEquals("thisxandxxthatxandxxstuff".reverse.split("x", 3).map(_.reverse).reverse.toVector, "thisxandxxthatxandxxstuff".rsplit("x", 3))
     assertEquals("thisxandxxthatxandxxstuff".reverse.split("x+", 3).map(_.reverse).reverse.toVector, "thisxandxxthatxandxxstuff".rsplit("x+", 3))
     assertEquals(Vector("thisabcandabccthat", "and", "stuff"), "thisabcandabccthatabcandabcccstuff".rsplit("abc+", 3))
+
+    assertEquals(Vector("xxthis", "xxthat", "xxxstuff", "x"), "xxthisxxthatxxxstuffx".rsplit("x+", KeepDelimiterAsFirst))
+    assertEquals(Vector("xx", "thisxx", "thatxxx", "stuffx", ""), "xxthisxxthatxxxstuffx".rsplit("x+", KeepDelimiterAsLast))
+    assertEquals(Vector("xxthisxxthat", "xxxstuff", "x"), "xxthisxxthatxxxstuffx".rsplit("x+", 3, KeepDelimiterAsFirst))
+    assertEquals(Vector("xxthisxxthatxxx", "stuffx", ""), "xxthisxxthatxxxstuffx".rsplit("x+", 3, KeepDelimiterAsLast))
+  }
+
+  @Test
+  def test_wrapToLines() {
+    assertEquals(Vector(""), "".wrapToLines(10))
+    assertEquals(Vector("this is a", "test this", "is only a", "test"), "this is a test this is only a test".wrapToLines(10))
+    assertEquals(Vector("this is a", "test", "this is", "only a", "test"), "this is a test\n this is only a test".wrapToLines(10))
   }
 
   @Test
@@ -90,6 +108,22 @@ class StringUtilTests {
     assertEquals(">>", "".indent(">>"))
     assertEquals(">>this is a test this is only a test", "this is a test this is only a test".indent(">>"))
     assertEquals(">>this is a test\n>> this is only a\n>>test", "this is a test\n this is only a\ntest".indent(">>"))
+  }
+
+  @Test
+  def test_sideBySideStrings() {
+    assertEquals("""
+this is         a crazy
+function that   aligns
+                multiple columns
+                of text""".split("\n").drop(1).mkString("\n"),
+      sideBySideStrings(3, "this is\nfunction that", "a crazy\naligns\nmultiple columns\nof text"))
+  }
+
+  @Test
+  def test_Regex_matches() {
+    assertEquals(true, "ab+c".r.matches("abbbc"))
+    assertEquals(false, "ab+c".r.matches("abbabc"))
   }
 
 }

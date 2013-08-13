@@ -207,9 +207,7 @@ object StringUtil {
   }
 
   implicit class EnrichedRegex(val self: Regex) extends AnyVal {
-    def matches(s: String): Boolean = {
-      self.pattern.matcher(s).matches
-    }
+    def matches(s: String): Boolean = self.pattern.matcher(s).matches
   }
 
 }
