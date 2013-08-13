@@ -46,7 +46,8 @@ trait Chart {
     showLegend: Boolean = false,
     includeXZero: Boolean = true,
     includeYZero: Boolean = true,
-    xaxisDates: Boolean = false) {
+    xaxisDates: Boolean = false,
+    exitOnClose: Boolean = true) {
 
     val plot = new XYPlot()
 
@@ -81,7 +82,7 @@ trait Chart {
     //frame.pack()
     frame.setBounds(a, b, width, height)
     frame.setVisible(true)
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
+    if (exitOnClose) frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
   }
 }
 
@@ -121,20 +122,20 @@ object Chart {
 //
 
 object BarChart {
-  def make[A](data: Vector[(A, Double)],
+  def apply[A](data: Vector[(A, Double)],
     color: Color = Color.blue): Chart = {
     ???
   }
 
-  def makeIndexed(
-    data: Vector[Double],
+  def indexed(
+    data: TraversableOnce[Double],
     color: Color = Color.blue): Chart = {
-    SingleChart(XYDataset(data.zipWithIndex.map { case (x, i) => (i.toDouble, x) }), BarRenderer(color))
+    SingleChart(XYDataset(data.toIterator.zipWithIndex.map { case (x, i) => i.toDouble -> x }), BarRenderer(color))
   }
 }
 
 object Histogram {
-  def make(
+  def apply(
     data: Vector[Double],
     numBins: Int,
     color: Color = Color.blue): Chart = {
@@ -143,7 +144,7 @@ object Histogram {
 }
 
 object ShadedHistogram {
-  def make(
+  def apply(
     data: Vector[Double],
     darkness: Vector[Double], // values 0.0 to 1.0, one for each bin
     color: Color = Color.blue): Chart = {
@@ -168,8 +169,8 @@ object ShadedHistogram {
 }
 
 object LineGraph {
-  def make(
-    data: Vector[(Double, Double)],
+  def apply(
+    data: TraversableOnce[(Double, Double)],
     color: Color = Color.blue,
     lineThickness: Int = 2,
     shape: Option[JShape] = None): Chart = {
@@ -177,26 +178,26 @@ object LineGraph {
   }
 
   def makeIndexed(
-    data: Vector[Double],
+    data: TraversableOnce[Double],
     color: Color = Color.blue,
     lineThickness: Int = 2,
     shape: Option[JShape] = None): Chart = {
-    make(data.zipWithIndex.map { case (y, x) => (x.toDouble, y) }, color, lineThickness)
+    apply(data.toIterator.zipWithIndex.map { case (y, x) => x.toDouble -> y }, color, lineThickness)
   }
 }
 
 object ScatterGraph {
-  def make(
-    data: Vector[(Double, Double)],
+  def apply(
+    data: TraversableOnce[(Double, Double)],
     color: Color = Color.blue,
     shape: JShape = Shape.circle): Chart = {
     SingleChart(XYDataset(data), ScatterRenderer(color = color, shape = shape))
   }
 
-  def makeIndexed(
-    data: Vector[Double],
+  def indexed(
+    data: TraversableOnce[Double],
     color: Color = Color.blue,
     shape: JShape = Shape.circle): Chart = {
-    make(data.zipWithIndex.map { case (y, x) => (x.toDouble, y) }, color, shape)
+    apply(data.toIterator.zipWithIndex.map { case (y, x) => x.toDouble -> y }, color, shape)
   }
 }
