@@ -43,49 +43,55 @@ object Pattern {
     def unapplySeq[A](s: Set[A]): Option[Seq[A]] = Some(s.toIndexedSeq)
   }
 
+  /**
+   * Make it possible to do:
+   *   val a -> b = (1,2)
+   */
   object -> {
-    def unapply[A, B](pair: (A, B)): Option[(A, B)] = {
-      Some(pair)
-    }
+    def unapply[A, B](pair: (A, B)): Option[(A, B)] = Some(pair)
   }
 
-  object Range {
+  /**
+   * 
+   */
+  object RangeString {
     val RangeRE = """^(\d+)-(\d+)$""".r
     def unapply(s: String): Option[Seq[Int]] = Some(
       s.replaceAll("\\s+", "").split(",").flatMap {
         case UInt(i) => i to i
         case RangeRE(UInt(b), UInt(e)) if b <= e => b to e
       })
+
+    /**
+     * Make a succinct string that describes the given sequence.
+     */
+    def unapply(seq: Seq[Int]): Option[String] = {
+      assert(seq.nonEmpty, "cannot make empty sequence into a range string")
+      Some((-2 +: seq).sliding(2).foldLeft(Vector[Vector[Int]]()) {
+        case (_, Seq(_, b)) if b < 0 =>
+          throw new AssertionError(s"negative numbers are not permitted: $seq")
+        case ((z :+ c), Seq(a, b)) =>
+          if (a != b - 1)
+            (z :+ c) :+ Vector(b)
+          else
+            (z :+ (c :+ b))
+        case (z, Seq(a, b)) =>
+          z :+ Vector(b)
+      }
+        .map {
+          case Seq(x) => x.toString
+          case s => s.head + "-" + s.last
+        }.mkString(","))
+    }
   }
 
-  class Range(max: Int) {
+  class RangeString(max: Int) {
     val OpenRangeRE = """^(\d+)-$""".r
     def unapply(s: String): Option[Seq[Int]] = Some(
       s.replaceAll("\\s+", "").split(",").flatMap {
         case OpenRangeRE(UInt(b)) => b to max
-        case Range(r) => r
+        case RangeString(r) => r
       })
-  }
-
-  /**
-   * Make a succinct string that describes the given sequence.
-   */
-  def makeRangeString(seq: Seq[Int]): String = {
-    assert(seq.nonEmpty, "cannot make empty sequence into a range string")
-    assert(seq.exists(_ >= 0), s"negative numbers are not permitted: $seq")
-    (-2 +: seq).sliding(2).foldLeft(Vector[Vector[Int]]()) {
-      case ((z :+ c), Seq(a, b)) =>
-        if (a != b - 1)
-          (z :+ c) :+ Vector(b)
-        else
-          (z :+ (c :+ b))
-      case (z, Seq(a, b)) =>
-        z :+ Vector(b)
-    }
-      .map {
-        case Seq(x) => x.toString
-        case s => s.head + "-" + s.last
-      }.mkString(",")
   }
 
   object Iterable {
