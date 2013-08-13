@@ -64,12 +64,20 @@ object Pattern {
 
   /**
    * Make it possible to interpret and create range strings:
-   * val RangeString(s) = 
+   *
+   *   val aVector = RangeString("1-3, 5, 6, 7-9,11-12, 13-14")
+   *   val RangeString(s) = "1-3, 5, 6, 7-9,11-12, 13-14"  // makes the same Vector
+   *
+   *   val rangeString = RangeString(Seq(1,2,3,5,7,8,9))   // rangeString = "1-3,5,7-9"
+   *   val RangeString(rangeString) = Seq(1,2,3,5,7,8,9)   // makes the same String
    */
   object RangeString {
     val RangeRE = """^(\d+)-(\d+)$""".r
     val OpenRangeRE = """^(\d+)-$""".r
 
+    /**
+     * Interpret the range string as a sequence of integers
+     */
     def apply(s: String): Vector[Int] = {
       s.replaceAll("\\s+", "").split(",").flatMap {
         case UInt(i) => i to i
@@ -104,6 +112,9 @@ object Pattern {
   }
 
   class RangeString(max: Int) {
+    /**
+     * Interpret the range string as a sequence of integers
+     */
     def apply(s: String): Vector[Int] = {
       s.replaceAll("\\s+", "").split(",").flatMap {
         case UInt(i) => i to i
