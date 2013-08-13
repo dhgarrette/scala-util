@@ -52,22 +52,23 @@ object Pattern {
   }
 
   /**
-   * 
+   *
    */
   object RangeString {
     val RangeRE = """^(\d+)-(\d+)$""".r
-    def unapply(s: String): Option[Seq[Int]] = Some(
+    def apply(s: String): Seq[Int] = {
       s.replaceAll("\\s+", "").split(",").flatMap {
         case UInt(i) => i to i
         case RangeRE(UInt(b), UInt(e)) if b <= e => b to e
-      })
+      }
+    }
 
     /**
      * Make a succinct string that describes the given sequence.
      */
-    def unapply(seq: Seq[Int]): Option[String] = {
+    def apply(seq: Seq[Int]): String = {
       assert(seq.nonEmpty, "cannot make empty sequence into a range string")
-      Some((-2 +: seq).sliding(2).foldLeft(Vector[Vector[Int]]()) {
+      (-2 +: seq).sliding(2).foldLeft(Vector[Vector[Int]]()) {
         case (_, Seq(_, b)) if b < 0 =>
           throw new AssertionError(s"negative numbers are not permitted: $seq")
         case ((z :+ c), Seq(a, b)) =>
@@ -81,17 +82,23 @@ object Pattern {
         .map {
           case Seq(x) => x.toString
           case s => s.head + "-" + s.last
-        }.mkString(","))
+        }.mkString(",")
     }
+
+    def unapply(s: String): Option[Seq[Int]] = Some(apply(s))
+    def unapply(seq: Seq[Int]): Option[String] = Some(apply(seq))
   }
 
   class RangeString(max: Int) {
     val OpenRangeRE = """^(\d+)-$""".r
-    def unapply(s: String): Option[Seq[Int]] = Some(
+    def apply(s: String): Seq[Int] = {
       s.replaceAll("\\s+", "").split(",").flatMap {
         case OpenRangeRE(UInt(b)) => b to max
-        case RangeString(r) => r
-      })
+        case UInt(i) => i to i
+        case RangeString.RangeRE(UInt(b), UInt(e)) if b <= e => b to e
+      }
+    }
+    def unapply(s: String): Option[Seq[Int]] = Some(apply(s))
   }
 
   object Iterable {
