@@ -28,6 +28,7 @@ import org.jfree.chart.axis.ValueAxis
 import org.jfree.chart.axis.DateAxis
 import scala.collection.GenTraversable
 import java.awt.{ Shape => JShape }
+import scala.collection.GenTraversableOnce
 
 /**
  * A chart for visualizing data
@@ -112,7 +113,7 @@ object Chart {
   }
 
   def apply(
-    charts: GenTraversable[Chart]) = {
+    charts: GenTraversableOnce[Chart]) = {
     MultiChart(charts.toVector)
   }
 }
