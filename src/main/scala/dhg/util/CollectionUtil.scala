@@ -13,6 +13,7 @@ import scala.util.Random
 import scala.collection.immutable.BitSet
 import scala.collection.Parallelizable
 import scala.collection.Parallel
+import scala.collection.GenTraversable
 
 /**
  * Enhancement methods for collections
@@ -516,6 +517,36 @@ object CollectionUtil {
     }
   }
 
+  def zipSafe[A, Repr, B, A1 >: A, That](a: GenTraversableLike[A, Repr], b: GenTraversableOnce[B])(implicit bf: CanBuildFrom[Repr, (A1, B), That]): That = {
+    val ai = a.toIterator
+    val bi = b.toIterator
+    val bldr = bf(a.asInstanceOf[Repr])
+    while (ai.hasNext && bi.hasNext) bldr += ((ai.next, bi.next))
+    assert(ai.hasNext && bi.hasNext, s"a=${if (ai.hasNext) "empty" else "nonempty"} b=${if (bi.hasNext) "empty" else "nonempty"}")
+    bldr.result
+  }
+
+  def zipSafe[A, Repr, B, C, A1 >: A, That](a: GenTraversableLike[A, Repr], b: GenTraversableOnce[B], c: GenTraversableOnce[C])(implicit bf: CanBuildFrom[Repr, (A1, B, C), That]): That = {
+    val ai = a.toIterator
+    val bi = b.toIterator
+    val ci = c.toIterator
+    val bldr = bf(a.asInstanceOf[Repr])
+    while (ai.hasNext && bi.hasNext && ci.hasNext) bldr += ((ai.next, bi.next, ci.next))
+    assert(ai.hasNext && bi.hasNext && ci.hasNext, s"a=${if (ai.hasNext) "empty" else "nonempty"} b=${if (bi.hasNext) "empty" else "nonempty"} c=${if (ci.hasNext) "empty" else "nonempty"}")
+    bldr.result
+  }
+
+  def zipSafe[A, Repr, B, C, D, A1 >: A, That](a: GenTraversableLike[A, Repr], b: GenTraversableOnce[B], c: GenTraversableOnce[C], d: GenTraversableOnce[D])(implicit bf: CanBuildFrom[Repr, (A1, B, C, D), That]): That = {
+    val ai = a.toIterator
+    val bi = b.toIterator
+    val ci = c.toIterator
+    val di = d.toIterator
+    val bldr = bf(a.asInstanceOf[Repr])
+    while (ai.hasNext && bi.hasNext && ci.hasNext && di.hasNext) bldr += ((ai.next, bi.next, ci.next, di.next))
+    assert(ai.hasNext && bi.hasNext && ci.hasNext && di.hasNext, s"a=${if (ai.hasNext) "empty" else "nonempty"} b=${if (bi.hasNext) "empty" else "nonempty"} c=${if (ci.hasNext) "empty" else "nonempty"} d=${if (di.hasNext) "empty" else "nonempty"}")
+    bldr.result
+  }
+
   //////////////////////////////////////////////////////
   // unzip 
   //   - Unzip this iterator of pairs into two iterators.
@@ -757,6 +788,22 @@ object CollectionUtil {
       def next() = {
         val x = self.next
         f(x._1, x._2, x._3)
+      }
+      def hasNext() = self.hasNext
+    }
+  }
+
+  implicit class Enriched_mapt_4_GenTraversableLike[A, B, C, D, Repr](val self: GenTraversableLike[(A, B, C, D), Repr]) extends AnyVal {
+    def mapt[R, That](f: (A, B, C, D) => R)(implicit bf: CanBuildFrom[Repr, R, That]) = {
+      self.map(x => f(x._1, x._2, x._3, x._4))
+    }
+  }
+
+  implicit class Enriched_mapt_4_Iterator[A, B, C, D](val self: Iterator[(A, B, C, D)]) { // extends AnyVal {
+    def mapt[R](f: (A, B, C, D) => R) = new Iterator[R] {
+      def next() = {
+        val x = self.next
+        f(x._1, x._2, x._3, x._4)
       }
       def hasNext() = self.hasNext
     }

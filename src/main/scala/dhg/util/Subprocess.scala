@@ -21,7 +21,7 @@ case class Subprocess(binary: String, args: Seq[String] = Nil) {
    * Create a callable subprocess object
    *
    * @param args		A list of command-line arguments.
-   * @return: stdout
+   * @return stdout
    */
   def args(args: String*) = new Subprocess(binary, args)
 
@@ -29,14 +29,14 @@ case class Subprocess(binary: String, args: Seq[String] = Nil) {
    * Create a callable subprocess object
    *
    * @param newArgs		A list of command-line arguments to be appended to the end of the existing arg list.
-   * @return: stdout
+   * @return stdout
    */
   def appendArgs(newArgs: String*) = new Subprocess(binary, args ++ newArgs)
 
   /**
    * Call the binary
    *
-   * @return: stdout
+   * @return stdout
    */
   def call(): String = {
     val (exitcode, stdout, stderr) = callAllReturns()
@@ -49,7 +49,7 @@ case class Subprocess(binary: String, args: Seq[String] = Nil) {
    * Call the binary with the given input
    *
    * @param input	A string whose contents are used as stdin
-   * @return: stdout
+   * @return stdout
    */
   def call(inputStr: String): String = {
     val (exitcode, stdout, stderr) = callAllReturns(inputStr)
@@ -61,7 +61,7 @@ case class Subprocess(binary: String, args: Seq[String] = Nil) {
   /**
    * Call the binary
    *
-   * @return: (returncode, stdout, stderr)
+   * @return (returncode, stdout, stderr)
    */
   def callAllReturns(): (Int, String, String) = {
     val out = new StringBuilder
@@ -74,7 +74,7 @@ case class Subprocess(binary: String, args: Seq[String] = Nil) {
    * Call the binary with the given input
    *
    * @param input	A string whose contents are used as stdin
-   * @return: (returncode, stdout, stderr)
+   * @return (returncode, stdout, stderr)
    */
   def callAllReturns(input: String): (Int, String, String) = {
     val out = new StringBuilder
@@ -88,7 +88,7 @@ case class Subprocess(binary: String, args: Seq[String] = Nil) {
    *
    * @param out		an appendable object where stdout information is written
    * @param err		an appendable object where stderr information is written
-   * @return: exitcode
+   * @return exitcode
    */
   def callWithStreams[T, R](out: Appendable[T, String], err: Appendable[R, String]): Int = {
     Process(binary +: args) ! ProcessLogger(out.append(_).append("\n"), err.append(_).append("\n"))
@@ -101,7 +101,7 @@ case class Subprocess(binary: String, args: Seq[String] = Nil) {
    * @param input	A string whose contents are used as stdin
    * @param out		an appendable object where stdout information is written
    * @param err		an appendable object where stderr information is written
-   * @return: exitcode
+   * @return exitcode
    */
   def callWithStreams[T, R](input: String, out: Appendable[T, String], err: Appendable[R, String]): Int = {
     Process(List("echo", input)) #| Process(binary +: args) ! ProcessLogger(out.append(_).append("\n"), err.append(_).append("\n"))

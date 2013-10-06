@@ -208,6 +208,11 @@ object StringUtil {
 
   implicit class EnrichedRegex(val self: Regex) extends AnyVal {
     def matches(s: String): Boolean = self.pattern.matcher(s).matches
+    def groups(s: String) = {
+      val m = self.pattern.matcher(s)
+      m.matches
+      (1 to m.groupCount).map(m.group).toVector
+    }
   }
 
 }
