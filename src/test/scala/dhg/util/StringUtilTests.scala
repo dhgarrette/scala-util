@@ -122,8 +122,52 @@ function that   aligns
 
   @Test
   def test_Regex_matches() {
-    assertEquals(true, "ab+c".r.matches("abbbc"))
-    assertEquals(false, "ab+c".r.matches("abbabc"))
+    val r = "(.{2})(.{2})".r
+    assertEquals(true, r.matches("abcd"))
+    assertEquals(false, r.matches("abc"))
+    assertEquals(false, r.matches("abcde"))
+  }
+
+  @Test
+  def test_Regex_apply() {
+    val r = "(.{2})(.{2})".r
+    assertEquals(List("ab", "cd"), r("abcd"))
+    assertException(r("abc")) { case e: IllegalStateException => assertEquals("No match found", e.getMessage) }
+    assertException(r("abcde")) { case e: IllegalStateException => assertEquals("No match found", e.getMessage) }
+  }
+
+  @Test
+  def test_Regex_groups() {
+    val r = "(.{2})(.{2})".r
+    assertEquals(List("ab", "cd"), r.groups("abcd"))
+    assertException(r.groups("abc")) { case e: IllegalStateException => assertEquals("No match found", e.getMessage) }
+    assertException(r.groups("abcde")) { case e: IllegalStateException => assertEquals("No match found", e.getMessage) }
+  }
+
+  @Test
+  def test_Regex_groupsOption() {
+    val r = "(.{2})(.{2})".r
+    assertEquals(Some(List("ab", "cd")), r.groupsOption("abcd"))
+    assertEquals(None, r.groupsOption("abc"))
+    assertEquals(None, r.groupsOption("abcde"))
+  }
+
+  @Test
+  def test_Regex_first() {
+    val r = "(.{2})(.{2})".r
+    assertEquals(Some(List("ab", "cd")), r.first("abcd"))
+    assertEquals(None, r.first("abc"))
+    assertEquals(Some(List("ab", "cd")), r.first("abcde"))
+    assertEquals(Some(List("ab", "cd")), r.first("abcdefghi"))
+  }
+
+  @Test
+  def test_Regex_all() {
+    val r = "(.{2})(.{2})".r
+    assertEqualsIterator(Iterator(List("ab", "cd")), r.all("abcd"))
+    assertEqualsIterator(Iterator(), r.all("abc"))
+    assertEqualsIterator(Iterator(List("ab", "cd")), r.all("abcde"))
+    assertEqualsIterator(Iterator(List("ab", "cd"), List("ef", "gh")), r.all("abcdefghi"))
   }
 
 }
