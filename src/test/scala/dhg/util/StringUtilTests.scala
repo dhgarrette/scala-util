@@ -155,19 +155,19 @@ function that   aligns
   @Test
   def test_Regex_first() {
     val r = "(.{2})(.{2})".r
-    assertEquals(Some(List("ab", "cd")), r.first("abcd"))
-    assertEquals(None, r.first("abc"))
-    assertEquals(Some(List("ab", "cd")), r.first("abcde"))
-    assertEquals(Some(List("ab", "cd")), r.first("abcdefghi"))
+    assertEquals(Some(List("ab", "cd")), r.firstGroup("abcd"))
+    assertEquals(None, r.firstGroup("abc"))
+    assertEquals(Some(List("ab", "cd")), r.firstGroup("abcde"))
+    assertEquals(Some(List("ab", "cd")), r.firstGroup("abcdefghi"))
   }
 
   @Test
   def test_Regex_all() {
     val r = "(.{2})(.{2})".r
-    assertEqualsIterator(Iterator(List("ab", "cd")), r.all("abcd"))
-    assertEqualsIterator(Iterator(), r.all("abc"))
-    assertEqualsIterator(Iterator(List("ab", "cd")), r.all("abcde"))
-    assertEqualsIterator(Iterator(List("ab", "cd"), List("ef", "gh")), r.all("abcdefghi"))
+    assertEqualsIterator(Iterator(List("ab", "cd")), r.allGroups("abcd"))
+    assertEqualsIterator(Iterator(), r.allGroups("abc"))
+    assertEqualsIterator(Iterator(List("ab", "cd")), r.allGroups("abcde"))
+    assertEqualsIterator(Iterator(List("ab", "cd"), List("ef", "gh")), r.allGroups("abcdefghi"))
   }
 
 }

@@ -206,8 +206,8 @@ object StringUtil {
     def apply(s: String) = groups(s)
     def groups(s: String) = groupsOption(s).getOrElse(sys.error(self.pattern.matcher(s).group))
     def groupsOption(s: String) = self.unapplySeq(s)
-    def first(s: String) = self.findFirstMatchIn(s).map(_.subgroups)
-    def all(s: String) = self.findAllMatchIn(s).map(_.subgroups)
+    def firstGroup(s: String) = self.findFirstMatchIn(s).map(_.subgroups)
+    def allGroups(s: String) = self.findAllMatchIn(s).map(_.subgroups)
   }
 
 }
