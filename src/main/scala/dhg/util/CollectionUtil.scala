@@ -236,7 +236,23 @@ object CollectionUtil {
   //   - Extend Traversable.splitAt to Iterator
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_splitAt_Iterator[A](val self: Iterator[A]) { // extends AnyVal {
+  private[this] class Counter(startAt: Int = 0) { private[this] var i = startAt; def get = i; def inc() = { i += 1; this }; override def toString = f"Counter($i)" }
+  private[this] class Enriched_splitAt_Iterator_FirstItr[A](self: Iterator[A], n: Int, c: Counter) extends Iterator[A] {
+    def next(): A = {
+      assert(hasNext, "first has already been read completely")
+      c.inc(); self.next
+    }
+    def hasNext() = c.get < n && self.hasNext
+  }
+  private[this] class Enriched_splitAt_Iterator_SecondItr[A](self: Iterator[A], n: Int, c: Counter) extends Iterator[A] {
+    def next(): A = {
+      assert(c.get >= n, "first has NOT YET been read completely")
+      assert(hasNext, "second has already been read completely")
+      c.inc(); self.next
+    }
+    def hasNext() = self.hasNext
+  }
+  implicit class Enriched_splitAt_Iterator[A](val self: Iterator[A]) extends AnyVal {
     /**
      * Safely split this iterator at the specified index.  The 'first'
      * iterator must be exhausted completely before the items in the 'second'
@@ -249,27 +265,9 @@ object CollectionUtil {
      *          starting with the split point
      */
     def splitAt(n: Int): (Iterator[A], Iterator[A]) = {
-      var i = 0
-
-      val first: Iterator[A] =
-        new Iterator[A] {
-          def next(): A = {
-            assert(hasNext, "first has already been read completely")
-            i += 1; self.next
-          }
-          def hasNext() = i < n && self.hasNext
-        }
-
-      val second: Iterator[A] =
-        new Iterator[A] {
-          def next(): A = {
-            assert(i >= n, "first has NOT YET been read completely")
-            assert(hasNext, "second has already been read completely")
-            i += 1; self.next
-          }
-          def hasNext() = self.hasNext
-        }
-
+      val c = new Counter()
+      val first: Iterator[A] = new Enriched_splitAt_Iterator_FirstItr(self, n, c)
+      val second: Iterator[A] = new Enriched_splitAt_Iterator_SecondItr(self, n, c)
       (first, second)
     }
   }
@@ -339,7 +337,50 @@ object CollectionUtil {
   //   - Split this on items for which the predicate is true 
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_splitWhere_Iterator[A](val self: Iterator[A]) { // extends AnyVal {
+  private[this] class SplitWhereIterator[A, That](self: Iterator[A], p: A => Boolean, builder: => Builder[A, That], keepDelimiter: KeepDelimiter) extends Iterator[That] {
+    var queued: Option[That] = None
+    val bldr = new BuilderHolder(builder)
+
+    def next(): That = {
+      assert(this.hasNext, "next on empty iterator")
+      val group = queued.get
+      queued = None
+      group
+    }
+
+    def hasNext() = {
+      if (queued.isEmpty) {
+        takeUntilDelim()
+      }
+      if (queued.isEmpty && bldr.nonEmpty) {
+        queued = Some(bldr.result)
+        bldr.clear()
+      }
+      queued.nonEmpty
+    }
+
+    @tailrec
+    private def takeUntilDelim() {
+      if (self.hasNext) {
+        val x = self.next
+        if (p(x)) {
+          if (keepDelimiter == KeepDelimiter.KeepDelimiterAsLast) {
+            bldr += x
+          }
+          queued = Some(bldr.result)
+          bldr.clear()
+          if (keepDelimiter == KeepDelimiter.KeepDelimiterAsFirst) {
+            bldr += x
+          }
+        }
+        else {
+          bldr += x
+          takeUntilDelim()
+        }
+      }
+    }
+  }
+  implicit class Enriched_splitWhere_Iterator[A](val self: Iterator[A]) extends AnyVal {
     /**
      * Split this on items for which the predicate is true.
      *
@@ -362,49 +403,7 @@ object CollectionUtil {
      * @param delim	The delimiter upon which to split.
      */
     def splitWhere[That](p: A => Boolean, builder: => Builder[A, That], keepDelimiter: KeepDelimiter): Iterator[That] =
-      new Iterator[That] {
-        var queued: Option[That] = None
-        val bldr = new BuilderHolder(builder)
-
-        def next(): That = {
-          assert(this.hasNext, "next on empty iterator")
-          val group = queued.get
-          queued = None
-          group
-        }
-
-        def hasNext() = {
-          if (queued.isEmpty) {
-            takeUntilDelim()
-          }
-          if (queued.isEmpty && bldr.nonEmpty) {
-            queued = Some(bldr.result)
-            bldr.clear()
-          }
-          queued.nonEmpty
-        }
-
-        @tailrec
-        private def takeUntilDelim() {
-          if (self.hasNext) {
-            val x = self.next
-            if (p(x)) {
-              if (keepDelimiter == KeepDelimiter.KeepDelimiterAsLast) {
-                bldr += x
-              }
-              queued = Some(bldr.result)
-              bldr.clear()
-              if (keepDelimiter == KeepDelimiter.KeepDelimiterAsFirst) {
-                bldr += x
-              }
-            }
-            else {
-              bldr += x
-              takeUntilDelim()
-            }
-          }
-        }
-      }
+      new SplitWhereIterator(self, p, builder, keepDelimiter)
   }
 
   class BuilderHolder[A, That](builder: => Builder[A, That]) {
@@ -449,7 +448,18 @@ object CollectionUtil {
   //     not of equal length.
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_zipSafe_Iterator[A](val self: Iterator[A]) { // extends AnyVal {
+  private[this] class ZipSafeIterator[A, B](self: Iterator[A], thatItr: Iterator[B]) extends Iterator[(A, B)] {
+    def hasNext() = {
+      val hn = self.hasNext
+      assert(hn == thatItr.hasNext, s"Attempting to zipSafe collections of different lengths.  ${if (hn) "Second" else "First"} ran out.")
+      hn
+    }
+    def next() = {
+      hasNext()
+      (self.next, thatItr.next)
+    }
+  }
+  implicit class Enriched_zipSafe_Iterator[A](val self: Iterator[A]) extends AnyVal {
     /**
      * zip this collection with another, throwing an exception if they
      * are not of equal length.
@@ -458,19 +468,9 @@ object CollectionUtil {
      * @return an iterator of pairs
      * @throws RuntimeException	thrown if collections differ in length
      */
-    def zipSafe[B](that: GenTraversableOnce[B]) = {
+    def zipSafe[B](that: GenTraversableOnce[B]): Iterator[(A, B)] = {
       val thatItr = that.toIterator
-      new Iterator[(A, B)] {
-        def hasNext() = {
-          val hn = self.hasNext
-          assert(hn == thatItr.hasNext, s"Attempting to zipSafe collections of different lengths.  ${if (hn) "Second" else "First"} ran out.")
-          hn
-        }
-        def next() = {
-          hasNext()
-          (self.next, thatItr.next)
-        }
-      }
+      new ZipSafeIterator(self, thatItr)
     }
   }
 
@@ -553,19 +553,21 @@ object CollectionUtil {
   //   - The new iterators coordinate to maintain laziness.
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_unzip2_Iterator[A, B](val self: Iterator[(A, B)]) { // extends AnyVal {
-    abstract class QueuedPairIterator[T, O](thisQueue: mutable.Queue[T], otherQueue: mutable.Queue[O]) extends Iterator[T] {
-      protected[this] def swapOrNot(p: (A, B)): (T, O)
-      override def hasNext = thisQueue.nonEmpty || self.hasNext
-      override def next =
-        if (thisQueue.nonEmpty) thisQueue.dequeue()
-        else { val (t, o) = swapOrNot(self.next()); otherQueue.enqueue(o); t }
-    }
+  private[this] abstract class QueuedPairIterator[A, B, T, O](self: Iterator[(A, B)], thisQueue: mutable.Queue[T], otherQueue: mutable.Queue[O]) extends Iterator[T] {
+    protected[this] def swapOrNot(p: (A, B)): (T, O)
+    override def hasNext = thisQueue.nonEmpty || self.hasNext
+    override def next =
+      if (thisQueue.nonEmpty) thisQueue.dequeue()
+      else { val (t, o) = swapOrNot(self.next()); otherQueue.enqueue(o); t }
+  }
+  private[this] class SwappingQueuedPairIterator[A, B](self: Iterator[(A, B)], aQueue: mutable.Queue[A], bQueue: mutable.Queue[B]) extends QueuedPairIterator[A, B, A, B](self, aQueue, bQueue) { override def swapOrNot(p: (A, B)) = p }
+  private[this] class NonSwpngQueuedPairIterator[A, B](self: Iterator[(A, B)], aQueue: mutable.Queue[A], bQueue: mutable.Queue[B]) extends QueuedPairIterator[A, B, B, A](self, bQueue, aQueue) { override def swapOrNot(p: (A, B)) = p.swap }
+  implicit class Enriched_unzip2_Iterator[A, B](val self: Iterator[(A, B)]) extends AnyVal {
     def unzip(): (Iterator[A], Iterator[B]) = {
       val aQueue = mutable.Queue[A]()
       val bQueue = mutable.Queue[B]()
-      val aItr = new QueuedPairIterator(aQueue, bQueue) { override def swapOrNot(p: (A, B)) = p }
-      val bItr = new QueuedPairIterator(bQueue, aQueue) { override def swapOrNot(p: (A, B)) = p.swap }
+      val aItr = new SwappingQueuedPairIterator(self, aQueue, bQueue)
+      val bItr = new NonSwpngQueuedPairIterator(self, aQueue, bQueue)
       (aItr, bItr)
     }
   }
@@ -593,7 +595,14 @@ object CollectionUtil {
     }
   }
 
-  implicit class Enriched_mapTo_Iterator[A](val self: Iterator[A]) { // extends AnyVal {
+  private[this] class MapToIterator[A, B](self: Iterator[A], f: A => B) extends Iterator[(A, B)] {
+    def hasNext = self.hasNext
+    def next() = {
+      val x = self.next
+      x -> f(x)
+    }
+  }
+  implicit class Enriched_mapTo_Iterator[A](val self: Iterator[A]) extends AnyVal {
     /**
      * Map a function over the collection, returning a set of pairs consisting
      * of the original item and the result of the function application
@@ -603,13 +612,7 @@ object CollectionUtil {
      * @param f	the function to map
      * @return a new iterator
      */
-    def mapTo[B](f: A => B): Iterator[(A, B)] = new Iterator[(A, B)] {
-      def hasNext = self.hasNext
-      def next() = {
-        val x = self.next
-        x -> f(x)
-      }
-    }
+    def mapTo[B](f: A => B): Iterator[(A, B)] = new MapToIterator(self, f)
   }
 
   //////////////////////////////////////////////////////
@@ -633,7 +636,11 @@ object CollectionUtil {
     }
   }
 
-  implicit class Enriched_mapToVal_Iterator[A](val self: Iterator[A]) { // extends AnyVal {
+  private[this] class MapToValIterator[A, B](self: Iterator[A], v: => B) extends Iterator[(A, B)] {
+    def hasNext = self.hasNext
+    def next() = self.next -> v
+  }
+  implicit class Enriched_mapToVal_Iterator[A](val self: Iterator[A]) extends AnyVal {
     /**
      * Map each item in the collection to a particular value
      *
@@ -642,10 +649,7 @@ object CollectionUtil {
      * @param v	the value to map to
      * @return a new iterator
      */
-    def mapToVal[B](v: => B): Iterator[(A, B)] = new Iterator[(A, B)] {
-      def hasNext = self.hasNext
-      def next() = self.next -> v
-    }
+    def mapToVal[B](v: => B): Iterator[(A, B)] = new MapToValIterator(self, v)
   }
 
   //////////////////////////////////////////////////////
@@ -669,7 +673,14 @@ object CollectionUtil {
     }
   }
 
-  implicit class Enriched_mapKeys_Iterator[T, U](val self: Iterator[(T, U)]) { // extends AnyVal {
+  private[this] class MapKeysIterator[T, U, R](self: Iterator[(T, U)], f: T => R) extends Iterator[(R, U)] {
+    def hasNext = self.hasNext
+    def next() = {
+      val (k, v) = self.next()
+      f(k) -> v
+    }
+  }
+  implicit class Enriched_mapKeys_Iterator[T, U](val self: Iterator[(T, U)]) extends AnyVal {
     /**
      * In a collection of pairs, map a function over the first item of each
      * pair.
@@ -677,13 +688,7 @@ object CollectionUtil {
      * @param f	function to map over the first item of each pair
      * @return a collection of pairs
      */
-    def mapKeys[R](f: T => R) = new Iterator[(R, U)] {
-      def hasNext = self.hasNext
-      def next() = {
-        val (k, v) = self.next()
-        f(k) -> v
-      }
-    }
+    def mapKeys[R](f: T => R): Iterator[(R, U)] = new MapKeysIterator(self, f)
   }
 
   //////////////////////////////////////////////////////
@@ -707,7 +712,14 @@ object CollectionUtil {
     }
   }
 
-  implicit class Enriched_mapVals_Iterator[T, U](val self: Iterator[(T, U)]) { // extends AnyVal {
+  private[this] class MapValsIterator[T, U, R](self: Iterator[(T, U)], f: U => R) extends Iterator[(T, R)] {
+    def hasNext = self.hasNext
+    def next() = {
+      val (k, v) = self.next()
+      k -> f(v)
+    }
+  }
+  implicit class Enriched_mapVals_Iterator[T, U](val self: Iterator[(T, U)]) extends AnyVal {
     /**
      * In a collection of pairs, map a function over the second item of each
      * pair.
@@ -715,13 +727,7 @@ object CollectionUtil {
      * @param f	function to map over the second item of each pair
      * @return a collection of pairs
      */
-    def mapVals[R](f: U => R) = new Iterator[(T, R)] {
-      def hasNext = self.hasNext
-      def next() = {
-        val (k, v) = self.next()
-        k -> f(v)
-      }
-    }
+    def mapVals[R](f: U => R): Iterator[(T, R)] = new MapValsIterator(self, f)
   }
 
   //////////////////////////////////////////////////////
@@ -742,17 +748,18 @@ object CollectionUtil {
     }
   }
 
-  implicit class Enriched_submap_Iterator[T, Repr](val self: Iterator[GenTraversableLike[T, Repr]]) { // extends AnyVal {
+  private[this] class SubmapIterator[T, R, Repr, That](self: Iterator[GenTraversableLike[T, Repr]], f: T => R, bf: CanBuildFrom[Repr, R, That]) extends Iterator[That] {
+    def hasNext = self.hasNext
+    def next() = self.next().map(f)(bf)
+  }
+  implicit class Enriched_submap_Iterator[T, Repr](val self: Iterator[GenTraversableLike[T, Repr]]) extends AnyVal {
     /**
      * In a collection of collections, map a function over the inner collections without flattening.
      *
      * @param f	function to map over the inner collections
      * @return a collection of collections
      */
-    def submap[R, That](f: T => R)(implicit bf: CanBuildFrom[Repr, R, That]) = new Iterator[That] {
-      def hasNext = self.hasNext
-      def next() = self.next().map(f)
-    }
+    def submap[R, That](f: T => R)(implicit bf: CanBuildFrom[Repr, R, That]): Iterator[That] = new SubmapIterator(self, f, bf)
   }
 
   //////////////////////////////////////////////////////
@@ -767,14 +774,15 @@ object CollectionUtil {
     }
   }
 
-  implicit class Enriched_mapt_2_Iterator[A, B](val self: Iterator[(A, B)]) { // extends AnyVal {
-    def mapt[R](f: (A, B) => R) = new Iterator[R] {
-      def next() = {
-        val x = self.next
-        f(x._1, x._2)
-      }
-      def hasNext() = self.hasNext
+  private[this] class Mapt2Iterator[A, B, R](self: Iterator[(A, B)], f: (A, B) => R) extends Iterator[R] {
+    def next() = {
+      val x = self.next
+      f(x._1, x._2)
     }
+    def hasNext() = self.hasNext
+  }
+  implicit class Enriched_mapt_2_Iterator[A, B](val self: Iterator[(A, B)]) extends AnyVal {
+    def mapt[R](f: (A, B) => R): Iterator[R] = new Mapt2Iterator(self, f)
   }
 
   implicit class Enriched_mapt_3_GenTraversableLike[A, B, C, Repr](val self: GenTraversableLike[(A, B, C), Repr]) extends AnyVal {
@@ -783,14 +791,15 @@ object CollectionUtil {
     }
   }
 
-  implicit class Enriched_mapt_3_Iterator[A, B, C](val self: Iterator[(A, B, C)]) { // extends AnyVal {
-    def mapt[R](f: (A, B, C) => R) = new Iterator[R] {
-      def next() = {
-        val x = self.next
-        f(x._1, x._2, x._3)
-      }
-      def hasNext() = self.hasNext
+  private[this] class Mapt3Iterator[A, B, C, R](self: Iterator[(A, B, C)], f: (A, B, C) => R) extends Iterator[R] {
+    def next() = {
+      val x = self.next
+      f(x._1, x._2, x._3)
     }
+    def hasNext() = self.hasNext
+  }
+  implicit class Enriched_mapt_3_Iterator[A, B, C](val self: Iterator[(A, B, C)]) extends AnyVal {
+    def mapt[R](f: (A, B, C) => R): Iterator[R] = new Mapt3Iterator(self, f)
   }
 
   implicit class Enriched_mapt_4_GenTraversableLike[A, B, C, D, Repr](val self: GenTraversableLike[(A, B, C, D), Repr]) extends AnyVal {
@@ -799,14 +808,15 @@ object CollectionUtil {
     }
   }
 
-  implicit class Enriched_mapt_4_Iterator[A, B, C, D](val self: Iterator[(A, B, C, D)]) { // extends AnyVal {
-    def mapt[R](f: (A, B, C, D) => R) = new Iterator[R] {
-      def next() = {
-        val x = self.next
-        f(x._1, x._2, x._3, x._4)
-      }
-      def hasNext() = self.hasNext
+  private[this] class Mapt4Iterator[A, B, C, D, R](self: Iterator[(A, B, C, D)], f: (A, B, C, D) => R) extends Iterator[R] {
+    def next() = {
+      val x = self.next
+      f(x._1, x._2, x._3, x._4)
     }
+    def hasNext() = self.hasNext
+  }
+  implicit class Enriched_mapt_4_Iterator[A, B, C, D](val self: Iterator[(A, B, C, D)]) extends AnyVal {
+    def mapt[R](f: (A, B, C, D) => R): Iterator[R] = new Mapt4Iterator(self, f)
   }
 
   //////////////////////////////////////////////////////
