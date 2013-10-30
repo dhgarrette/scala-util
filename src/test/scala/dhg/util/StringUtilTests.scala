@@ -83,6 +83,26 @@ class StringUtilTests {
   }
 
   @Test
+  def test_padLeft() {
+    assertEquals("  abc", "abc".padLeft(5))
+    assertEquals("abc", "abc".padLeft(3))
+    assertEquals("abc", "abc".padLeft(2))
+    assertEquals("xyabc", "abc".padLeft(5, "xy"))
+    assertEquals("yxyabc", "abc".padLeft(6, "xy"))
+    assertEquals("xyxyabc", "abc".padLeft(7, "xy"))
+  }
+  
+  @Test
+  def test_padRight() {
+    assertEquals("abc  ", "abc".padRight(5))
+    assertEquals("abc", "abc".padRight(3))
+    assertEquals("abc", "abc".padRight(2))
+    assertEquals("abcxy", "abc".padRight(5, "xy"))
+    assertEquals("abcxyx", "abc".padRight(6, "xy"))
+    assertEquals("abcxyxy", "abc".padRight(7, "xy"))
+  }
+  
+  @Test
   def test_wrapToLines() {
     assertEquals(Vector(""), "".wrapToLines(10))
     assertEquals(Vector("this is a", "test this", "is only a", "test"), "this is a test this is only a test".wrapToLines(10))

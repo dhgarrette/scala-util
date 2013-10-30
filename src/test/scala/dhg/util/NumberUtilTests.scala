@@ -18,4 +18,9 @@ class NumberUtilTests {
     assertEquals(4 to Int.MaxValue, 4.up)
   }
 
+  @Test
+  def test_Int_downto() {
+    assertEquals(5 to 2 by -1, 5 downto 2)
+  }
+
 }

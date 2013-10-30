@@ -84,9 +84,20 @@ object StringUtil {
         if (allSpans.size > limit) {
           val h +: rightSpans = allSpans.takeRight(limit)
           (0 -> h._2) +: rightSpans
-        } else
+        }
+        else
           allSpans
       spans.map { case (b, e) => self.substring(b, e) }
+    }
+
+    def padLeft(to: Int, padding: String = " ") = {
+      val toadd = to - self.length
+      if (toadd > 0) ((padding * toadd) + self).takeRight(to) else self
+    }
+
+    def padRight(to: Int, padding: String = " ") = {
+      val toadd = to - self.length
+      if (toadd > 0) (self + (padding * toadd)).take(to) else self
     }
 
     /**
@@ -169,7 +180,8 @@ object StringUtil {
     def hasNext() =
       if (queued.isDefined) {
         true
-      } else if (m.find()) {
+      }
+      else if (m.find()) {
         queued =
           if (keepDelimiter == KeepDelimiter.KeepDelimiterAsLast)
             Some(prevE -> m.end)
@@ -181,11 +193,13 @@ object StringUtil {
           else
             Some(m.end)
         true
-      } else if (nextE.isDefined) {
+      }
+      else if (nextE.isDefined) {
         queued = Some(nextE.get -> str.length())
         nextE = None
         true
-      } else {
+      }
+      else {
         false
       }
 
@@ -195,7 +209,8 @@ object StringUtil {
         prevE = nextE.getOrElse(-1)
         queued = None
         n
-      } else
+      }
+      else
         Iterator().next()
 
     override def toString = s"RegexMatcherSplitIterator(string=$str, pattern=$pattern, keepDelimiter=$keepDelimiter, prevE=$prevE, queued=$queued, nextE=$nextE, hasNext=$hasNext)"
