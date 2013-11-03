@@ -26,6 +26,8 @@ import scala.util.matching.Regex
  */
 object FileUtil {
 
+  type File = java.io.File
+  
   object File {
     def apply(parent: File, child: String) = new File(parent, child)
     def apply(path: String) = new File(path)
