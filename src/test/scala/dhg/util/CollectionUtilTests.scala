@@ -561,4 +561,11 @@ class CollectionUtilTests {
     assertEquals(Vector("a", "i", "to"), col2.iterator.minByN(_.length, 3))
   }
 
+  @Test
+  def test_sumBy() {
+    assertEquals(21, Vector(1, 3, 5).sumBy(_ + 4))
+    assertEquals(21, Iterator(1, 3, 5).sumBy(_ + 4))
+    assertEquals(0, Vector[Int]().sumBy(_ + 4))
+    assertEquals(0, Iterator[Int]().sumBy(_ + 4))
+  }
 }

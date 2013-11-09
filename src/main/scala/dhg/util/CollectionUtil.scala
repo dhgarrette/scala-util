@@ -1061,6 +1061,48 @@ object CollectionUtil {
   }
 
   //////////////////////////////////////////////////////
+  // sumBy[B: Numeric](f: A => B): B
+  //   - Map a numeric-producing function over each item and sum the results 
+  //   - Functionally equivalent to:
+  //         this.map(f).sum
+  //////////////////////////////////////////////////////
+
+  implicit class Enriched_sumBy_GenTraversableOnce[A](val self: GenTraversableOnce[A]) extends AnyVal {
+    /**
+     * Map a numeric-producing function over each item and sum the results.
+     *
+     * Functionally equivalent to `this.map(f).sum`
+     *
+     * @param f	A function that produces a Numeric
+     * @return the sum of the results after applications of f
+     */
+    def sumBy[B](f: A => B)(implicit num: Numeric[B]): B = {
+      (num.zero /: self)((accum, x) => num.plus(accum, f(x)))
+    }
+  }
+
+  //////////////////////////////////////////////////////
+  // No-Op
+  //////////////////////////////////////////////////////
+  implicit class Enriched_noop_GenTraversableLike[A, Repr](val self: GenTraversableLike[A, Repr]) extends AnyVal {
+    def noop[That](f: A => _)(implicit bf: CanBuildFrom[Repr, A, That]): That = {
+      self.map { x => f(x); x }
+    }
+  }
+
+  private[this] class NoOpIterator[A](self: Iterator[A], f: A => _) extends Iterator[A] {
+    def hasNext = self.hasNext
+    def next() = {
+      val x = self.next
+      f(x)
+      x
+    }
+  }
+  implicit class Enriched_noop_Iterator[A](val self: Iterator[A]) extends AnyVal {
+    def noop(f: A => _): Iterator[A] = new NoOpIterator(self, f)
+  }
+
+  //////////////////////////////////////////////////////
   // shuffle
   //////////////////////////////////////////////////////
 
