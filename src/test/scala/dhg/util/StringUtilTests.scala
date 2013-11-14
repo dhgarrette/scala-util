@@ -91,7 +91,7 @@ class StringUtilTests {
     assertEquals("yxyabc", "abc".padLeft(6, "xy"))
     assertEquals("xyxyabc", "abc".padLeft(7, "xy"))
   }
-  
+
   @Test
   def test_padRight() {
     assertEquals("abc  ", "abc".padRight(5))
@@ -101,7 +101,7 @@ class StringUtilTests {
     assertEquals("abcxyx", "abc".padRight(6, "xy"))
     assertEquals("abcxyxy", "abc".padRight(7, "xy"))
   }
-  
+
   @Test
   def test_wrapToLines() {
     assertEquals(Vector(""), "".wrapToLines(10))
@@ -162,6 +162,10 @@ function that   aligns
     assertEquals(List("ab", "cd"), r.groups("abcd"))
     assertException(r.groups("abc")) { case e: IllegalStateException => assertEquals("No match found", e.getMessage) }
     assertException(r.groups("abcde")) { case e: IllegalStateException => assertEquals("No match found", e.getMessage) }
+
+    assertEquals(List("ab", "cd"), "abcd".groups(r))
+    assertException("abc".groups(r)) { case e: IllegalStateException => assertEquals("No match found", e.getMessage) }
+    assertException("abcde".groups(r)) { case e: IllegalStateException => assertEquals("No match found", e.getMessage) }
   }
 
   @Test
@@ -170,24 +174,38 @@ function that   aligns
     assertEquals(Some(List("ab", "cd")), r.groupsOption("abcd"))
     assertEquals(None, r.groupsOption("abc"))
     assertEquals(None, r.groupsOption("abcde"))
+
+    assertEquals(Some(List("ab", "cd")), "abcd".groupsOption(r))
+    assertEquals(None, "abc".groupsOption(r))
+    assertEquals(None, "abcde".groupsOption(r))
   }
 
   @Test
-  def test_Regex_first() {
+  def test_Regex_firstGroup() {
     val r = "(.{2})(.{2})".r
     assertEquals(Some(List("ab", "cd")), r.firstGroup("abcd"))
     assertEquals(None, r.firstGroup("abc"))
     assertEquals(Some(List("ab", "cd")), r.firstGroup("abcde"))
     assertEquals(Some(List("ab", "cd")), r.firstGroup("abcdefghi"))
+
+    assertEquals(Some(List("ab", "cd")), "abcd".firstGroup(r))
+    assertEquals(None, "abc".firstGroup(r))
+    assertEquals(Some(List("ab", "cd")), "abcde".firstGroup(r))
+    assertEquals(Some(List("ab", "cd")), "abcdefghi".firstGroup(r))
   }
 
   @Test
-  def test_Regex_all() {
+  def test_Regex_allGroups() {
     val r = "(.{2})(.{2})".r
     assertEqualsIterator(Iterator(List("ab", "cd")), r.allGroups("abcd"))
     assertEqualsIterator(Iterator(), r.allGroups("abc"))
     assertEqualsIterator(Iterator(List("ab", "cd")), r.allGroups("abcde"))
     assertEqualsIterator(Iterator(List("ab", "cd"), List("ef", "gh")), r.allGroups("abcdefghi"))
+
+    assertEqualsIterator(Iterator(List("ab", "cd")), "abcd".allGroups(r))
+    assertEqualsIterator(Iterator(), "abc".allGroups(r))
+    assertEqualsIterator(Iterator(List("ab", "cd")), "abcde".allGroups(r))
+    assertEqualsIterator(Iterator(List("ab", "cd"), List("ef", "gh")), "abcdefghi".allGroups(r))
   }
 
 }

@@ -90,6 +90,11 @@ object StringUtil {
       spans.map { case (b, e) => self.substring(b, e) }
     }
 
+    def groups(regex: Regex) = regex.groups(self)
+    def groupsOption(regex: Regex) = regex.groupsOption(self)
+    def firstGroup(regex: Regex) = regex.firstGroup(self)
+    def allGroups(regex: Regex) = regex.allGroups(self)
+
     def padLeft(to: Int, padding: String = " ") = {
       val toadd = to - self.length
       if (toadd > 0) ((padding * toadd) + self).takeRight(to) else self
