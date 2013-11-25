@@ -1082,6 +1082,15 @@ object CollectionUtil {
   }
 
   //////////////////////////////////////////////////////
+  // asc
+  //////////////////////////////////////////////////////
+
+  implicit class Enriched_AscDesc_GenTraversableOnce[K, V](val self: GenTraversableOnce[(K, V)])(implicit ord: Ordering[V]) /*extends AnyVal */ {
+    def asc: Vector[(K, V)] = self.toVector.sortBy(t => t._2)
+    def desc: Vector[(K, V)] = self.toVector.sorted(ord on ((t: (K, V)) => t._2) reverse)
+  }
+
+  //////////////////////////////////////////////////////
   // No-Op
   //////////////////////////////////////////////////////
   implicit class Enriched_noop_GenTraversableLike[A, Repr](val self: GenTraversableLike[A, Repr]) extends AnyVal {
