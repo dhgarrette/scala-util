@@ -26,12 +26,12 @@ object StringUtil {
     /**
      * Split on newlines
      */
-    def splitlines: Array[String] = self.split("\n")
+    def splitlines: Vector[String] = self.lsplit("\n")
 
     /**
      * Split on whitespace
      */
-    def splitWhitespace: Array[String] = self.split("\\s+")
+    def splitWhitespace: Vector[String] = self.lsplit("\\s+")
 
     /**
      * Split a string into `limit` pieces, starting from the left side.

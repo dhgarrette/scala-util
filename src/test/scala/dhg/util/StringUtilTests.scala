@@ -27,19 +27,19 @@ class StringUtilTests {
 
   @Test
   def test_splitlines() {
-    assertEqualsArray(Array(""), "".splitlines)
-    assertEqualsArray(Array(), "\n".splitlines)
-    assertEqualsArray(Array("this and", "that"), "this and\nthat".splitlines)
-    assertEqualsArray(Array("this and ", " that"), "this and \n that".splitlines)
+    assertEquals(Vector(""), "".splitlines)
+    assertEquals(Vector(""), "\n".splitlines)
+    assertEquals(Vector("this and", "that"), "this and\nthat".splitlines)
+    assertEquals(Vector("this and ", " that"), "this and \n that".splitlines)
   }
 
   @Test
   def test_splitWhitespace() {
-    assertEqualsArray(Array(""), "".splitWhitespace)
-    assertEqualsArray(Array(), " ".splitWhitespace)
-    assertEqualsArray(Array("this", "and", "that"), "this and\nthat".splitWhitespace)
-    assertEqualsArray(Array("this", "and", "that"), "this and \n that".splitWhitespace)
-    assertEqualsArray(Array("this", "and", "that", "stuff"), "this   and \nthat\tstuff".splitWhitespace)
+    assertEquals(Vector(""), "".splitWhitespace)
+    assertEquals(Vector(""), " ".splitWhitespace)
+    assertEquals(Vector("this", "and", "that"), "this and\nthat".splitWhitespace)
+    assertEquals(Vector("this", "and", "that"), "this and \n that".splitWhitespace)
+    assertEquals(Vector("this", "and", "that", "stuff"), "this   and \nthat\tstuff".splitWhitespace)
   }
 
   @Test

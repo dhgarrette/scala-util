@@ -97,16 +97,16 @@ object FileUtil {
       self.parent.foreach(_.mkdirs())
     }
 
-    def ls() = {
+    def ls(): Vector[File] = {
       assert(self.exists, s"'$self' does not exist")
       assert(self.isDirectory, s"'$self' is not a directory")
-      self.listFiles
+      self.listFiles.toVector
     }
 
-    def ls(regex: Regex, pathMatch: Boolean = false) = {
+    def ls(regex: Regex, pathMatch: Boolean = false): Vector[File] = {
       assert(self.exists, s"'$self' does not exist")
       assert(self.isDirectory, s"'$self' is not a directory")
-      val files = self.listFiles
+      val files = self.listFiles.toVector
       def getName(f: File) =
         if (pathMatch) f.getAbsolutePath
         else f.getName
@@ -149,7 +149,8 @@ object FileUtil {
       val selfPath = self.getAbsolutePath
       if (selfPath.startsWith(dirPath)) {
         val a = selfPath.drop(dirPath.length)
-        Some(File(if (a.startsWith(separator)) a.drop(1) else a))
+        val s = if (a.startsWith(separator)) a.drop(1) else a
+        Some(File(s))
       }
       else
         None
