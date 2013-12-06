@@ -1,19 +1,19 @@
 package dhg.util
 
 import scala.annotation.tailrec
+import scala.collection.GenTraversable
 import scala.collection.GenTraversableLike
 import scala.collection.GenTraversableOnce
+import scala.collection.Parallel
+import scala.collection.Parallelizable
 import scala.collection.SeqLike
 import scala.collection.TraversableLike
 import scala.collection.generic.CanBuildFrom
 import scala.collection.immutable
+import scala.collection.immutable.BitSet
 import scala.collection.mutable
 import scala.collection.mutable.Builder
 import scala.util.Random
-import scala.collection.immutable.BitSet
-import scala.collection.Parallelizable
-import scala.collection.Parallel
-import scala.collection.GenTraversable
 
 /**
  * Enhancement methods for collections
@@ -1089,15 +1089,15 @@ object CollectionUtil {
   //////////////////////////////////////////////////////
 
   implicit class Enriched_slidingN_Iterator[A](val self: Iterator[A]) { // extends AnyVal {
-    def sliding2[B >: A](): Iterator[(B, B)] = self.sliding(2).map(_.toTuple2)
-    def sliding3[B >: A](): Iterator[(B, B, B)] = self.sliding(3).map(_.toTuple3)
-    def sliding4[B >: A](): Iterator[(B, B, B, B)] = self.sliding(4).map(_.toTuple4)
+    def sliding2(): Iterator[(A,A)] = self.sliding(2).map(_.toTuple2)
+    def sliding3(): Iterator[(A, A, A)] = self.sliding(3).map(_.toTuple3)
+    def sliding4(): Iterator[(A, A, A, A)] = self.sliding(4).map(_.toTuple4)
   }
 
   implicit class Enriched_slidingN_GenTraversableLike[A, Repr <: GenTraversable[A]](val self: GenTraversableLike[A, Repr]) { // extends AnyVal {
-    def sliding2[B >: A](): Iterator[(B, B)] = self.toIterator.sliding2()
-    def sliding3[B >: A](): Iterator[(B, B, B)] = self.toIterator.sliding3()
-    def sliding4[B >: A](): Iterator[(B, B, B, B)] = self.toIterator.sliding4()
+    def sliding2(): Iterator[(A, A)] = self.toIterator.sliding2()
+    def sliding3(): Iterator[(A, A, A)] = self.toIterator.sliding3()
+    def sliding4(): Iterator[(A, A, A, A)] = self.toIterator.sliding4()
   }
 
   //////////////////////////////////////////////////////
