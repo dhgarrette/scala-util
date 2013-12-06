@@ -36,7 +36,7 @@ object TestUtil {
     if (expected.hasNext)
       fail("expected still contains: [%s]".format(expected.toSeq.mkString(", ")))
     if (result.hasNext)
-      fail("result still contains: [%s]".format(expected.toSeq.mkString(", ")))
+      fail("result still contains: [%s]".format(result.toSeq.mkString(", ")))
   }
 
   def assertEqualsSameElements[T: Ordering](expected: Seq[T], actual: Seq[T]) {

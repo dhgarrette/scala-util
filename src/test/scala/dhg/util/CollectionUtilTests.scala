@@ -568,4 +568,91 @@ class CollectionUtilTests {
     assertEquals(0, Vector[Int]().sumBy(_ + 4))
     assertEquals(0, Iterator[Int]().sumBy(_ + 4))
   }
+
+  @Test
+  def test_slidingN() {
+    assertEqualsIterator(Iterator[(Int, Int)](), Iterator[Int]().sliding2)
+    assertException(for (x <- Iterator(1).sliding2) {}) { case e: AssertionError => e.getMessage == "Cannot convert sequence of length 1 into Tuple2: List(1)" }
+    assertEqualsIterator(Iterator((1, 2)), Iterator(1, 2).sliding2)
+    assertEqualsIterator(Iterator((1, 2), (2, 3)), Iterator(1, 2, 3).sliding2)
+    assertEqualsIterator(Iterator((1, 2), (2, 3), (3, 4)), Iterator(1, 2, 3, 4).sliding2)
+    assertEqualsIterator(Iterator((1, 2), (2, 3), (3, 4), (4, 5)), Iterator(1, 2, 3, 4, 5).sliding2)
+
+    assertEqualsIterator(Iterator[(Int, Int)](), Vector[Int]().sliding2)
+    assertException(for (x <- Vector(1).sliding2) {}) { case e: AssertionError => e.getMessage == "Cannot convert sequence of length 1 into Tuple2: List(1)" }
+    assertEqualsIterator(Iterator((1, 2)), Vector(1, 2).sliding2)
+    assertEqualsIterator(Iterator((1, 2), (2, 3)), Vector(1, 2, 3).sliding2)
+    assertEqualsIterator(Iterator((1, 2), (2, 3), (3, 4)), Vector(1, 2, 3, 4).sliding2)
+    assertEqualsIterator(Iterator((1, 2), (2, 3), (3, 4), (4, 5)), Vector(1, 2, 3, 4, 5).sliding2)
+
+    assertEqualsIterator(Iterator[(Int, Int, Int)](), Iterator[Int]().sliding3)
+    assertException(for (x <- Iterator(1).sliding3) {}) { case e: AssertionError => e.getMessage == "Cannot convert sequence of length 1 into Tuple3: List(1)" }
+    assertException(for (x <- Iterator(1, 2).sliding3) {}) { case e: AssertionError => e.getMessage == "Cannot convert sequence of length 2 into Tuple3: List(1,2)" }
+    assertEqualsIterator(Iterator((1, 2, 3)), Iterator(1, 2, 3).sliding3)
+    assertEqualsIterator(Iterator((1, 2, 3), (2, 3, 4)), Iterator(1, 2, 3, 4).sliding3)
+    assertEqualsIterator(Iterator((1, 2, 3), (2, 3, 4), (3, 4, 5)), Iterator(1, 2, 3, 4, 5).sliding3)
+
+    assertEqualsIterator(Iterator[(Int, Int, Int)](), Vector[Int]().sliding3)
+    assertException(for (x <- Vector(1).sliding3) {}) { case e: AssertionError => e.getMessage == "Cannot convert sequence of length 1 into Tuple3: List(1)" }
+    assertException(for (x <- Vector(1, 2).sliding3) {}) { case e: AssertionError => e.getMessage == "Cannot convert sequence of length 2 into Tuple3: List(1,2)" }
+    assertEqualsIterator(Iterator((1, 2, 3)), Vector(1, 2, 3).sliding3)
+    assertEqualsIterator(Iterator((1, 2, 3), (2, 3, 4)), Vector(1, 2, 3, 4).sliding3)
+    assertEqualsIterator(Iterator((1, 2, 3), (2, 3, 4), (3, 4, 5)), Vector(1, 2, 3, 4, 5).sliding3)
+  }
+
+  @Test
+  def test_countCompare() {
+    var i = 0
+    def it = Iterator(
+      () => { i += 1; 1 },
+      () => { i += 1; 2 },
+      () => { i += 1; 3 },
+      () => { i += 1; 4 },
+      () => { i += 1; 5 },
+      () => { i += 1; 6 },
+      () => { i += 1; 7 },
+      () => { i += 1; 9 }) //
+
+    { val v = it; i = 0; assertTrue(v.countCompare(_.apply() % 2 == 0, 0) > 0); assertEquals(2, i); assertTrue(v.hasNext) } //
+    { val v = it; i = 0; assertTrue(v.countCompare(_.apply() % 2 == 0, 1) > 0); assertEquals(4, i); assertTrue(v.hasNext) } //
+    { val v = it; i = 0; assertTrue(v.countCompare(_.apply() % 2 == 0, 2) > 0); assertEquals(6, i); assertTrue(v.hasNext) } //
+    { val v = it; i = 0; assertTrue(v.countCompare(_.apply() % 2 == 0, 3) == 0); assertEquals(8, i); assertFalse(v.hasNext) } //
+    { val v = it; i = 0; assertTrue(v.countCompare(_.apply() % 2 == 0, 4) < 0); assertEquals(8, i); assertFalse(v.hasNext) } //
+    { val v = it; i = 0; assertTrue(v.countCompare(_.apply() % 2 == 0, 5) < 0); assertEquals(8, i); assertFalse(v.hasNext) } //
+  }
+
+  @Test
+  def test_takeSub() {
+    val v = Vector(Vector(1, 2, 3), Vector(4, 5, 6), Vector(7, 8, 9))
+
+    assertEquals(Vector[Vector[Int]](), v.takeSub(0))
+    assertEquals(Vector[Vector[Int]](), v.takeSub(1))
+    assertEquals(Vector[Vector[Int]](), v.takeSub(2))
+    assertEquals(Vector[Vector[Int]](Vector(1, 2, 3)), v.takeSub(3))
+    assertEquals(Vector[Vector[Int]](Vector(1, 2, 3)), v.takeSub(4))
+    assertEquals(Vector[Vector[Int]](Vector(1, 2, 3)), v.takeSub(5))
+    assertEquals(Vector[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6)), v.takeSub(6))
+    assertEquals(Vector[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6)), v.takeSub(7))
+    assertEquals(Vector[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6)), v.takeSub(8))
+    assertEquals(Vector[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6), Vector(7, 8, 9)), v.takeSub(9))
+    assertEquals(Vector[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6), Vector(7, 8, 9)), v.takeSub(10))
+
+    assertEqualsIterator(Iterator[Vector[Int]](), v.iterator.takeSub(0))
+    assertEqualsIterator(Iterator[Vector[Int]](), v.iterator.takeSub(1))
+    assertEqualsIterator(Iterator[Vector[Int]](), v.iterator.takeSub(2))
+    assertEqualsIterator(Iterator[Vector[Int]](Vector(1, 2, 3)), v.iterator.takeSub(3))
+    assertEqualsIterator(Iterator[Vector[Int]](Vector(1, 2, 3)), v.iterator.takeSub(4))
+    assertEqualsIterator(Iterator[Vector[Int]](Vector(1, 2, 3)), v.iterator.takeSub(5))
+    assertEqualsIterator(Iterator[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6)), v.iterator.takeSub(6))
+    assertEqualsIterator(Iterator[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6)), v.iterator.takeSub(7))
+    assertEqualsIterator(Iterator[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6)), v.iterator.takeSub(8))
+    assertEqualsIterator(Iterator[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6), Vector(7, 8, 9)), v.iterator.takeSub(9))
+    assertEqualsIterator(Iterator[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6), Vector(7, 8, 9)), v.iterator.takeSub(10))
+  }
+
+  @Test
+  def test_ascDesc() {
+    assertEquals(Vector('a -> 1, 'b -> 2, 'c -> 3), Map('b -> 2, 'a -> 1, 'c -> 3).asc)
+    assertEquals(Vector('c -> 3, 'b -> 2, 'a -> 1), Map('b -> 2, 'a -> 1, 'c -> 3).desc)
+  }
 }

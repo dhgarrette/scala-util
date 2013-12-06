@@ -1082,7 +1082,121 @@ object CollectionUtil {
   }
 
   //////////////////////////////////////////////////////
-  // asc
+  // sliding2: Iterator[(A,A)]
+  //   - slide over this collection to produce pairs.
+  //   - Functionally equivalent to:
+  //         this.sliding(2).map{Seq(a,b) => (a,b)}
+  //////////////////////////////////////////////////////
+
+  implicit class Enriched_slidingN_Iterator[A](val self: Iterator[A]) { // extends AnyVal {
+    def sliding2[B >: A](): Iterator[(B, B)] = self.sliding(2).map(_.toTuple2)
+    def sliding3[B >: A](): Iterator[(B, B, B)] = self.sliding(3).map(_.toTuple3)
+    def sliding4[B >: A](): Iterator[(B, B, B, B)] = self.sliding(4).map(_.toTuple4)
+  }
+
+  implicit class Enriched_slidingN_GenTraversableLike[A, Repr <: GenTraversable[A]](val self: GenTraversableLike[A, Repr]) { // extends AnyVal {
+    def sliding2[B >: A](): Iterator[(B, B)] = self.toIterator.sliding2()
+    def sliding3[B >: A](): Iterator[(B, B, B)] = self.toIterator.sliding3()
+    def sliding4[B >: A](): Iterator[(B, B, B, B)] = self.toIterator.sliding4()
+  }
+
+  //////////////////////////////////////////////////////
+  // countCompare(p: A => Boolean, count: Int): Int
+  //   - Compares the number of items satisfying a predicate to a test value.
+  //   - Functionally equivalent to (but more efficient than):
+  //         this.count(p).compareTo(count)
+  //////////////////////////////////////////////////////
+
+  implicit class Enriched_countCompare_GenTraversableOnce[A](val self: GenTraversableOnce[A]) extends AnyVal {
+    /**
+     * Compares the number of items satisfying a predicate to a test value.
+     *
+     *   @param p       the predicate used to test elements.
+     *   @param count   the test value that gets compared with the count.
+     *   @return Int value `x` where
+     *   {{{
+     *        x <  0       if this.count(p) <  count
+     *        x == 0       if this.count(p) == count
+     *        x >  0       if this.count(p) >  count
+     *   }}}
+     *  The method as implemented here does not call `length` directly; its running time
+     *  is `O(length min count)` instead of `O(length)`.
+     */
+    def countCompare(p: A => Boolean, count: Int): Int = {
+      val itr = self.toIterator
+      var i = 0
+      while (itr.hasNext && i <= count) {
+        if (p(itr.next))
+          i += 1
+      }
+      i - count
+    }
+  }
+
+  //////////////////////////////////////////////////////
+  // takeSub[GenIterable[B]](n: Int): Repr[GenIterable[B]]
+  //   - Take iterables from this collection until the total number of 
+  //     elements in the taken items is about to exceed `n`.  The total number
+  //     of elements will be less than or equal to `n`.
+  //////////////////////////////////////////////////////
+
+  implicit class Enriched_takeSub_Iterator[A, R <: GenTraversable[A]](val self: Iterator[GenTraversableLike[A, R]]) {
+    /**
+     * Take iterables from this collection until the total number of elements
+     * in the taken items is about to exceed `n`.  The total number of
+     * elements will be less than or equal to `n`.
+     *
+     * @param n	the maximum number of sub-elements to take
+     * @return the new collection
+     */
+    def takeSub(n: Int): Iterator[R] = {
+      if (self.isEmpty) {
+        self.asInstanceOf[Iterator[R]]
+      }
+      else {
+        new Iterator[R] {
+          private var nextElement: R = self.next.asInstanceOf[R]
+          private var total: Int = nextElement.size
+
+          override def hasNext = total <= n
+
+          override def next = {
+            if (hasNext) {
+              val x = nextElement
+              if (self.hasNext) {
+                nextElement = self.next.asInstanceOf[R]
+                total += nextElement.size
+              }
+              else
+                total = n + 1
+              x
+            }
+            else
+              throw new NoSuchElementException("next on empty iterator")
+          }
+        }
+      }
+    }
+  }
+
+  implicit class Enriched_takeSub_GenTraversableLike[A, R <: GenTraversable[A], Repr <: GenTraversable[GenTraversable[A]]](val self: GenTraversableLike[GenTraversableLike[A, R], Repr]) extends AnyVal {
+    /**
+     * Take iterables from this collection until the total number of elements
+     * in the taken items is about to exceed `n`.  The total number of
+     * elements will be less than or equal to `n`.
+     *
+     * @param n	the maximum number of sub-elements to take
+     * @return the new collection
+     */
+    def takeSub[That](n: Int)(implicit bf: CanBuildFrom[Repr, R, That]): That = {
+      val b = bf(self.asInstanceOf[Repr])
+      for (x <- self.toIterator.takeSub(n)) b += x
+      b.result
+    }
+  }
+
+  //////////////////////////////////////////////////////
+  // asc/desc
   //////////////////////////////////////////////////////
 
   implicit class Enriched_AscDesc_GenTraversableOnce[K, V](val self: GenTraversableOnce[(K, V)])(implicit ord: Ordering[V]) /*extends AnyVal */ {
