@@ -1,5 +1,27 @@
-sbt publish
-scp target/scala-2.10/scala-util_2.10-1.0.0-SNAPSHOT* k:public_html/maven-repository/snapshots/dhg/scala-util_2.10/1.0.0-SNAPSHOT
+#!/bin/bash
 
+projectname=scala-util
+version_len=5
+
+rm -rf target/scala-2.10/${projectname}_2.10-*
+sbt publish
+
+rm -rf target/scala-2.10/api
 sbt doc
-scp -r target/scala-2.10/api k:public_html/maven-repository/snapshots/dhg/scala-util_2.10/1.0.0-SNAPSHOT
+
+
+for f in target/scala-2.10/${projectname}_2.10-*
+do
+  len=24+${#projectname}
+  version=${f:$len:$version_len}
+  dir=public_html/maven-repository/snapshots/dhg/${projectname}_2.10/$version-SNAPSHOT/
+  ssh k mkdir -p $dir
+  scp $f k:$dir
+  
+  rm -rf ~/.ivy2/cache/dhg/${projectname}_2.10/*-$version*
+  rm -rf ~/.ivy2/cache/dhg/${projectname}_2.10/*/*-$version*
+
+done
+
+scp -r target/scala-2.10/api k:public_html/maven-repository/snapshots/dhg/${projectname}_2.10/$version-SNAPSHOT
+
