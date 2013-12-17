@@ -1112,6 +1112,15 @@ object CollectionUtil {
       b ++= self.slice(start, end).toIterator
       b.result
     }
+
+    def slyce[That](range: Range)(implicit bf: CanBuildFrom[Repr, A, That]): That = {
+      val start = if (range.start >= 0) range.start else self.size + range.start
+      val end = (if (range.end >= 0) range.end else self.size + range.end) + (if (range.isInclusive) 1 else 0)
+      val b = bf(self.asInstanceOf[Repr])
+      b.sizeHint(end - start)
+      b ++= self.slice(start, end).toIterator
+      b.result
+    }
   }
 
   //////////////////////////////////////////////////////
