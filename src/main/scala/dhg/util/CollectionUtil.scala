@@ -1088,16 +1088,30 @@ object CollectionUtil {
   //         this.sliding(2).map{Seq(a,b) => (a,b)}
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_slidingN_Iterator[A](val self: Iterator[A]) { // extends AnyVal {
-    def sliding2(): Iterator[(A,A)] = self.sliding(2).map(_.toTuple2)
+  implicit class Enriched_slidingN_Iterator[A](val self: Iterator[A]) extends AnyVal {
+    def sliding2(): Iterator[(A, A)] = self.sliding(2).map(_.toTuple2)
     def sliding3(): Iterator[(A, A, A)] = self.sliding(3).map(_.toTuple3)
     def sliding4(): Iterator[(A, A, A, A)] = self.sliding(4).map(_.toTuple4)
   }
 
-  implicit class Enriched_slidingN_GenTraversableLike[A, Repr <: GenTraversable[A]](val self: GenTraversableLike[A, Repr]) { // extends AnyVal {
+  implicit class Enriched_slidingN_GenTraversableLike[A, Repr <: GenTraversable[A]](val self: GenTraversableLike[A, Repr]) extends AnyVal {
     def sliding2(): Iterator[(A, A)] = self.toIterator.sliding2()
     def sliding3(): Iterator[(A, A, A)] = self.toIterator.sliding3()
     def sliding4(): Iterator[(A, A, A, A)] = self.toIterator.sliding4()
+  }
+
+  //////////////////////////////////////////////////////
+  // slyce
+  //////////////////////////////////////////////////////
+  implicit class Enriched_slyce_GenTraversable[A, Repr <: GenTraversable[A]](val self: GenTraversableLike[A, Repr]) extends AnyVal {
+    def slyce[That](from: Int, until: Int)(implicit bf: CanBuildFrom[Repr, A, That]): That = {
+      val start = if (from >= 0) from else self.size + from
+      val end = if (until >= 0) until else self.size + until
+      val b = bf(self.asInstanceOf[Repr])
+      b.sizeHint(end - start)
+      b ++= self.slice(start, end).toIterator
+      b.result
+    }
   }
 
   //////////////////////////////////////////////////////

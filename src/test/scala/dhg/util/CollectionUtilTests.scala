@@ -601,6 +601,16 @@ class CollectionUtilTests {
   }
 
   @Test
+  def test_slyce() {
+    assertEquals(Vector(3, 4, 5), (0 to 9).toVector.slyce(3, 6))
+    assertEquals(Vector(), (0 to 9).toVector.slyce(6, 3))
+    assertEquals(Vector(7, 8), (0 to 9).toVector.slyce(-3, -1))
+    assertEquals(List(), (0 to 9).toList.slyce(-3, 2))
+    assertEquals(List(5, 6), (0 to 9).toList.slyce(5, -3))
+    assertEquals(List(4, 5, 6, 7), (0 to 9).toList.slyce(-6, 8))
+  }
+
+  @Test
   def test_countCompare() {
     var i = 0
     def it = Iterator(
