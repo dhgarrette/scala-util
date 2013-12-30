@@ -2,10 +2,12 @@ package dhg.util
 
 import org.junit.Assert._
 import dhg.util.CollectionUtil._
+import dhg.util.StringUtil._
 import dhg.util.math.LogDouble
 import dhg.util.math.LogDouble._
 import scala.math.log
 import java.lang.AssertionError
+import scala.util.matching.Regex
 
 /**
  * Test utilities
@@ -20,6 +22,23 @@ object TestUtil {
 
   def assertException(block: => Unit)(handle: PartialFunction[Throwable, Unit]) {
     try { block; fail("no exception thrown") } catch (handle)
+  }
+
+  def assertExceptionAny(block: => Unit) {
+    try { block; fail("no exception thrown") } catch { case e: Exception => }
+  }
+
+  def assertExceptionMsg(expectedMessage: String)(block: => Unit) {
+    try { block; fail("no exception thrown") } catch { case e: Exception => assertEquals(expectedMessage, e.getMessage) }
+  }
+
+  def assertExceptionMsg(expectedMessageRe: Regex)(block: => Unit) {
+    try { block; fail("no exception thrown") } catch { case e: Exception => assertMatch(expectedMessageRe, e.getMessage) }
+  }
+
+  def assertMatch(expectedRe: Regex, result: String) = {
+    if (!expectedRe.matches(result))
+      throw new AssertionError(s"expected match: $expectedRe but was: $result")
   }
 
   def assertEqualsArray[A](expected: Array[A], result: Array[A]) {
