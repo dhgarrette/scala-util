@@ -34,7 +34,7 @@ object LineGraphDataset {
   def apply(xyPairs: TraversableOnce[(Double, Double)], name: String = "") = XYDataset(xyPairs, name)
 }
 
-case class HistogramDatasetBuilder(
+case class HistogramDatasetBuilder private (
   data: Option[GenTraversable[Double]] = None,
   numBins: Option[Int] = None,
   rangeStart: Option[Double] = None,
@@ -80,6 +80,10 @@ case class HistogramDatasetBuilder(
 
   implicit def toDataset(hdb: HistogramDatasetBuilder) = hdb.build.dataset
 }
+object HistogramDatasetBuilder {
+  def apply() = new HistogramDatasetBuilder()
+  def apply(data: GenTraversable[Double]) = new HistogramDatasetBuilder(data = Some(data))
+}
 
 object HistogramDataset {
   def apply(data: GenTraversable[Double], numBins: Int): HistogramDataset = {
@@ -105,7 +109,7 @@ object HistogramDataset {
     val binArray = makeBinArray(data, numBins, rangeStart, binwidth)
     HistogramDataset(binArray, rangeStart, binwidth)
   }
-  
+
   def binWidth(numBins: Int, rangeStart: Double, rangeEnd: Double) = (rangeEnd - rangeStart) / numBins
 
   def binData[A](data: GenTraversableOnce[(A, Double)], numBins: Int, rangeStart: Double, binWidth: Double): Vector[Vector[A]] = {
