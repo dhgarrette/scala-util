@@ -1228,6 +1228,24 @@ object CollectionUtil {
   }
 
   //////////////////////////////////////////////////////
+  // Iterator.last
+  //////////////////////////////////////////////////////
+
+  implicit class Enriched_last_Iterator[A](val self: Iterator[A]) extends AnyVal {
+    /**
+     * @return The last item in the iterator.  Note that the iterator will be consumed after calling.
+     */
+    def last(): A = {
+      if (!self.hasNext) throw new AssertionError("cannot call Iterator.last on an empty iterator")
+      var a = self.next()
+      while (self.hasNext) {
+        a = self.next()
+      }
+      a
+    }
+  }
+
+  //////////////////////////////////////////////////////
   // No-Op
   //////////////////////////////////////////////////////
   implicit class Enriched_noop_GenTraversableLike[A, Repr](val self: GenTraversableLike[A, Repr]) extends AnyVal {
