@@ -79,7 +79,7 @@ case class Subprocess(binary: String, args: Seq[String] = Nil) {
   def callAllReturns(input: String): (Int, String, String) = {
     val out = new StringBuilder
     val err = new StringBuilder
-    val exitcode = callWithStreams(out, err)
+    val exitcode = callWithStreams(input, out, err)
     (exitcode, out.result, err.result)
   }
 
