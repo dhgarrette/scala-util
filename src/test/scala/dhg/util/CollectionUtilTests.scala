@@ -679,4 +679,30 @@ class CollectionUtilTests {
     assertEquals(Vector('a -> 1, 'b -> 2, 'c -> 3), Map('b -> 2, 'a -> 1, 'c -> 3).asc)
     assertEquals(Vector('c -> 3, 'b -> 2, 'a -> 1), Map('b -> 2, 'a -> 1, 'c -> 3).desc)
   }
+
+  @Test
+  def test_mutableMapUpdateWith {
+    val m = mutable.Map('a -> 1, 'b -> 2)
+    val m1 = m.updateWith('a)(_ + 3)
+    assertSame(m, m1)
+    assertEquals(mutable.Map('a -> 4, 'b -> 2), m)
+    val m2 = m.updateWith('b)(_ + 4)
+    assertSame(m, m2)
+    assertEquals(mutable.Map('a -> 4, 'b -> 6), m)
+    assertExceptionMsg(f"key not found: 'c")(m.updateWith('c)(_ + 5))
+  }
+
+  @Test
+  def test_mutableMapUpdateOrElseWith {
+    val m = mutable.Map('a -> 1, 'b -> 2)
+    val m1 = m.updateOrElseWith('a, 7)(_ + 3)
+    assertSame(m, m1)
+    assertEquals(mutable.Map('a -> 4, 'b -> 2), m)
+    val m2 = m.updateOrElseWith('b, 8)(_ + 4)
+    assertSame(m, m2)
+    assertEquals(mutable.Map('a -> 4, 'b -> 6), m)
+    val m3 = m.updateOrElseWith('c, 9)(_ + 5)
+    assertSame(m, m3)
+    assertEquals(mutable.Map('a -> 4, 'b -> 6, 'c -> 14), m)
+  }
 }

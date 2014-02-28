@@ -96,4 +96,9 @@ object LogDouble {
     override def zero = LogDouble.zero
     override def one = LogDouble.one
   }
+
+  implicit object LogDoubleSemigroup extends Semigroup[LogDouble] {
+    override def append(f1: LogDouble, f2: => LogDouble) = f1 + f2
+  }
+
 }

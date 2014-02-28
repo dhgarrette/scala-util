@@ -4,6 +4,8 @@ import scala.math._
 import org.junit.Assert._
 import org.junit.Test
 import dhg.util.math.LogDouble._
+import scalaz._
+import Scalaz._
 
 /**
  * @author Dan Garrette (dhgarrette@gmail.com)
@@ -75,6 +77,14 @@ class LogDoubleTests {
     }
 
     stuff(a, b, c, d, e)
+  }
+
+  @Test
+  def test_semigroup_append() {
+    val a: LogDouble = LogDouble(3)
+    val b: LogDouble = LogDouble(5)
+    val c: LogDouble = LogDouble(8)
+    assertEqualsLog(c, a |+| b)
   }
 
   def assertEqualsLog(a: LogDouble, b: LogDouble) {

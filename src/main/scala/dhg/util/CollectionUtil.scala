@@ -1288,6 +1288,22 @@ object CollectionUtil {
   }
 
   //////////////////////////////////////////////////////
+  // mutable.Map.updateWith, mutable.Map.updateOrElseWith
+  //////////////////////////////////////////////////////
+
+  implicit class Enriched_updateWith_MutableMap[K, V](val self: mutable.Map[K, V]) extends AnyVal {
+    def updateWith(key: K)(f: (V => V)): mutable.Map[K, V] = {
+      self(key) = f(self(key))
+      self
+    }
+
+    def updateOrElseWith(key: K, default: V)(f: (V => V)): mutable.Map[K, V] = {
+      self(key) = f(self.getOrElse(key, default))
+      self
+    }
+  }
+
+  //////////////////////////////////////////////////////
   // PARALLEL / SEQUENTIAL
   //   - obnoxious versions of the .par and .seq methods 
   //////////////////////////////////////////////////////
