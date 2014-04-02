@@ -13,4 +13,14 @@ object MathUtil {
       blog + math.log1p(math.exp(alog - blog))
   }
 
+  implicit class DoubleWithExponentOp(val v: Double) extends AnyVal {
+    def **(o: Int) = math.pow(v, o)
+    def **(o: Double) = math.pow(v, o)
+  }
+
+  implicit class IntWithExponentOp(val v: Int) extends AnyVal {
+    def **(o: Int) = math.pow(v, o)
+    def **(o: Double) = math.pow(v, o)
+  }
+
 }
