@@ -8,7 +8,7 @@ object NumUtil {
     def pow(e: Double): Double = math.pow(self, e)
     def **(e: Double): Double = math.pow(self, e)
 
-    def toLogDouble: LogDouble = new LogDouble(math.log(self))
+    def toLogDouble: LogDouble = LogDouble(self)
     def log: LogDouble = toLogDouble
   }
 
@@ -16,12 +16,12 @@ object NumUtil {
     def pow(e: Double): Double = math.pow(self, e)
     def **(e: Double): Double = math.pow(self, e)
 
-    def toLogDouble: LogDouble = new LogDouble(math.log(self))
+    def toLogDouble: LogDouble = LogDouble(self)
     def log: LogDouble = toLogDouble
   }
 
   //  implicit class NumericWithToLogDouble[N](self: N)(implicit num: Numeric[N]) {
-  //    def toLogDouble = new LogDouble(math.log(num.toDouble(self)))
+  //    def toLogDouble = LogDouble(self)
   //    def log = toLogDouble
   //  }
 

@@ -4,15 +4,14 @@ version := "1.0.0-SNAPSHOT"
 
 organization := "dhg"
 
-scalaVersion := "2.10.4"
+scalaVersion := "2.11.0"
 
 libraryDependencies ++= Seq(
-  "org.scalaz" % "scalaz-core_2.10" % "7.0.3",
-  "org.jfree" % "jfreechart" % "1.0.14",
-  "com.typesafe" % "scalalogging-log4j_2.10" % "1.0.1",
-  "org.apache.logging.log4j" % "log4j-core" % "2.0-beta3",
-  "junit" % "junit" % "4.10",
-  "com.novocode" % "junit-interface" % "0.8" % "test->default") //switch to ScalaTest at some point...
+  "org.scalaz" %% "scalaz-core" % "7.0.6",
+  "org.jfree" % "jfreechart" % "1.0.17",
+  "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.0",
+  "junit" % "junit" % "4.11",
+  "com.novocode" % "junit-interface" % "0.10" % "test") //switch to ScalaTest at some point...
 
 scalacOptions ++= Seq("-deprecation", "-optimize")
 
