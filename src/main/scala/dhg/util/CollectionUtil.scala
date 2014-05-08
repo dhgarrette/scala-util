@@ -1245,6 +1245,20 @@ object CollectionUtil {
     }
   }
 
+  implicit class Enriched_takeRight_Iterator[A](val self: Iterator[A]) extends AnyVal {
+    /**
+     * @return The last n items of the iterator.  Note that the iterator will be consumed after calling.
+     */
+    def takeRight(n: Int): Vector[A] = {
+      val q = mutable.Queue.empty[A]
+      while (self.hasNext) {
+        q += self.next()
+        if(q.size > n) q.dequeue()
+      }
+      q.toVector
+    }
+  }
+
   //////////////////////////////////////////////////////
   // No-Op
   //////////////////////////////////////////////////////
