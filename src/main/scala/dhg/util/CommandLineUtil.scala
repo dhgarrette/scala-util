@@ -1,5 +1,8 @@
 package dhg.util
 
+import dhg.util.CollectionUtil._
+import dhg.util.Pattern._
+
 object CommandLineUtil {
   private[this] val OptionRegex = "--(.*)".r
 
@@ -20,7 +23,7 @@ object CommandLineUtil {
       }
 
     val arguments = argumentList.map(_._2).toVector // arguments are a Vector
-    val options = optionList.toMap // options are a Map
+    val options = optionList.groupByKey.map{case (opt, Coll(v)) => opt->v; case (opt, _) => sys.error(f"option --${opt} given twice") } // options are a Map
     (arguments, options)
   }
 
