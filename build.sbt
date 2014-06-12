@@ -4,7 +4,7 @@ version := "1.0.0-SNAPSHOT"
 
 organization := "dhg"
 
-scalaVersion := "2.11.0"
+scalaVersion := "2.11.1"
 
 libraryDependencies ++= Seq(
   "org.scalaz" %% "scalaz-core" % "7.0.6",
