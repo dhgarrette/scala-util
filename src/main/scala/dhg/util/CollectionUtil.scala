@@ -1253,9 +1253,28 @@ object CollectionUtil {
       val q = mutable.Queue.empty[A]
       while (self.hasNext) {
         q += self.next()
-        if(q.size > n) q.dequeue()
+        if (q.size > n) q.dequeue()
       }
       q.toVector
+    }
+  }
+
+  //////////////////////////////////////////////////////
+  // GenTraversableOnce.only
+  //////////////////////////////////////////////////////
+
+  implicit class Enriched_only_GenTraversableOnce[A](val self: GenTraversableOnce[A]) extends AnyVal {
+    /**
+     * Return the only element in the collection, or error if there is not exactly one element.
+     *
+     * @return the only element
+     */
+    def only(): A = {
+      val itr = self.toIterator
+      assert(itr.hasNext, "cannot call `only` on empty collection.")
+      val a = itr.next
+      assert(!itr.hasNext, f"cannot call `only` on collection with ${itr.size + 1} elements.")
+      a
     }
   }
 

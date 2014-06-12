@@ -681,6 +681,39 @@ class CollectionUtilTests {
   }
 
   @Test
+  def test_Iterator_last() {
+    { val i = Iterator("a", "b", "c"); assertEquals("c", i.last); assertFalse(i.hasNext) }
+    { val i = Iterator("a"); assertEquals("a", i.last); assertFalse(i.hasNext) }
+    { val i = Iterator[String](); assertException(i.last) { case e: AssertionError => assertEquals("cannot call Iterator.last on an empty iterator", e.getMessage) } }
+  }
+
+  @Test
+  def test_Iterator_takeRight() {
+    { val i = Iterator("a", "b", "c"); assertEquals(Vector("b", "c"), i.takeRight(2)); assertFalse(i.hasNext) }
+    { val i = Iterator("a"); assertEquals(Vector("a"), i.takeRight(2)); assertFalse(i.hasNext) }
+    { val i = Iterator[String](); assertEquals(Vector[String](), i.takeRight(2)); assertFalse(i.hasNext) }
+    { val i = Iterator("a", "b", "c"); assertEquals(Vector[String](), i.takeRight(0)); assertFalse(i.hasNext) }
+  }
+
+  @Test
+  def test_only() {
+    { val i = Iterator("a"); assertEquals("a", i.only); assertFalse(i.hasNext) }
+    { val i = Iterator("a", "b"); assertException(i.only) { case e: AssertionError => assertEquals("assertion failed: cannot call `only` on collection with 2 elements.", e.getMessage) }; assertFalse(i.hasNext) }
+    { val i = Iterator("a", "b", "c"); assertException(i.only) { case e: AssertionError => assertEquals("assertion failed: cannot call `only` on collection with 3 elements.", e.getMessage) }; assertFalse(i.hasNext) }
+    { val i = Iterator[String](); assertException(i.only) { case e: AssertionError => assertEquals("assertion failed: cannot call `only` on empty collection.", e.getMessage) } }
+
+    { val v = Vector("a"); assertEquals("a", v.only) }
+    { val v = Vector("a", "b"); assertException(v.only) { case e: AssertionError => assertEquals("assertion failed: cannot call `only` on collection with 2 elements.", e.getMessage) } }
+    { val v = Vector("a", "b", "c"); assertException(v.only) { case e: AssertionError => assertEquals("assertion failed: cannot call `only` on collection with 3 elements.", e.getMessage) } }
+    { val v = Vector[String](); assertException(v.only) { case e: AssertionError => assertEquals("assertion failed: cannot call `only` on empty collection.", e.getMessage) } }
+
+    { val m = Vector("a" -> 1); assertEquals("a" -> 1, m.only) }
+    { val m = Vector("a" -> 1, "b" -> 2); assertException(m.only) { case e: AssertionError => assertEquals("assertion failed: cannot call `only` on collection with 2 elements.", e.getMessage) } }
+    { val m = Vector("a" -> 1, "b" -> 2, "c" -> 3); assertException(m.only) { case e: AssertionError => assertEquals("assertion failed: cannot call `only` on collection with 3 elements.", e.getMessage) } }
+    { val m = Vector[(String, Int)](); assertException(m.only) { case e: AssertionError => assertEquals("assertion failed: cannot call `only` on empty collection.", e.getMessage) } }
+  }
+
+  @Test
   def test_mutableMapUpdateWith {
     val m = mutable.Map('a -> 1, 'b -> 2)
     val m1 = m.updateWith('a)(_ + 3)
