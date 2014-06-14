@@ -696,6 +696,14 @@ class CollectionUtilTests {
   }
 
   @Test
+  def test_Iterator_dropRight() {
+    { val i = Iterator("a", "b", "c"); assertEquals(Vector("c"), i.dropRight(2)); assertFalse(i.hasNext) }
+    { val i = Iterator("a"); assertEquals(Vector[String](), i.dropRight(2)); assertFalse(i.hasNext) }
+    { val i = Iterator[String](); assertEquals(Vector[String](), i.dropRight(2)); assertFalse(i.hasNext) }
+    { val i = Iterator("a", "b", "c"); assertEquals(Vector("a","b","c"), i.dropRight(0)); assertFalse(i.hasNext) }
+  }
+
+  @Test
   def test_only() {
     { val i = Iterator("a"); assertEquals("a", i.only); assertFalse(i.hasNext) }
     { val i = Iterator("a", "b"); assertException(i.only) { case e: AssertionError => assertEquals("assertion failed: cannot call `only` on collection with 2 elements.", e.getMessage) }; assertFalse(i.hasNext) }

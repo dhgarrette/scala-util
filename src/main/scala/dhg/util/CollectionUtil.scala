@@ -1103,6 +1103,7 @@ object CollectionUtil {
   //////////////////////////////////////////////////////
   // slyce
   //////////////////////////////////////////////////////
+  
   implicit class Enriched_slyce_GenTraversable[A, Repr <: GenTraversable[A]](val self: GenTraversableLike[A, Repr]) extends AnyVal {
     def slyce[That](from: Int, until: Int)(implicit bf: CanBuildFrom[Repr, A, That]): That = {
       val start = if (from >= 0) from else self.size + from
@@ -1229,6 +1230,8 @@ object CollectionUtil {
 
   //////////////////////////////////////////////////////
   // Iterator.last
+  // Iterator.takeRight
+  // Iterator.dropRight
   //////////////////////////////////////////////////////
 
   implicit class Enriched_last_Iterator[A](val self: Iterator[A]) extends AnyVal {
@@ -1238,25 +1241,19 @@ object CollectionUtil {
     def last(): A = {
       if (!self.hasNext) throw new AssertionError("cannot call Iterator.last on an empty iterator")
       var a = self.next()
-      while (self.hasNext) {
-        a = self.next()
-      }
+      while (self.hasNext) a = self.next()
       a
     }
-  }
 
-  implicit class Enriched_takeRight_Iterator[A](val self: Iterator[A]) extends AnyVal {
     /**
      * @return The last n items of the iterator.  Note that the iterator will be consumed after calling.
      */
-    def takeRight(n: Int): Vector[A] = {
-      val q = mutable.Queue.empty[A]
-      while (self.hasNext) {
-        q += self.next()
-        if (q.size > n) q.dequeue()
-      }
-      q.toVector
-    }
+    def takeRight(n: Int): Vector[A] = self.toVector.takeRight(n)
+      
+    /**
+     * @return The all but the last n items of the iterator.  Note that the iterator will be consumed after calling.
+     */
+    def dropRight(n: Int): Vector[A] = self.toVector.dropRight(n)
   }
 
   //////////////////////////////////////////////////////
