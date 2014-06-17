@@ -697,7 +697,7 @@ class CollectionUtilTests {
 
   @Test
   def test_Iterator_dropRight() {
-    { val i = Iterator("a", "b", "c"); assertEquals(Vector("c"), i.dropRight(2)); assertFalse(i.hasNext) }
+    { val i = Iterator("a", "b", "c"); assertEquals(Vector("a"), i.dropRight(2)); assertFalse(i.hasNext) }
     { val i = Iterator("a"); assertEquals(Vector[String](), i.dropRight(2)); assertFalse(i.hasNext) }
     { val i = Iterator[String](); assertEquals(Vector[String](), i.dropRight(2)); assertFalse(i.hasNext) }
     { val i = Iterator("a", "b", "c"); assertEquals(Vector("a","b","c"), i.dropRight(0)); assertFalse(i.hasNext) }
