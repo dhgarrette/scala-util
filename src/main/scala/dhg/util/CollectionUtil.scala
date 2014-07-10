@@ -553,23 +553,75 @@ object CollectionUtil {
   //   - The new iterators coordinate to maintain laziness.
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_unzip4_Iterator[A, B, C, D, Repr <: GenTraversable[(A, B, C, D)]](val self: GenTraversableLike[(A, B, C, D), Repr]) extends AnyVal {
+  implicit class Enriched_unzip3_GenTraversable[A, B, C, D, Repr <: GenTraversable[(A, B, C, D)]](val self: GenTraversableLike[(A, B, C, D), Repr]) extends AnyVal {
     def unzip4[ThatA, ThatB, ThatC, ThatD](implicit // 
     bfA: CanBuildFrom[Repr, A, ThatA],
       bfB: CanBuildFrom[Repr, B, ThatB],
       bfC: CanBuildFrom[Repr, C, ThatC],
-      bfD: CanBuildFrom[Repr, D, ThatD]): (ThatA, ThatB, ThatC, ThatD) = {
+      bfD: CanBuildFrom[Repr, D, ThatD] //
+      ): (ThatA, ThatB, ThatC, ThatD) = {
       val bldrA = bfA(self.asInstanceOf[Repr])
       val bldrB = bfB(self.asInstanceOf[Repr])
       val bldrC = bfC(self.asInstanceOf[Repr])
       val bldrD = bfD(self.asInstanceOf[Repr])
-      for ((a, b, c, d) <- self) {
+      for ((a, b, c, d) <- self.seq) {
         bldrA += a
         bldrB += b
         bldrC += c
         bldrD += d
       }
       (bldrA.result(), bldrB.result(), bldrC.result(), bldrD.result())
+    }
+  }
+
+  implicit class Enriched_unzip5_GenTraversable[A, B, C, D, E, Repr <: GenTraversable[(A, B, C, D, E)]](val self: GenTraversableLike[(A, B, C, D, E), Repr]) extends AnyVal {
+    def unzip5[ThatA, ThatB, ThatC, ThatD, ThatE](implicit // 
+    bfA: CanBuildFrom[Repr, A, ThatA],
+      bfB: CanBuildFrom[Repr, B, ThatB],
+      bfC: CanBuildFrom[Repr, C, ThatC],
+      bfD: CanBuildFrom[Repr, D, ThatD],
+      bfE: CanBuildFrom[Repr, E, ThatE] //
+      ): (ThatA, ThatB, ThatC, ThatD, ThatE) = {
+      val bldrA = bfA(self.asInstanceOf[Repr])
+      val bldrB = bfB(self.asInstanceOf[Repr])
+      val bldrC = bfC(self.asInstanceOf[Repr])
+      val bldrD = bfD(self.asInstanceOf[Repr])
+      val bldrE = bfE(self.asInstanceOf[Repr])
+      for ((a, b, c, d, e) <- self.seq) {
+        bldrA += a
+        bldrB += b
+        bldrC += c
+        bldrD += d
+        bldrE += e
+      }
+      (bldrA.result(), bldrB.result(), bldrC.result(), bldrD.result(), bldrE.result())
+    }
+  }
+
+  implicit class Enriched_unzip6_GenTraversable[A, B, C, D, E, F, Repr <: GenTraversable[(A, B, C, D, E, F)]](val self: GenTraversableLike[(A, B, C, D, E, F), Repr]) extends AnyVal {
+    def unzip6[ThatA, ThatB, ThatC, ThatD, ThatE, ThatF](implicit // 
+    bfA: CanBuildFrom[Repr, A, ThatA],
+      bfB: CanBuildFrom[Repr, B, ThatB],
+      bfC: CanBuildFrom[Repr, C, ThatC],
+      bfD: CanBuildFrom[Repr, D, ThatD],
+      bfE: CanBuildFrom[Repr, E, ThatE],
+      bfF: CanBuildFrom[Repr, F, ThatF] //
+      ): (ThatA, ThatB, ThatC, ThatD, ThatE, ThatF) = {
+      val bldrA = bfA(self.asInstanceOf[Repr])
+      val bldrB = bfB(self.asInstanceOf[Repr])
+      val bldrC = bfC(self.asInstanceOf[Repr])
+      val bldrD = bfD(self.asInstanceOf[Repr])
+      val bldrE = bfE(self.asInstanceOf[Repr])
+      val bldrF = bfF(self.asInstanceOf[Repr])
+      for ((a, b, c, d, e, f) <- self.seq) {
+        bldrA += a
+        bldrB += b
+        bldrC += c
+        bldrD += d
+        bldrE += e
+        bldrF += f
+      }
+      (bldrA.result(), bldrB.result(), bldrC.result(), bldrD.result(), bldrE.result(), bldrF.result())
     }
   }
 

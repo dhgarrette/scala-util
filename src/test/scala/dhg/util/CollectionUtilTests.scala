@@ -276,12 +276,41 @@ class CollectionUtilTests {
     val v1 = Vector(
       (1, "a", 'a, 'a'),
       (2, "b", 'b, 'b'),
-      (3, "c", 'c, 'c'))
+      (3, "c", 'c, 'c')).par
     val (i, s, m, c) = v1.unzip4
-    assertEquals(Vector(1, 2, 3), i)
-    assertEquals(Vector("a", "b", "c"), s)
-    assertEquals(Vector('a, 'b, 'c), m)
-    assertEquals(Vector('a', 'b', 'c'), c)
+    assertEquals(Vector(1, 2, 3).par, i)
+    assertEquals(Vector("a", "b", "c").par, s)
+    assertEquals(Vector('a, 'b, 'c).par, m)
+    assertEquals(Vector('a', 'b', 'c').par, c)
+  }
+
+  @Test
+  def test_unzip5() {
+    val v1 = Vector(
+      (1, "a", 'a, 'a', 1.0),
+      (2, "b", 'b, 'b', 2.0),
+      (3, "c", 'c, 'c', 3.0)).par
+    val (i, s, m, c, d) = v1.unzip5
+    assertEquals(Vector(1, 2, 3).par, i)
+    assertEquals(Vector("a", "b", "c").par, s)
+    assertEquals(Vector('a, 'b, 'c).par, m)
+    assertEquals(Vector('a', 'b', 'c').par, c)
+    assertEquals(Vector(1.0, 2.0, 3.0).par, d)
+  }
+
+  @Test
+  def test_unzip6() {
+    val v1 = Vector(
+      (1, "a", 'a, 'a', 1.0, 1l),
+      (2, "b", 'b, 'b', 2.0, 2l),
+      (3, "c", 'c, 'c', 3.0, 3l)).par
+    val (i, s, m, c, d, l) = v1.unzip6
+    assertEquals(Vector(1, 2, 3).par, i)
+    assertEquals(Vector("a", "b", "c").par, s)
+    assertEquals(Vector('a, 'b, 'c).par, m)
+    assertEquals(Vector('a', 'b', 'c').par, c)
+    assertEquals(Vector(1.0, 2.0, 3.0).par, d)
+    assertEquals(Vector(1l, 2l, 3l).par, l)
   }
 
   @Test
