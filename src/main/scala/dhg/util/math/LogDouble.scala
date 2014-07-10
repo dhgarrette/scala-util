@@ -60,6 +60,8 @@ class LogDouble(val logValue: Double) extends AnyVal with Ordered[LogDouble] {
   def nonZero: Boolean = !logValue.isNegInfinity
   def isNaN: Boolean = logValue.isNaN
   def notNaN: Boolean = !logValue.isNaN
+  def isInfinite: Boolean = logValue.isPosInfinity
+  def nonInfinite: Boolean = !logValue.isPosInfinity
 
   def toInt = toDouble.toInt
   def toLong = toDouble.toLong
@@ -74,7 +76,10 @@ object LogDouble {
   def apply[N](n: N)(implicit num: Numeric[N]): LogDouble = {
     n match {
       case logDouble: LogDouble => logDouble
-      case _ => new LogDouble(log(num.toDouble(n)))
+      case _ =>
+        val d = num.toDouble(n)
+        require(d >= 0.0, "cannot take log of a negative number")
+        new LogDouble(log(d))
     }
   }
 

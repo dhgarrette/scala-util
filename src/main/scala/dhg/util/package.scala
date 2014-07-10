@@ -93,6 +93,7 @@ package object `packagex` {
   type Enriched_toBitSet_GenTraversableOnce = dhg.util.CollectionUtil.Enriched_toBitSet_GenTraversableOnce
   type Enriched_updateWith_MutableMap[K, V] = dhg.util.CollectionUtil.Enriched_updateWith_MutableMap[K, V]
   type Enriched_PARALLEL_Parallelizable[+A, +ParRepr <: Parallel] = dhg.util.CollectionUtil.Enriched_PARALLEL_Parallelizable[A, ParRepr]
-  type Enriched_SEQUENTIAL_GenTraversableOnce[+A] = dhg.util.CollectionUtil.Enriched_SEQUENTIAL_GenTraversableOnce[A]
+  type Enriched_SEQUENTIAL_Iterator[+A] = dhg.util.CollectionUtil.Enriched_SEQUENTIAL_Iterator[A]
+  type Enriched_SEQUENTIAL_GenTraversableLike[+A, Repr] = dhg.util.CollectionUtil.Enriched_SEQUENTIAL_GenTraversableLike[A, Repr]
 
 }

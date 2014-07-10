@@ -522,7 +522,7 @@ object CollectionUtil {
     val bi = b.toIterator
     val bldr = bf(a.asInstanceOf[Repr])
     while (ai.hasNext && bi.hasNext) bldr += ((ai.next, bi.next))
-    assert(ai.hasNext && bi.hasNext, s"a=${if (ai.hasNext) "empty" else "nonempty"} b=${if (bi.hasNext) "empty" else "nonempty"}")
+    assert(!ai.hasNext && !bi.hasNext, s"a=${if (ai.hasNext) "empty" else "nonempty"} b=${if (bi.hasNext) "empty" else "nonempty"}")
     bldr.result
   }
 
@@ -532,7 +532,7 @@ object CollectionUtil {
     val ci = c.toIterator
     val bldr = bf(a.asInstanceOf[Repr])
     while (ai.hasNext && bi.hasNext && ci.hasNext) bldr += ((ai.next, bi.next, ci.next))
-    assert(ai.hasNext && bi.hasNext && ci.hasNext, s"a=${if (ai.hasNext) "empty" else "nonempty"} b=${if (bi.hasNext) "empty" else "nonempty"} c=${if (ci.hasNext) "empty" else "nonempty"}")
+    assert(!ai.hasNext && !bi.hasNext && !ci.hasNext, s"a=${if (ai.hasNext) "empty" else "nonempty"} b=${if (bi.hasNext) "empty" else "nonempty"} c=${if (ci.hasNext) "empty" else "nonempty"}")
     bldr.result
   }
 
@@ -543,7 +543,7 @@ object CollectionUtil {
     val di = d.toIterator
     val bldr = bf(a.asInstanceOf[Repr])
     while (ai.hasNext && bi.hasNext && ci.hasNext && di.hasNext) bldr += ((ai.next, bi.next, ci.next, di.next))
-    assert(ai.hasNext && bi.hasNext && ci.hasNext && di.hasNext, s"a=${if (ai.hasNext) "empty" else "nonempty"} b=${if (bi.hasNext) "empty" else "nonempty"} c=${if (ci.hasNext) "empty" else "nonempty"} d=${if (di.hasNext) "empty" else "nonempty"}")
+    assert(!ai.hasNext && !bi.hasNext && !ci.hasNext && !di.hasNext, s"a=${if (ai.hasNext) "empty" else "nonempty"} b=${if (bi.hasNext) "empty" else "nonempty"} c=${if (ci.hasNext) "empty" else "nonempty"} d=${if (di.hasNext) "empty" else "nonempty"}")
     bldr.result
   }
 
@@ -1341,8 +1341,11 @@ object CollectionUtil {
   implicit class Enriched_PARALLEL_Parallelizable[+A, +ParRepr <: Parallel](val self: Parallelizable[A, ParRepr]) extends AnyVal {
     def PARALLEL = self.par
   }
-  implicit class Enriched_SEQUENTIAL_GenTraversableOnce[+A](val self: GenTraversableOnce[A]) extends AnyVal {
+  implicit class Enriched_SEQUENTIAL_Iterator[+A](val self: Iterator[A]) extends AnyVal {
     def SEQUENTIAL = self.seq
+  }
+  implicit class Enriched_SEQUENTIAL_GenTraversableLike[+A, Repr](val self: GenTraversableLike[A, Repr]) extends AnyVal {
+    def SEQUENTIAL[That](implicit bf: CanBuildFrom[Repr, A, That]): That = (bf(self.asInstanceOf[Repr]) ++= self.seq).result
   }
 
 }
