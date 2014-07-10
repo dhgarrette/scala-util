@@ -272,6 +272,19 @@ class CollectionUtilTests {
   }
 
   @Test
+  def test_unzip4() {
+    val v1 = Vector(
+      (1, "a", 'a, 'a'),
+      (2, "b", 'b, 'b'),
+      (3, "c", 'c, 'c'))
+    val (i, s, m, c) = v1.unzip4
+    assertEquals(Vector(1, 2, 3), i)
+    assertEquals(Vector("a", "b", "c"), s)
+    assertEquals(Vector('a, 'b, 'c), m)
+    assertEquals(Vector('a', 'b', 'c'), c)
+  }
+
+  @Test
   def test_unzip() {
     val aBuf = Buffer[Int]()
     val bBuf = Buffer[Char]()
@@ -700,7 +713,7 @@ class CollectionUtilTests {
     { val i = Iterator("a", "b", "c"); assertEquals(Vector("a"), i.dropRight(2)); assertFalse(i.hasNext) }
     { val i = Iterator("a"); assertEquals(Vector[String](), i.dropRight(2)); assertFalse(i.hasNext) }
     { val i = Iterator[String](); assertEquals(Vector[String](), i.dropRight(2)); assertFalse(i.hasNext) }
-    { val i = Iterator("a", "b", "c"); assertEquals(Vector("a","b","c"), i.dropRight(0)); assertFalse(i.hasNext) }
+    { val i = Iterator("a", "b", "c"); assertEquals(Vector("a", "b", "c"), i.dropRight(0)); assertFalse(i.hasNext) }
   }
 
   @Test

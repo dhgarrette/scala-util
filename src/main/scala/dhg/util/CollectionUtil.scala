@@ -553,6 +553,26 @@ object CollectionUtil {
   //   - The new iterators coordinate to maintain laziness.
   //////////////////////////////////////////////////////
 
+  implicit class Enriched_unzip4_Iterator[A, B, C, D, Repr <: GenTraversable[(A, B, C, D)]](val self: GenTraversableLike[(A, B, C, D), Repr]) extends AnyVal {
+    def unzip4[ThatA, ThatB, ThatC, ThatD](implicit // 
+    bfA: CanBuildFrom[Repr, A, ThatA],
+      bfB: CanBuildFrom[Repr, B, ThatB],
+      bfC: CanBuildFrom[Repr, C, ThatC],
+      bfD: CanBuildFrom[Repr, D, ThatD]): (ThatA, ThatB, ThatC, ThatD) = {
+      val bldrA = bfA(self.asInstanceOf[Repr])
+      val bldrB = bfB(self.asInstanceOf[Repr])
+      val bldrC = bfC(self.asInstanceOf[Repr])
+      val bldrD = bfD(self.asInstanceOf[Repr])
+      for ((a, b, c, d) <- self) {
+        bldrA += a
+        bldrB += b
+        bldrC += c
+        bldrD += d
+      }
+      (bldrA.result(), bldrB.result(), bldrC.result(), bldrD.result())
+    }
+  }
+
   private[this] abstract class QueuedPairIterator[A, B, T, O](self: Iterator[(A, B)], thisQueue: mutable.Queue[T], otherQueue: mutable.Queue[O]) extends Iterator[T] {
     protected[this] def swapOrNot(p: (A, B)): (T, O)
     override def hasNext = thisQueue.nonEmpty || self.hasNext
@@ -1103,7 +1123,7 @@ object CollectionUtil {
   //////////////////////////////////////////////////////
   // slyce
   //////////////////////////////////////////////////////
-  
+
   implicit class Enriched_slyce_GenTraversable[A, Repr <: GenTraversable[A]](val self: GenTraversableLike[A, Repr]) extends AnyVal {
     def slyce[That](from: Int, until: Int)(implicit bf: CanBuildFrom[Repr, A, That]): That = {
       val start = if (from >= 0) from else self.size + from
@@ -1249,7 +1269,7 @@ object CollectionUtil {
      * @return The last n items of the iterator.  Note that the iterator will be consumed after calling.
      */
     def takeRight(n: Int): Vector[A] = self.toVector.takeRight(n)
-      
+
     /**
      * @return The all but the last n items of the iterator.  Note that the iterator will be consumed after calling.
      */
