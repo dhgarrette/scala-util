@@ -30,14 +30,14 @@ object CollectionUtil {
   //   - Convert this sequence to a tuple
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_toTuple_Seq[A](val seq: Seq[A]) extends AnyVal {
+  final implicit class Enriched_toTuple_Seq[A](val seq: Seq[A]) extends AnyVal {
     def toTuple2 = seq match { case Seq(a, b) => (a, b); case x => throw new AssertionError(s"Cannot convert sequence of length ${seq.size} into Tuple2: $x") }
     def toTuple3 = seq match { case Seq(a, b, c) => (a, b, c); case x => throw new AssertionError(s"Cannot convert sequence of length ${seq.size} into Tuple3: $x") }
     def toTuple4 = seq match { case Seq(a, b, c, d) => (a, b, c, d); case x => throw new AssertionError(s"Cannot convert sequence of length ${seq.size} into Tuple4: $x") }
     def toTuple5 = seq match { case Seq(a, b, c, d, e) => (a, b, c, d, e); case x => throw new AssertionError(s"Cannot convert sequence of length ${seq.size} into Tuple5: $x") }
   }
 
-  implicit class Enriched_toTuple_Array[A](val seq: Array[A]) extends AnyVal {
+  final implicit class Enriched_toTuple_Array[A](val seq: Array[A]) extends AnyVal {
     def toTuple2 = seq match { case Array(a, b) => (a, b); case x => throw new AssertionError(s"Cannot convert array of length ${seq.size} into Tuple2: Array(${x.mkString(", ")})") }
     def toTuple3 = seq match { case Array(a, b, c) => (a, b, c); case x => throw new AssertionError(s"Cannot convert array of length ${seq.size} into Tuple3: Array(${x.mkString(", ")})") }
     def toTuple4 = seq match { case Array(a, b, c, d) => (a, b, c, d); case x => throw new AssertionError(s"Cannot convert array of length ${seq.size} into Tuple4: Array(${x.mkString(", ")})") }
@@ -51,7 +51,7 @@ object CollectionUtil {
   //   - Append an element to the end of the iterator
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_prependAppend_Iterator[A](val self: Iterator[A]) extends AnyVal {
+  final implicit class Enriched_prependAppend_Iterator[A](val self: Iterator[A]) extends AnyVal {
     /**
      * Prepend an item to the front of the iterator
      *
@@ -76,7 +76,7 @@ object CollectionUtil {
   //   - Map each distinct item in the collection to the number of times it appears.
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_counts_TraversableOnce[A](val self: TraversableOnce[A]) extends AnyVal {
+  final implicit class Enriched_counts_TraversableOnce[A](val self: TraversableOnce[A]) extends AnyVal {
     /**
      * Map each distinct item in the collection to the number of times it appears.
      *
@@ -97,7 +97,7 @@ object CollectionUtil {
   //   - Make Traversable.groupBy functionality available to Iterator
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_groupBy_Iterator[A](val self: Iterator[A]) extends AnyVal {
+  final implicit class Enriched_groupBy_Iterator[A](val self: Iterator[A]) extends AnyVal {
     /**
      * Same functionality as Traversable.groupBy(f)
      *
@@ -135,7 +135,7 @@ object CollectionUtil {
   //   - Equivalent to self.groupBy(_._1).map { case (k, elems) => (k, elems.map(_._2)) }
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_groupByKey_Traversable[K, V, Repr](val self: TraversableLike[(K, V), Repr]) extends AnyVal {
+  final implicit class Enriched_groupByKey_Traversable[K, V, Repr](val self: TraversableLike[(K, V), Repr]) extends AnyVal {
     /**
      * For a collection of pairs (k,v), create a map from each `k` to the
      * collection of `v`s with which it is associated.
@@ -157,7 +157,7 @@ object CollectionUtil {
     }
   }
 
-  implicit class Enriched_groupByKey_Iterator[A](val self: Iterator[A]) extends AnyVal {
+  final implicit class Enriched_groupByKey_Iterator[A](val self: Iterator[A]) extends AnyVal {
     /**
      * For a collection of pairs, group by the first item in the pair.
      *
@@ -183,7 +183,7 @@ object CollectionUtil {
   //   - Equivalent to self.toIterator.flatMap { case (a, bs) => bs.toIterator.map(a -> _) }
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_ungroup_GenTraversableOnce[A, B](val self: GenTraversableOnce[(A, GenTraversableOnce[B])]) extends AnyVal {
+  final implicit class Enriched_ungroup_GenTraversableOnce[A, B](val self: GenTraversableOnce[(A, GenTraversableOnce[B])]) extends AnyVal {
     /**
      * For a map with collections for values, return an iterator of pairs
      * where each key is paired with each item in its value collection.
@@ -199,7 +199,7 @@ object CollectionUtil {
   // dropRightWhile(p: A => Boolean): Repr
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_dropRightWhile_Seq[A, Repr](val self: SeqLike[A, Repr]) extends AnyVal {
+  final implicit class Enriched_dropRightWhile_Seq[A, Repr](val self: SeqLike[A, Repr]) extends AnyVal {
     def dropRightWhile[That](p: A => Boolean)(implicit bf: CanBuildFrom[Repr, A, That]): That = {
       val b = bf(self.asInstanceOf[Repr])
       val buffer = mutable.Buffer[A]()
@@ -214,7 +214,7 @@ object CollectionUtil {
     }
   }
 
-  implicit class Enriched_dropRightWhile_String(val self: String) extends AnyVal {
+  final implicit class Enriched_dropRightWhile_String(val self: String) extends AnyVal {
     def dropRightWhile(p: Char => Boolean): String = {
       val b = StringCanBuildFrom()
       val buffer = mutable.Buffer[Char]()
@@ -252,7 +252,7 @@ object CollectionUtil {
     }
     def hasNext() = self.hasNext
   }
-  implicit class Enriched_splitAt_Iterator[A](val self: Iterator[A]) extends AnyVal {
+  final implicit class Enriched_splitAt_Iterator[A](val self: Iterator[A]) extends AnyVal {
     /**
      * Safely split this iterator at the specified index.  The 'first'
      * iterator must be exhausted completely before the items in the 'second'
@@ -288,7 +288,7 @@ object CollectionUtil {
   //   - Inspired by String.split
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_split_Iterator[A](val self: Iterator[A]) extends AnyVal {
+  final implicit class Enriched_split_Iterator[A](val self: Iterator[A]) extends AnyVal {
     /**
      * Split this collection on each occurrence of the delimiter.
      *
@@ -320,7 +320,7 @@ object CollectionUtil {
       self.splitWhere(_ == delim, builder, keepDelimiter)
   }
 
-  implicit class Enriched_split_Traversable[A, Repr](val self: TraversableLike[A, Repr]) extends AnyVal {
+  final implicit class Enriched_split_Traversable[A, Repr](val self: TraversableLike[A, Repr]) extends AnyVal {
     /**
      * Split this collection on each occurrence of the delimiter.
      *
@@ -380,7 +380,7 @@ object CollectionUtil {
       }
     }
   }
-  implicit class Enriched_splitWhere_Iterator[A](val self: Iterator[A]) extends AnyVal {
+  final implicit class Enriched_splitWhere_Iterator[A](val self: Iterator[A]) extends AnyVal {
     /**
      * Split this on items for which the predicate is true.
      *
@@ -431,7 +431,7 @@ object CollectionUtil {
     override def toString() = s"BuilderHolder(${b.result}, isEmpty=$isEmpty)"
   }
 
-  implicit class Enriched_splitWhere_Traversable[A, Repr](val self: TraversableLike[A, Repr]) extends AnyVal {
+  final implicit class Enriched_splitWhere_Traversable[A, Repr](val self: TraversableLike[A, Repr]) extends AnyVal {
     /**
      * Split this on items for which the predicate is true.  Delimiters
      * do not appear in the output.
@@ -459,7 +459,7 @@ object CollectionUtil {
       (self.next, thatItr.next)
     }
   }
-  implicit class Enriched_zipSafe_Iterator[A](val self: Iterator[A]) extends AnyVal {
+  final implicit class Enriched_zipSafe_Iterator[A](val self: Iterator[A]) extends AnyVal {
     /**
      * zip this collection with another, throwing an exception if they
      * are not of equal length.
@@ -474,7 +474,7 @@ object CollectionUtil {
     }
   }
 
-  implicit class Enriched_zipSafe_GenTraversable[A, Repr](val self: GenTraversableLike[A, Repr]) extends AnyVal {
+  final implicit class Enriched_zipSafe_GenTraversable[A, Repr](val self: GenTraversableLike[A, Repr]) extends AnyVal {
     /**
      * zip this collection with another, throwing an exception if they
      * are not of equal length.
@@ -490,7 +490,7 @@ object CollectionUtil {
     }
   }
 
-  implicit class Enriched_zipSafe_Tuple_of_Iterator[A, B](val self: (Iterator[A], GenTraversableOnce[B])) extends AnyVal {
+  final implicit class Enriched_zipSafe_Tuple_of_Iterator[A, B](val self: (Iterator[A], GenTraversableOnce[B])) extends AnyVal {
     /**
      * zip this collection with another, throwing an exception if they
      * are not of equal length.
@@ -501,7 +501,7 @@ object CollectionUtil {
     def zipSafe = self._1 zipSafe self._2
   }
 
-  implicit class Enriched_zipSafe_Tuple_of_GenTraversable[A, Repr, B](val self: (GenTraversableLike[A, Repr], GenTraversableOnce[B])) extends AnyVal {
+  final implicit class Enriched_zipSafe_Tuple_of_GenTraversable[A, Repr, B](val self: (GenTraversableLike[A, Repr], GenTraversableOnce[B])) extends AnyVal {
     /**
      * zip this collection with another, throwing an exception if they
      * are not of equal length.
@@ -553,7 +553,7 @@ object CollectionUtil {
   //   - The new iterators coordinate to maintain laziness.
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_unzip3_GenTraversable[A, B, C, D, Repr <: GenTraversable[(A, B, C, D)]](val self: GenTraversableLike[(A, B, C, D), Repr]) extends AnyVal {
+  final implicit class Enriched_unzip3_GenTraversable[A, B, C, D, Repr <: GenTraversable[(A, B, C, D)]](val self: GenTraversableLike[(A, B, C, D), Repr]) extends AnyVal {
     def unzip4[ThatA, ThatB, ThatC, ThatD](implicit // 
     bfA: CanBuildFrom[Repr, A, ThatA],
       bfB: CanBuildFrom[Repr, B, ThatB],
@@ -574,7 +574,7 @@ object CollectionUtil {
     }
   }
 
-  implicit class Enriched_unzip5_GenTraversable[A, B, C, D, E, Repr <: GenTraversable[(A, B, C, D, E)]](val self: GenTraversableLike[(A, B, C, D, E), Repr]) extends AnyVal {
+  final implicit class Enriched_unzip5_GenTraversable[A, B, C, D, E, Repr <: GenTraversable[(A, B, C, D, E)]](val self: GenTraversableLike[(A, B, C, D, E), Repr]) extends AnyVal {
     def unzip5[ThatA, ThatB, ThatC, ThatD, ThatE](implicit // 
     bfA: CanBuildFrom[Repr, A, ThatA],
       bfB: CanBuildFrom[Repr, B, ThatB],
@@ -598,7 +598,7 @@ object CollectionUtil {
     }
   }
 
-  implicit class Enriched_unzip6_GenTraversable[A, B, C, D, E, F, Repr <: GenTraversable[(A, B, C, D, E, F)]](val self: GenTraversableLike[(A, B, C, D, E, F), Repr]) extends AnyVal {
+  final implicit class Enriched_unzip6_GenTraversable[A, B, C, D, E, F, Repr <: GenTraversable[(A, B, C, D, E, F)]](val self: GenTraversableLike[(A, B, C, D, E, F), Repr]) extends AnyVal {
     def unzip6[ThatA, ThatB, ThatC, ThatD, ThatE, ThatF](implicit // 
     bfA: CanBuildFrom[Repr, A, ThatA],
       bfB: CanBuildFrom[Repr, B, ThatB],
@@ -634,7 +634,7 @@ object CollectionUtil {
   }
   private[this] class SwappingQueuedPairIterator[A, B](self: Iterator[(A, B)], aQueue: mutable.Queue[A], bQueue: mutable.Queue[B]) extends QueuedPairIterator[A, B, A, B](self, aQueue, bQueue) { override def swapOrNot(p: (A, B)) = p }
   private[this] class NonSwpngQueuedPairIterator[A, B](self: Iterator[(A, B)], aQueue: mutable.Queue[A], bQueue: mutable.Queue[B]) extends QueuedPairIterator[A, B, B, A](self, bQueue, aQueue) { override def swapOrNot(p: (A, B)) = p.swap }
-  implicit class Enriched_unzip2_Iterator[A, B](val self: Iterator[(A, B)]) extends AnyVal {
+  final implicit class Enriched_unzip2_Iterator[A, B](val self: Iterator[(A, B)]) extends AnyVal {
     def unzip(): (Iterator[A], Iterator[B]) = {
       val aQueue = mutable.Queue[A]()
       val bQueue = mutable.Queue[B]()
@@ -652,7 +652,7 @@ object CollectionUtil {
   //         map(x => x -> f(x))
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_mapTo_GenTraversableLike[A, Repr](val self: GenTraversableLike[A, Repr]) extends AnyVal {
+  final implicit class Enriched_mapTo_GenTraversableLike[A, Repr](val self: GenTraversableLike[A, Repr]) extends AnyVal {
     /**
      * Map a function over the collection, returning a set of pairs consisting
      * of the original item and the result of the function application
@@ -674,7 +674,7 @@ object CollectionUtil {
       x -> f(x)
     }
   }
-  implicit class Enriched_mapTo_Iterator[A](val self: Iterator[A]) extends AnyVal {
+  final implicit class Enriched_mapTo_Iterator[A](val self: Iterator[A]) extends AnyVal {
     /**
      * Map a function over the collection, returning a set of pairs consisting
      * of the original item and the result of the function application
@@ -694,7 +694,7 @@ object CollectionUtil {
   //         map(x => x -> v)
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_mapToVal_GenTraversableLike[A, Repr](val self: GenTraversableLike[A, Repr]) extends AnyVal {
+  final implicit class Enriched_mapToVal_GenTraversableLike[A, Repr](val self: GenTraversableLike[A, Repr]) extends AnyVal {
     /**
      * Map each item in the collection to a particular value
      *
@@ -712,7 +712,7 @@ object CollectionUtil {
     def hasNext = self.hasNext
     def next() = self.next -> v
   }
-  implicit class Enriched_mapToVal_Iterator[A](val self: Iterator[A]) extends AnyVal {
+  final implicit class Enriched_mapToVal_Iterator[A](val self: Iterator[A]) extends AnyVal {
     /**
      * Map each item in the collection to a particular value
      *
@@ -731,7 +731,7 @@ object CollectionUtil {
   //         this.map{case (k,v) => f(k) -> v}
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_mapKeys_GenTraversable[T, U, Repr](val self: GenTraversableLike[(T, U), Repr]) extends AnyVal {
+  final implicit class Enriched_mapKeys_GenTraversable[T, U, Repr](val self: GenTraversableLike[(T, U), Repr]) extends AnyVal {
     /**
      * In a collection of pairs, map a function over the first item of each
      * pair.  Ensures that the map is computed at call-time, and not returned
@@ -752,7 +752,7 @@ object CollectionUtil {
       f(k) -> v
     }
   }
-  implicit class Enriched_mapKeys_Iterator[T, U](val self: Iterator[(T, U)]) extends AnyVal {
+  final implicit class Enriched_mapKeys_Iterator[T, U](val self: Iterator[(T, U)]) extends AnyVal {
     /**
      * In a collection of pairs, map a function over the first item of each
      * pair.
@@ -770,7 +770,7 @@ object CollectionUtil {
   //   - Equivalent to: this.map { case (k,v) => k -> f(v) }
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_mapVals_GenTraversable[T, U, Repr](val self: GenTraversableLike[(T, U), Repr]) extends AnyVal {
+  final implicit class Enriched_mapVals_GenTraversable[T, U, Repr](val self: GenTraversableLike[(T, U), Repr]) extends AnyVal {
     /**
      * In a collection of pairs, map a function over the second item of each
      * pair.  Ensures that the map is computed at call-time, and not returned
@@ -791,7 +791,7 @@ object CollectionUtil {
       k -> f(v)
     }
   }
-  implicit class Enriched_mapVals_Iterator[T, U](val self: Iterator[(T, U)]) extends AnyVal {
+  final implicit class Enriched_mapVals_Iterator[T, U](val self: Iterator[(T, U)]) extends AnyVal {
     /**
      * In a collection of pairs, map a function over the second item of each
      * pair.
@@ -808,7 +808,7 @@ object CollectionUtil {
   //   - Equivalent to: this.map(_.map(x => f(x)))
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_submap_GenTraversable[T, TRepr, SRepr](val self: GenTraversableLike[GenTraversableLike[T, TRepr], SRepr]) extends AnyVal {
+  final implicit class Enriched_submap_GenTraversable[T, TRepr, SRepr](val self: GenTraversableLike[GenTraversableLike[T, TRepr], SRepr]) extends AnyVal {
     /**
      * In a collection of collections, map a function over the inner collections without flattening.
      *
@@ -824,7 +824,7 @@ object CollectionUtil {
     def hasNext = self.hasNext
     def next() = self.next().map(f)(bf)
   }
-  implicit class Enriched_submap_Iterator[T, Repr](val self: Iterator[GenTraversableLike[T, Repr]]) extends AnyVal {
+  final implicit class Enriched_submap_Iterator[T, Repr](val self: Iterator[GenTraversableLike[T, Repr]]) extends AnyVal {
     /**
      * In a collection of collections, map a function over the inner collections without flattening.
      *
@@ -840,7 +840,7 @@ object CollectionUtil {
   //   - same as `xs.map { case (x,y) => f(x,y) } `
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_mapt_2_GenTraversableLike[A, B, Repr](val self: GenTraversableLike[(A, B), Repr]) extends AnyVal {
+  final implicit class Enriched_mapt_2_GenTraversableLike[A, B, Repr](val self: GenTraversableLike[(A, B), Repr]) extends AnyVal {
     def mapt[R, That](f: (A, B) => R)(implicit bf: CanBuildFrom[Repr, R, That]) = {
       self.map(x => f(x._1, x._2))
     }
@@ -853,11 +853,11 @@ object CollectionUtil {
     }
     def hasNext() = self.hasNext
   }
-  implicit class Enriched_mapt_2_Iterator[A, B](val self: Iterator[(A, B)]) extends AnyVal {
+  final implicit class Enriched_mapt_2_Iterator[A, B](val self: Iterator[(A, B)]) extends AnyVal {
     def mapt[R](f: (A, B) => R): Iterator[R] = new Mapt2Iterator(self, f)
   }
 
-  implicit class Enriched_mapt_3_GenTraversableLike[A, B, C, Repr](val self: GenTraversableLike[(A, B, C), Repr]) extends AnyVal {
+  final implicit class Enriched_mapt_3_GenTraversableLike[A, B, C, Repr](val self: GenTraversableLike[(A, B, C), Repr]) extends AnyVal {
     def mapt[R, That](f: (A, B, C) => R)(implicit bf: CanBuildFrom[Repr, R, That]) = {
       self.map(x => f(x._1, x._2, x._3))
     }
@@ -870,11 +870,11 @@ object CollectionUtil {
     }
     def hasNext() = self.hasNext
   }
-  implicit class Enriched_mapt_3_Iterator[A, B, C](val self: Iterator[(A, B, C)]) extends AnyVal {
+  final implicit class Enriched_mapt_3_Iterator[A, B, C](val self: Iterator[(A, B, C)]) extends AnyVal {
     def mapt[R](f: (A, B, C) => R): Iterator[R] = new Mapt3Iterator(self, f)
   }
 
-  implicit class Enriched_mapt_4_GenTraversableLike[A, B, C, D, Repr](val self: GenTraversableLike[(A, B, C, D), Repr]) extends AnyVal {
+  final implicit class Enriched_mapt_4_GenTraversableLike[A, B, C, D, Repr](val self: GenTraversableLike[(A, B, C, D), Repr]) extends AnyVal {
     def mapt[R, That](f: (A, B, C, D) => R)(implicit bf: CanBuildFrom[Repr, R, That]) = {
       self.map(x => f(x._1, x._2, x._3, x._4))
     }
@@ -887,7 +887,7 @@ object CollectionUtil {
     }
     def hasNext() = self.hasNext
   }
-  implicit class Enriched_mapt_4_Iterator[A, B, C, D](val self: Iterator[(A, B, C, D)]) extends AnyVal {
+  final implicit class Enriched_mapt_4_Iterator[A, B, C, D](val self: Iterator[(A, B, C, D)]) extends AnyVal {
     def mapt[R](f: (A, B, C, D) => R): Iterator[R] = new Mapt4Iterator(self, f)
   }
 
@@ -898,7 +898,7 @@ object CollectionUtil {
   //     if it operates on the accumulator, then it behaves like `while`.
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_foldLeftWhile_GenTraversableOnce[A](val self: GenTraversableOnce[A]) extends AnyVal {
+  final implicit class Enriched_foldLeftWhile_GenTraversableOnce[A](val self: GenTraversableOnce[A]) extends AnyVal {
     def foldLeftWhile[B](z: B)(p: (B, A) => Boolean)(op: (B, A) => B): B = {
       var result = z
       val it = self.toIterator
@@ -916,7 +916,7 @@ object CollectionUtil {
   //   - Find the average (mean) of this collection of numbers
   //////////////////////////////////////////////////////
 
-  implicit class Enrich_avg_GenTraversableOnce[A](val self: GenTraversableOnce[A])(implicit num: Fractional[A]) {
+  final implicit class Enrich_avg_GenTraversableOnce[A](val self: GenTraversableOnce[A])(implicit num: Fractional[A]) {
     /**
      * Find the average (mean) of this collection of numbers.
      *
@@ -931,7 +931,7 @@ object CollectionUtil {
     }
   }
 
-  implicit class Enrich_avg_Int_GenTraversableOnce(val self: GenTraversableOnce[Int]) extends AnyVal {
+  final implicit class Enrich_avg_Int_GenTraversableOnce(val self: GenTraversableOnce[Int]) extends AnyVal {
     /**
      * Find the average (mean) of this collection of numbers.
      *
@@ -947,11 +947,31 @@ object CollectionUtil {
   }
 
   //////////////////////////////////////////////////////
+  // proportion(p: A => Boolean): Double
+  //   - Find the proportion of elements for which the predicate holds
+  //////////////////////////////////////////////////////
+
+  final implicit class Enrich_proportion_GenTraversableOnce[A](val self: GenTraversableOnce[A]) {
+    /**
+     * Find the proportion of elements for which the predicate holds
+     *
+     * @return the proportion
+     */
+    def proportion(p: A => Boolean) = {
+      assert(self.nonEmpty, "cannot call `proportion` on an empty collection")
+      val (total, count) = self.foldLeft((0, 0)) {
+        case ((total, count), x) => (total + 1, if (p(x)) count + 1 else count)
+      }
+      count / total.toDouble
+    }
+  }
+
+  //////////////////////////////////////////////////////
   // normalize(): Repr[A]
   //   - Normalize this collection of numbers by dividing each by the sum
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_normalize_GenTraversable[A, Repr](val self: GenTraversableLike[A, Repr]) extends AnyVal {
+  final implicit class Enriched_normalize_GenTraversable[A, Repr](val self: GenTraversableLike[A, Repr]) extends AnyVal {
     /**
      * Normalize this collection of numbers by dividing each by the sum
      *
@@ -964,7 +984,7 @@ object CollectionUtil {
     }
   }
 
-  implicit class Enriched_normalize_Int_GenTraversable[Repr](val self: GenTraversableLike[Int, Repr]) extends AnyVal {
+  final implicit class Enriched_normalize_Int_GenTraversable[Repr](val self: GenTraversableLike[Int, Repr]) extends AnyVal {
     /**
      * Normalize this collection of numbers by dividing each by the sum
      *
@@ -982,7 +1002,7 @@ object CollectionUtil {
   //   - Normalize this values in this collection of pairs
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_normalizeValues_GenTraversable[T, U, Repr](val self: GenTraversableLike[(T, U), Repr]) extends AnyVal {
+  final implicit class Enriched_normalizeValues_GenTraversable[T, U, Repr](val self: GenTraversableLike[(T, U), Repr]) extends AnyVal {
     /**
      * Normalize this values in this collection of pairs
      *
@@ -994,7 +1014,7 @@ object CollectionUtil {
     }
   }
 
-  implicit class Enriched_normalizeValues_Int_GenTraversable[T, Repr](val self: GenTraversableLike[(T, Int), Repr]) extends AnyVal {
+  final implicit class Enriched_normalizeValues_Int_GenTraversable[T, Repr](val self: GenTraversableLike[(T, Int), Repr]) extends AnyVal {
     /**
      * Normalize this values in this collection of pairs
      *
@@ -1011,7 +1031,7 @@ object CollectionUtil {
   //   - Equivalent to, but faster than self.sortBy(f).takeRight(n).reverse
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_maxByN_GenTraversable[A, Repr](val self: GenTraversableLike[A, Repr]) extends AnyVal {
+  final implicit class Enriched_maxByN_GenTraversable[A, Repr](val self: GenTraversableLike[A, Repr]) extends AnyVal {
     /**
      * Find the N maximum entries in the collection.
      *
@@ -1040,7 +1060,7 @@ object CollectionUtil {
     }
   }
 
-  implicit class Enriched_maxByN_Iterator[A](val self: Iterator[A]) extends AnyVal {
+  final implicit class Enriched_maxByN_Iterator[A](val self: Iterator[A]) extends AnyVal {
     /**
      * Find the N maximum entries in the collection.
      *
@@ -1074,7 +1094,7 @@ object CollectionUtil {
   //   - Equivalent to, but faster than self.sortBy(f).take(n)
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_minByN_GenTraversable[A, Repr](val self: GenTraversableLike[A, Repr]) extends AnyVal {
+  final implicit class Enriched_minByN_GenTraversable[A, Repr](val self: GenTraversableLike[A, Repr]) extends AnyVal {
     /**
      * Find the N minimum entries in the collection.
      *
@@ -1103,7 +1123,7 @@ object CollectionUtil {
     }
   }
 
-  implicit class Enriched_minByN_Iterator[A](val self: Iterator[A]) extends AnyVal {
+  final implicit class Enriched_minByN_Iterator[A](val self: Iterator[A]) extends AnyVal {
     /**
      * Find the N minimum entries in the collection.
      *
@@ -1139,7 +1159,7 @@ object CollectionUtil {
   //         this.map(f).sum
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_sumBy_GenTraversableOnce[A](val self: GenTraversableOnce[A]) extends AnyVal {
+  final implicit class Enriched_sumBy_GenTraversableOnce[A](val self: GenTraversableOnce[A]) extends AnyVal {
     /**
      * Map a numeric-producing function over each item and sum the results.
      *
@@ -1160,13 +1180,13 @@ object CollectionUtil {
   //         this.sliding(2).map{Seq(a,b) => (a,b)}
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_slidingN_Iterator[A](val self: Iterator[A]) extends AnyVal {
+  final implicit class Enriched_slidingN_Iterator[A](val self: Iterator[A]) extends AnyVal {
     def sliding2(): Iterator[(A, A)] = self.sliding(2).map(_.toTuple2)
     def sliding3(): Iterator[(A, A, A)] = self.sliding(3).map(_.toTuple3)
     def sliding4(): Iterator[(A, A, A, A)] = self.sliding(4).map(_.toTuple4)
   }
 
-  implicit class Enriched_slidingN_GenTraversableLike[A, Repr <: GenTraversable[A]](val self: GenTraversableLike[A, Repr]) extends AnyVal {
+  final implicit class Enriched_slidingN_GenTraversableLike[A, Repr <: GenTraversable[A]](val self: GenTraversableLike[A, Repr]) extends AnyVal {
     def sliding2(): Iterator[(A, A)] = self.toIterator.sliding2()
     def sliding3(): Iterator[(A, A, A)] = self.toIterator.sliding3()
     def sliding4(): Iterator[(A, A, A, A)] = self.toIterator.sliding4()
@@ -1176,7 +1196,7 @@ object CollectionUtil {
   // slyce
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_slyce_GenTraversable[A, Repr <: GenTraversable[A]](val self: GenTraversableLike[A, Repr]) extends AnyVal {
+  final implicit class Enriched_slyce_GenTraversable[A, Repr <: GenTraversable[A]](val self: GenTraversableLike[A, Repr]) extends AnyVal {
     def slyce[That](from: Int, until: Int)(implicit bf: CanBuildFrom[Repr, A, That]): That = {
       val start = if (from >= 0) from else self.size + from
       val end = if (until >= 0) until else self.size + until
@@ -1203,7 +1223,7 @@ object CollectionUtil {
   //         this.count(p).compareTo(count)
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_countCompare_GenTraversableOnce[A](val self: GenTraversableOnce[A]) extends AnyVal {
+  final implicit class Enriched_countCompare_GenTraversableOnce[A](val self: GenTraversableOnce[A]) extends AnyVal {
     /**
      * Compares the number of items satisfying a predicate to a test value.
      *
@@ -1236,7 +1256,7 @@ object CollectionUtil {
   //     of elements will be less than or equal to `n`.
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_takeSub_Iterator[A, R <: GenTraversable[A]](val self: Iterator[GenTraversableLike[A, R]]) {
+  final implicit class Enriched_takeSub_Iterator[A, R <: GenTraversable[A]](val self: Iterator[GenTraversableLike[A, R]]) {
     /**
      * Take iterables from this collection until the total number of elements
      * in the taken items is about to exceed `n`.  The total number of
@@ -1275,7 +1295,7 @@ object CollectionUtil {
     }
   }
 
-  implicit class Enriched_takeSub_GenTraversableLike[A, R <: GenTraversable[A], Repr <: GenTraversable[GenTraversable[A]]](val self: GenTraversableLike[GenTraversableLike[A, R], Repr]) extends AnyVal {
+  final implicit class Enriched_takeSub_GenTraversableLike[A, R <: GenTraversable[A], Repr <: GenTraversable[GenTraversable[A]]](val self: GenTraversableLike[GenTraversableLike[A, R], Repr]) extends AnyVal {
     /**
      * Take iterables from this collection until the total number of elements
      * in the taken items is about to exceed `n`.  The total number of
@@ -1295,7 +1315,7 @@ object CollectionUtil {
   // asc/desc
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_AscDesc_GenTraversableOnce[K, V](val self: GenTraversableOnce[(K, V)])(implicit ord: Ordering[V]) /*extends AnyVal */ {
+  final implicit class Enriched_AscDesc_GenTraversableOnce[K, V](val self: GenTraversableOnce[(K, V)])(implicit ord: Ordering[V]) /*extends AnyVal */ {
     def asc: Vector[(K, V)] = self.toVector.sortBy(t => t._2)
     def desc: Vector[(K, V)] = self.toVector.sorted((ord on ((t: (K, V)) => t._2)).reverse)
   }
@@ -1306,7 +1326,7 @@ object CollectionUtil {
   // Iterator.dropRight
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_last_Iterator[A](val self: Iterator[A]) extends AnyVal {
+  final implicit class Enriched_last_Iterator[A](val self: Iterator[A]) extends AnyVal {
     /**
      * @return The last item in the iterator.  Note that the iterator will be consumed after calling.
      */
@@ -1332,7 +1352,7 @@ object CollectionUtil {
   // GenTraversableOnce.only
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_only_GenTraversableOnce[A](val self: GenTraversableOnce[A]) extends AnyVal {
+  final implicit class Enriched_only_GenTraversableOnce[A](val self: GenTraversableOnce[A]) extends AnyVal {
     /**
      * Return the only element in the collection, or error if there is not exactly one element.
      *
@@ -1350,7 +1370,7 @@ object CollectionUtil {
   //////////////////////////////////////////////////////
   // No-Op
   //////////////////////////////////////////////////////
-  implicit class Enriched_noop_GenTraversableLike[A, Repr](val self: GenTraversableLike[A, Repr]) extends AnyVal {
+  final implicit class Enriched_noop_GenTraversableLike[A, Repr](val self: GenTraversableLike[A, Repr]) extends AnyVal {
     def noop[That](f: A => _)(implicit bf: CanBuildFrom[Repr, A, That]): That = {
       self.map { x => f(x); x }
     }
@@ -1364,7 +1384,7 @@ object CollectionUtil {
       x
     }
   }
-  implicit class Enriched_noop_Iterator[A](val self: Iterator[A]) extends AnyVal {
+  final implicit class Enriched_noop_Iterator[A](val self: Iterator[A]) extends AnyVal {
     def noop(f: A => _): Iterator[A] = new NoOpIterator(self, f)
   }
 
@@ -1372,12 +1392,12 @@ object CollectionUtil {
   // shuffle
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_shuffle_Seq[A, Repr](val self: SeqLike[A, Repr]) extends AnyVal {
+  final implicit class Enriched_shuffle_Seq[A, Repr](val self: SeqLike[A, Repr]) extends AnyVal {
     def shuffle[That](implicit bf: CanBuildFrom[Repr, A, That]): That =
       (bf(self.asInstanceOf[Repr]) ++= Random.shuffle(self)).result
   }
 
-  implicit class Enriched_shuffle_Iterator[A](val self: Iterator[A]) extends AnyVal {
+  final implicit class Enriched_shuffle_Iterator[A](val self: Iterator[A]) extends AnyVal {
     def shuffle: Iterator[A] = Random.shuffle(self)
   }
 
@@ -1385,7 +1405,7 @@ object CollectionUtil {
   // toBitSet
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_toBitSet_GenTraversableOnce(val self: GenTraversableOnce[Int]) extends AnyVal {
+  final implicit class Enriched_toBitSet_GenTraversableOnce(val self: GenTraversableOnce[Int]) extends AnyVal {
     def toBitSet: BitSet = BitSet() ++ self
   }
 
@@ -1393,7 +1413,7 @@ object CollectionUtil {
   // mutable.Map.updateWith, mutable.Map.updateOrElseWith
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_updateWith_MutableMap[K, V](val self: mutable.Map[K, V]) extends AnyVal {
+  final implicit class Enriched_updateWith_MutableMap[K, V](val self: mutable.Map[K, V]) extends AnyVal {
     def updateWith(key: K)(f: (V => V)): mutable.Map[K, V] = {
       self(key) = f(self(key))
       self
@@ -1410,13 +1430,13 @@ object CollectionUtil {
   //   - obnoxious versions of the .par and .seq methods 
   //////////////////////////////////////////////////////
 
-  implicit class Enriched_PARALLEL_Parallelizable[+A, +ParRepr <: Parallel](val self: Parallelizable[A, ParRepr]) extends AnyVal {
+  final implicit class Enriched_PARALLEL_Parallelizable[+A, +ParRepr <: Parallel](val self: Parallelizable[A, ParRepr]) extends AnyVal {
     def PARALLEL = self.par
   }
-  implicit class Enriched_SEQUENTIAL_Iterator[+A](val self: Iterator[A]) extends AnyVal {
+  final implicit class Enriched_SEQUENTIAL_Iterator[+A](val self: Iterator[A]) extends AnyVal {
     def SEQUENTIAL = self.seq
   }
-  implicit class Enriched_SEQUENTIAL_GenTraversableLike[+A, Repr](val self: GenTraversableLike[A, Repr]) extends AnyVal {
+  final implicit class Enriched_SEQUENTIAL_GenTraversableLike[+A, Repr](val self: GenTraversableLike[A, Repr]) extends AnyVal {
     def SEQUENTIAL[That](implicit bf: CanBuildFrom[Repr, A, That]): That = (bf(self.asInstanceOf[Repr]) ++= self.seq).result
   }
 
