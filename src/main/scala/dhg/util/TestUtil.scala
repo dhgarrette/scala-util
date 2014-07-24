@@ -16,24 +16,38 @@ import scala.util.matching.Regex
  */
 object TestUtil {
 
+  private[this] class TestUtilExceptionNotFound extends RuntimeException("exception expected, but no exception thrown")
+
   def assertEqualsDouble(expected: Double, actual: Double) {
     assertEquals(expected, actual, 0.000000001)
   }
 
   def assertException(block: => Unit)(handle: PartialFunction[Throwable, Unit]) {
-    try { block; fail("no exception thrown") } catch (handle)
+    try { block; throw new TestUtilExceptionNotFound } catch {
+      case e: TestUtilExceptionNotFound => fail(e.getMessage)
+      case e: Throwable => handle(e)
+    }
   }
 
   def assertExceptionAny(block: => Unit) {
-    try { block; fail("no exception thrown") } catch { case e: Exception => }
+    try { block; throw new TestUtilExceptionNotFound } catch {
+      case e: TestUtilExceptionNotFound => fail(e.getMessage)
+      case e: Exception =>
+    }
   }
 
   def assertExceptionMsg(expectedMessage: String)(block: => Unit) {
-    try { block; fail("no exception thrown") } catch { case e: Exception => assertEquals(expectedMessage, e.getMessage) }
+    try { block; throw new TestUtilExceptionNotFound } catch {
+      case e: TestUtilExceptionNotFound => fail(e.getMessage)
+      case e: Exception => assertEquals(expectedMessage, e.getMessage)
+    }
   }
 
   def assertExceptionMsg(expectedMessageRe: Regex)(block: => Unit) {
-    try { block; fail("no exception thrown") } catch { case e: Exception => assertMatch(expectedMessageRe, e.getMessage) }
+    try { block; throw new TestUtilExceptionNotFound } catch {
+      case e: TestUtilExceptionNotFound => fail(e.getMessage)
+      case e: Exception => assertMatch(expectedMessageRe, e.getMessage)
+    }
   }
 
   def assertMatch(expectedRe: Regex, result: String) = {
