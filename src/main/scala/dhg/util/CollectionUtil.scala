@@ -1027,7 +1027,7 @@ object CollectionUtil {
   }
 
   //////////////////////////////////////////////////////
-  // maxByN(f: A => B, n: Int): Repr[A]
+  // maxByN(n: Int)(f: A => B): Repr[A]
   //   - Equivalent to, but faster than self.sortBy(f).takeRight(n).reverse
   //////////////////////////////////////////////////////
 
@@ -1037,7 +1037,7 @@ object CollectionUtil {
      *
      * @return a collection containing the N maximum entries, sorted so the max is first
      */
-    def maxByN[B, That](f: A => B, n: Int)(implicit ord: Ordering[B], bf: CanBuildFrom[Repr, A, That]): That = {
+    def maxByN[B, That](n: Int)(f: A => B)(implicit ord: Ordering[B], bf: CanBuildFrom[Repr, A, That]): That = {
       val r = new Array[(A, B)](n min self.size)
       val it = self.toIterator
       var i = 0
@@ -1066,7 +1066,7 @@ object CollectionUtil {
      *
      * @return a collection containing the N maximum entries, sorted so the max is first
      */
-    def maxByN[B](f: A => B, n: Int)(implicit ord: Ordering[B]): Vector[A] = {
+    def maxByN[B](n: Int)(f: A => B)(implicit ord: Ordering[B]): Vector[A] = {
       val r = new Array[(A, B)](n)
       val it = self.toIterator
       var i = 0
@@ -1090,7 +1090,7 @@ object CollectionUtil {
   }
 
   //////////////////////////////////////////////////////
-  // minByN(f: A => B, n: Int): Repr[A]
+  // minByN(n: Int)(f: A => B): Repr[A]
   //   - Equivalent to, but faster than self.sortBy(f).take(n)
   //////////////////////////////////////////////////////
 
@@ -1100,7 +1100,7 @@ object CollectionUtil {
      *
      * @return a collection containing the N minimum entries, sorted so the min is first
      */
-    def minByN[B, That](f: A => B, n: Int)(implicit ord: Ordering[B], bf: CanBuildFrom[Repr, A, That]): That = {
+    def minByN[B, That](n: Int)(f: A => B)(implicit ord: Ordering[B], bf: CanBuildFrom[Repr, A, That]): That = {
       val r = new Array[(A, B)](n min self.size)
       val it = self.toIterator
       var i = 0
@@ -1129,7 +1129,7 @@ object CollectionUtil {
      *
      * @return a collection containing the N minimum entries, sorted so the min is first
      */
-    def minByN[B](f: A => B, n: Int)(implicit ord: Ordering[B]): Vector[A] = {
+    def minByN[B](n: Int)(f: A => B)(implicit ord: Ordering[B]): Vector[A] = {
       val r = new Array[(A, B)](n)
       val it = self.toIterator
       var i = 0
