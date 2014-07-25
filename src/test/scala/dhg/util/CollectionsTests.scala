@@ -22,6 +22,17 @@ class CollectionsTests {
   }
 
   @Test
+  def test_KMaxPriorityQueue() {
+    val q = KMaxPriorityQueue.empty[Int](3)
+    assertEquals(Vector[Int](), q.toVector)
+    assertEquals(Vector(4), (q += 4).toVector)
+    assertEquals(Vector(6, 4), (q += 6).toVector)
+    assertEquals(Vector(8, 6, 4), (q += 8).toVector)
+    assertEquals(Vector(8, 7, 6), (q += 7).toVector)
+    assertEquals(Vector(10, 8, 7), (q += 10).toVector)
+  }
+
+  @Test
   def test_WindowIteratorish() {
     val i = new WindowIteratorish(Iterator[(Int, Symbol)](2 -> 'a, 3 -> 'b, 3 -> 'c, 5 -> 'd, 8 -> 'e, 9 -> 'f, 10 -> 'g, 11 -> 'h))
     assertEquals(Vector(), i.visible)

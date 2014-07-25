@@ -27,6 +27,25 @@ object Collections {
   }
 
   /**
+   *
+   */
+  class KMaxPriorityQueue[A](k: Int)(implicit ord: scala.math.Ordering[A]) {
+    private[this] val q = collection.mutable.PriorityQueue.empty[A](ord.reverse)
+    def +=(e: A) = {
+      q += e;
+      balance();
+      this
+    }
+    private[this] def balance(): Unit = { while (q.length > k) q.dequeue }
+    def iterator = toVector.iterator
+    def toVector = (collection.mutable.PriorityQueue.empty[A](ord) ++= q.iterator).dequeueAll.toVector
+    override def toString = f"KMaxPriorityQueue(k)(${q})"
+  }
+  object KMaxPriorityQueue {
+    def empty[A](k: Int)(implicit ord: scala.math.Ordering[A]) = new KMaxPriorityQueue(k)(ord)
+  }
+
+  /**
    * Data structure that moves an arbitrarily growing/shrinking window over
    * an iterator, preserving the underlying iterator for future method calls.
    */
