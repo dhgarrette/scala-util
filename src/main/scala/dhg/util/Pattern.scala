@@ -69,7 +69,7 @@ object Pattern {
    */
   object SetHeadTail {
     def unapply[T](s: Set[T]): Option[(T, Set[T])] = {
-      if (s.size < 2) None
+      if (s.isEmpty) None
       else {
         val a +: bs = s.toVector
         Some((a, bs.toSet))

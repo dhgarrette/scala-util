@@ -84,11 +84,27 @@ class PatternTests {
 
   @Test
   def test_SetHeadTail {
-    val s = (1 to 10).toSet
-    assertEquals(10, s.size)
-    val SetHeadTail(a, bs) = s
-    assertEquals(9, bs.size)
-    assertEquals(s, bs + a)
+    val s0 = Set.empty[Int]
+    s0 match { case SetHeadTail(_, _) => fail(f"s=$s0"); case _ => }
+
+    val s1 = Set(1)
+    assertEquals(1, s1.size)
+    val SetHeadTail(a1, bs1) = s1
+    assertEquals(0, bs1.size)
+    assertEquals(1, a1)
+    assertEquals(Set.empty[Int], bs1)
+
+    val s2 = Set(1, 2)
+    assertEquals(2, s2.size)
+    val SetHeadTail(a2, bs2) = s2
+    assertEquals(1, bs2.size)
+    assertEquals(s2, bs2 + a2)
+
+    val s3 = (1 to 10).toSet
+    assertEquals(10, s3.size)
+    val SetHeadTail(a3, bs3) = s3
+    assertEquals(9, bs3.size)
+    assertEquals(s3, bs3 + a3)
   }
 
   @Test
