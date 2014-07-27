@@ -83,6 +83,15 @@ class PatternTests {
   }
 
   @Test
+  def test_SetHeadTail {
+    val s = (1 to 10).toSet
+    assertEquals(10, s.size)
+    val SetHeadTail(a, bs) = s
+    assertEquals(9, bs.size)
+    assertEquals(s, bs + a)
+  }
+
+  @Test
   def test_arrow() {
     val a -> b = (1 -> 'a)
     assertEquals(1, a)

@@ -63,6 +63,21 @@ object Pattern {
   }
 
   /**
+   * Make it possible to do:
+   *   val SetHeadTail(a, bs) = Set(1,2,3)
+   * where `a` is an element and `bs` is the set of remaining elements 
+   */
+  object SetHeadTail {
+    def unapply[T](s: Set[T]): Option[(T, Set[T])] = {
+      if (s.size < 2) None
+      else {
+        val a +: bs = s.toVector
+        Some((a, bs.toSet))
+      }
+    }
+  }
+
+  /**
    * Make it possible to interpret and create range strings:
    *
    *   val aVector = RangeString("1-3, 5, 6, 7-9,11-12, 13-14")
