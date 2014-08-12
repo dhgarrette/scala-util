@@ -21,4 +21,13 @@ object NumberUtil {
     def downto(n: Int): Range = self to n by -1
   }
 
+  /**
+   * A mutable number-holding object
+   */
+  class MutableNumber[N](private[this] var i: N)(implicit num: Numeric[N]) {
+    def this()(implicit num: Numeric[N]) = this(num.zero)
+    def +=(o: N) = { i = num.plus(i, o); this }
+    def get = i
+  }
+
 }

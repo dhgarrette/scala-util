@@ -7,7 +7,7 @@ organization := "dhg"
 scalaVersion := "2.11.2"
 
 libraryDependencies ++= Seq(
-  "org.scalaz" %% "scalaz-core" % "7.0.6",
+  "org.scalaz" %% "scalaz-core" % "7.1.0",
   "org.jfree" % "jfreechart" % "1.0.17",
   "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.0",
   "org.slf4j" % "slf4j-log4j12" % "1.7.7",

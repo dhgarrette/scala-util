@@ -54,7 +54,7 @@ class LogDouble(val logValue: Double) extends AnyVal with Ordered[LogDouble] {
   def min(that: LogDouble): LogDouble = if (this.logValue < that.logValue) this else that
 
   def approx(o: LogDouble, tolerance: Double): Boolean = (logValue - o.logValue).abs < tolerance
-  def approx(o: LogDouble): Boolean = this.approx(o, 0.00000001)
+  def approx(o: LogDouble): Boolean = this.approx(o, 1e-10)
 
   def isZero: Boolean = logValue.isNegInfinity
   def nonZero: Boolean = !logValue.isNegInfinity

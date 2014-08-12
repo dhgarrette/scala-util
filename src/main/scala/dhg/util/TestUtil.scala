@@ -32,21 +32,21 @@ object TestUtil {
   def assertExceptionAny(block: => Unit) {
     try { block; throw new TestUtilExceptionNotFound } catch {
       case e: TestUtilExceptionNotFound => fail(e.getMessage)
-      case e: Exception =>
+      case e: Throwable =>
     }
   }
 
   def assertExceptionMsg(expectedMessage: String)(block: => Unit) {
     try { block; throw new TestUtilExceptionNotFound } catch {
       case e: TestUtilExceptionNotFound => fail(e.getMessage)
-      case e: Exception => assertEquals(expectedMessage, e.getMessage)
+      case e: Throwable => assertEquals(expectedMessage, e.getMessage)
     }
   }
 
   def assertExceptionMsg(expectedMessageRe: Regex)(block: => Unit) {
     try { block; throw new TestUtilExceptionNotFound } catch {
       case e: TestUtilExceptionNotFound => fail(e.getMessage)
-      case e: Exception => assertMatch(expectedMessageRe, e.getMessage)
+      case e: Throwable => assertMatch(expectedMessageRe, e.getMessage)
     }
   }
 
