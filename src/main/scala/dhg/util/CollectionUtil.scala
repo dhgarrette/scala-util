@@ -1,6 +1,7 @@
 package dhg.util
 
 import scala.annotation.tailrec
+import scala.collection.GenSeqLike
 import scala.collection.GenTraversable
 import scala.collection.GenTraversableLike
 import scala.collection.GenTraversableOnce
@@ -1149,6 +1150,32 @@ object CollectionUtil {
         i += 1
       }
       (Vector.newBuilder ++= r.take(i min n).map(_._1)).result
+    }
+  }
+
+  //////////////////////////////////////////////////////
+  // distinctBy[A, B](f: A => B): Seq[A]
+  //   - Remove duplicates according to some function `f`.
+  //////////////////////////////////////////////////////
+
+  final implicit class Enriched_distinctBy_GenSeqLike[A, Repr](val self: GenSeqLike[A, Repr]) extends AnyVal {
+    /**
+     * Remove duplicates according to some function `f`.
+     *
+     * @param p	the function to determine the duplication key
+     * @return the new collection
+     */
+    def distinctBy[B, That](f: A => B)(implicit bf: CanBuildFrom[Repr, A, That]): That = {
+      val builder = bf()
+      val seen = mutable.HashSet[B]()
+      for (a <- self) {
+        val b = f(a)
+        if (!seen(b)) {
+          builder += a
+          seen += b
+        }
+      }
+      builder.result()
     }
   }
 

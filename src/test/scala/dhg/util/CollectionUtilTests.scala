@@ -604,6 +604,14 @@ class CollectionUtilTests {
   }
 
   @Test
+  def test_distinctBy() {
+    val in1 = Vector("the", "a", "dog", "it", "to", "bag", "door")
+    val out1 = Vector("the", "a", "it", "door")
+    assertEquals(out1, in1.distinctBy(_.size))
+    assertEquals(out1.toList, in1.toList.distinctBy(_.size))
+  }
+
+  @Test
   def test_sumBy() {
     assertEquals(21, Vector(1, 3, 5).sumBy(_ + 4))
     assertEquals(21, Iterator(1, 3, 5).sumBy(_ + 4))
