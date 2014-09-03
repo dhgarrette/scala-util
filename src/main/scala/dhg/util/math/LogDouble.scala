@@ -83,6 +83,10 @@ object LogDouble {
     }
   }
 
+  def sum(xs: Seq[LogDouble]): LogDouble = {
+    new LogDouble(FastMathUtil.logSum(xs.map(_.logValue)))
+  }
+
   val zero = new LogDouble(Double.NegativeInfinity)
   val one = new LogDouble(0.0)
 
@@ -110,5 +114,5 @@ object LogDouble {
   implicit object LogDoubleSemigroup extends Semigroup[LogDouble] {
     override def append(f1: LogDouble, f2: => LogDouble) = f1 + f2
   }
-
+  
 }

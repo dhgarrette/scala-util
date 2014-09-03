@@ -57,6 +57,14 @@ class LogDoubleTests {
   }
 
   @Test
+  def test_LogDouble_static_sum() {
+    assertEqualsLog(LogDouble(15.0), LogDouble.sum(Vector(3.5, 7.5, 4.0).map(LogDouble(_))))
+    assertEqualsLog(LogDouble(11.0), LogDouble.sum(Vector(3.5, 7.5).map(LogDouble(_))))
+    assertEqualsLog(LogDouble(3.5), LogDouble.sum(Vector(3.5).map(LogDouble(_))))
+    assertEqualsLog(LogDouble.zero, LogDouble.sum(Vector.empty[LogDouble]))
+  }
+
+  @Test
   def test_numeric() {
     val a: LogDouble = LogDouble(3)
     val b: LogDouble = LogDouble(5)
