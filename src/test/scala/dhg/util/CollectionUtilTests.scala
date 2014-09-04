@@ -710,6 +710,7 @@ class CollectionUtilTests {
     assertEquals(Vector[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6)), v.takeSub(8))
     assertEquals(Vector[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6), Vector(7, 8, 9)), v.takeSub(9))
     assertEquals(Vector[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6), Vector(7, 8, 9)), v.takeSub(10))
+    assertEquals(Vector[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6), Vector(7, 8, 9)), v.takeSub(Int.MaxValue))
 
     assertEqualsIterator(Iterator[Vector[Int]](), v.iterator.takeSub(0))
     assertEqualsIterator(Iterator[Vector[Int]](), v.iterator.takeSub(1))
@@ -722,6 +723,7 @@ class CollectionUtilTests {
     assertEqualsIterator(Iterator[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6)), v.iterator.takeSub(8))
     assertEqualsIterator(Iterator[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6), Vector(7, 8, 9)), v.iterator.takeSub(9))
     assertEqualsIterator(Iterator[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6), Vector(7, 8, 9)), v.iterator.takeSub(10))
+    assertEqualsIterator(Iterator[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6), Vector(7, 8, 9)), v.iterator.takeSub(Int.MaxValue))
   }
 
   @Test

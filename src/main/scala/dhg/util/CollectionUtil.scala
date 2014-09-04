@@ -1293,15 +1293,16 @@ object CollectionUtil {
      * @return the new collection
      */
     def takeSub(n: Int): Iterator[R] = {
+      require(n >= 0, "`n` cannot be negative")
       if (self.isEmpty) {
         self.asInstanceOf[Iterator[R]]
       }
       else {
         new Iterator[R] {
-          private var nextElement: R = self.next.asInstanceOf[R]
-          private var total: Int = nextElement.size
+          private[this] var nextElement: R = self.next.asInstanceOf[R]
+          private[this] var total: Int = nextElement.size
 
-          override def hasNext = total <= n
+          override def hasNext = 0 <= total && total <= n
 
           override def next = {
             if (hasNext) {
@@ -1311,7 +1312,7 @@ object CollectionUtil {
                 total += nextElement.size
               }
               else
-                total = n + 1
+                total = n + 1 // indicate to `hasNext` that there should be no more elements
               x
             }
             else
@@ -1332,9 +1333,7 @@ object CollectionUtil {
      * @return the new collection
      */
     def takeSub[That](n: Int)(implicit bf: CanBuildFrom[Repr, R, That]): That = {
-      val b = bf(self.asInstanceOf[Repr])
-      for (x <- self.toIterator.takeSub(n)) b += x
-      b.result
+      bf(self.asInstanceOf[Repr]) ++= self.toIterator.takeSub(n) result
     }
   }
 

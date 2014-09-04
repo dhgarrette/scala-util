@@ -98,7 +98,8 @@ object FastMathUtil {
    * The length parameter is used to make things faster.
    *
    * This method needs to be fast. Don't scala-ify it.
-   * @the  log(\sum^length exp(a_i))
+   * 
+   * log(\sum^length exp(a_i))
    *
    * stolen from breeze
    */
