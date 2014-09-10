@@ -672,6 +672,29 @@ class CollectionUtilTests {
     assertEquals(List(), (0 to 9).toList.slyce(-3 to 2))
     assertEquals(List(5, 6, 7), (0 to 9).toList.slyce(5 to -3))
     assertEquals(List(4, 5, 6, 7, 8), (0 to 9).toList.slyce(-6 to 8))
+
+    //
+
+    assertEqualsIterator(Iterator(3, 4, 5), (0 to 9).iterator.slyce(3, 6))
+    assertEqualsIterator(Iterator(), (0 to 9).iterator.slyce(6, 3))
+    assertEqualsIterator(Iterator(7, 8), (0 to 9).iterator.slyce(-3, -1))
+    assertEqualsIterator(Iterator(), (0 to 9).iterator.slyce(-3, 2))
+    assertEqualsIterator(Iterator(5, 6), (0 to 9).iterator.slyce(5, -3))
+    assertEqualsIterator(Iterator(4, 5, 6, 7), (0 to 9).iterator.slyce(-6, 8))
+
+    assertEqualsIterator(Iterator(3, 4, 5), (0 to 9).iterator.slyce(3 until 6))
+    assertEqualsIterator(Iterator(), (0 to 9).iterator.slyce(6 until 3))
+    assertEqualsIterator(Iterator(7, 8), (0 to 9).iterator.slyce(-3 until -1))
+    assertEqualsIterator(Iterator(), (0 to 9).iterator.slyce(-3 until 2))
+    assertEqualsIterator(Iterator(5, 6), (0 to 9).iterator.slyce(5 until -3))
+    assertEqualsIterator(Iterator(4, 5, 6, 7), (0 to 9).iterator.slyce(-6 until 8))
+
+    assertEqualsIterator(Iterator(3, 4, 5, 6), (0 to 9).iterator.slyce(3 to 6))
+    assertEqualsIterator(Iterator(), (0 to 9).iterator.slyce(6 to 3))
+    assertEqualsIterator(Iterator(7, 8, 9), (0 to 9).iterator.slyce(-3 to -1))
+    assertEqualsIterator(Iterator(), (0 to 9).iterator.slyce(-3 to 2))
+    assertEqualsIterator(Iterator(5, 6, 7), (0 to 9).iterator.slyce(5 to -3))
+    assertEqualsIterator(Iterator(4, 5, 6, 7, 8), (0 to 9).iterator.slyce(-6 to 8))
   }
 
   @Test
