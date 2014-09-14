@@ -21,16 +21,16 @@ class CollectionsTests {
     assertException(u - 1) { case e: NotImplementedError => }
   }
 
-  @Test
-  def test_KMaxPriorityQueue() {
-    val q = KMaxPriorityQueue.empty[Int](3)
-    assertEquals(Vector[Int](), q.toVector)
-    assertEquals(Vector(4), (q += 4).toVector)
-    assertEquals(Vector(6, 4), (q += 6).toVector)
-    assertEquals(Vector(8, 6, 4), (q += 8).toVector)
-    assertEquals(Vector(8, 7, 6), (q += 7).toVector)
-    assertEquals(Vector(10, 8, 7), (q += 10).toVector)
-  }
+  //  @Test
+  //  def test_KMaxPriorityQueue() {
+  //    val q = KMaxPriorityQueue.empty[Int](3)
+  //    assertEquals(Vector[Int](), q.toVector)
+  //    assertEquals(Vector(4), (q += 4).toVector)
+  //    assertEquals(Vector(6, 4), (q += 6).toVector)
+  //    assertEquals(Vector(8, 6, 4), (q += 8).toVector)
+  //    assertEquals(Vector(8, 7, 6), (q += 7).toVector)
+  //    assertEquals(Vector(10, 8, 7), (q += 10).toVector)
+  //  }
 
   @Test
   def test_WindowIteratorish() {

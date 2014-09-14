@@ -14,6 +14,7 @@ import scala.collection.immutable
 import scala.collection.immutable.BitSet
 import scala.collection.mutable
 import scala.collection.mutable.Builder
+import scala.collection.mutable.ListBuffer
 import scala.util.Random
 
 /**
@@ -1245,14 +1246,14 @@ object CollectionUtil {
 
   final implicit class Enriched_slyce_Iterator[A](val self: Iterator[A]) extends AnyVal {
     def slyce(from: Int, until: Int): Iterator[A] = {
-      val start = if (from >= 0) from else self.size + from
-      val end = if (until >= 0) until else self.size + until
+      val start = if (from >= 0) from else throw new IllegalArgumentException("cannot slice Iterator with negative indices")
+      val end = if (until >= 0) until else throw new IllegalArgumentException("cannot slice Iterator with negative indices")
       self.slice(start, end)
     }
 
     def slyce(range: Range): Iterator[A] = {
-      val start = if (range.start >= 0) range.start else self.size + range.start
-      val end = (if (range.end >= 0) range.end else self.size + range.end) + (if (range.isInclusive) 1 else 0)
+      val start = if (range.start >= 0) range.start else throw new IllegalArgumentException("cannot slice Iterator with negative indices")
+      val end = (if (range.end >= 0) range.end else throw new IllegalArgumentException("cannot slice Iterator with negative indices")) + (if (range.isInclusive) 1 else 0)
       self.slice(start, end)
     }
   }
@@ -1287,6 +1288,48 @@ object CollectionUtil {
           i += 1
       }
       i - count
+    }
+  }
+
+  //////////////////////////////////////////////////////
+  // takeWhileAg
+  //////////////////////////////////////////////////////
+
+  final implicit class Enriched_takeWhileAg_Iterator[A](val self: Iterator[A]) {
+    def takeWhileAg(p: Iterable[A] => Boolean): Iterator[A] = {
+      if (self.isEmpty) {
+        self
+      }
+      else {
+        new Iterator[A] {
+          private[this] var nextElement: A = self.next
+          private[this] val z = ListBuffer[A](nextElement)
+          private[this] var done = false
+
+          override def hasNext = !done && p(z)
+
+          override def next = {
+            if (hasNext) {
+              val x = nextElement
+              if (self.hasNext) {
+                nextElement = self.next
+                z += nextElement
+              }
+              else
+                done = true
+              x
+            }
+            else
+              throw new NoSuchElementException("next on empty iterator")
+          }
+        }
+      }
+    }
+  }
+
+  final implicit class Enriched_takeWhileAg_GenTraversableLike[A, Repr <: GenTraversable[A]](val self: GenTraversableLike[A, Repr]) extends AnyVal {
+    def takeWhileAg[That](p: Iterable[A] => Boolean)(implicit bf: CanBuildFrom[Repr, A, That]): That = {
+      bf(self.asInstanceOf[Repr]) ++= self.toIterator.takeWhileAg(p) result
     }
   }
 

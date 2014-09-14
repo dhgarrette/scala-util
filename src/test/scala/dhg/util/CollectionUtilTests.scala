@@ -652,49 +652,67 @@ class CollectionUtilTests {
 
   @Test
   def test_slyce() {
+    assertEquals(Vector(0, 1, 2, 3), (0 to 9).toVector.slyce(0, 4))
+    assertEquals(Vector(6, 7, 8), (0 to 9).toVector.slyce(6, 9))
     assertEquals(Vector(3, 4, 5), (0 to 9).toVector.slyce(3, 6))
     assertEquals(Vector(), (0 to 9).toVector.slyce(6, 3))
     assertEquals(Vector(7, 8), (0 to 9).toVector.slyce(-3, -1))
     assertEquals(List(), (0 to 9).toList.slyce(-3, 2))
     assertEquals(List(5, 6), (0 to 9).toList.slyce(5, -3))
     assertEquals(List(4, 5, 6, 7), (0 to 9).toList.slyce(-6, 8))
+    assertEquals(Vector(6, 7, 8, 9), (0 to 9).toVector.slyce(6, 12))
 
+    assertEquals(Vector(0, 1, 2, 3), (0 to 9).toVector.slyce(0 until 4))
+    assertEquals(Vector(6, 7, 8), (0 to 9).toVector.slyce(6 until 9))
     assertEquals(Vector(3, 4, 5), (0 to 9).toVector.slyce(3 until 6))
     assertEquals(Vector(), (0 to 9).toVector.slyce(6 until 3))
     assertEquals(Vector(7, 8), (0 to 9).toVector.slyce(-3 until -1))
     assertEquals(List(), (0 to 9).toList.slyce(-3 until 2))
     assertEquals(List(5, 6), (0 to 9).toList.slyce(5 until -3))
     assertEquals(List(4, 5, 6, 7), (0 to 9).toList.slyce(-6 until 8))
+    assertEquals(Vector(6, 7, 8, 9), (0 to 9).toVector.slyce(6 until 12))
 
+    assertEquals(Vector(0, 1, 2, 3, 4), (0 to 9).toVector.slyce(0 to 4))
+    assertEquals(Vector(6, 7, 8, 9), (0 to 9).toVector.slyce(6 to 9))
     assertEquals(Vector(3, 4, 5, 6), (0 to 9).toVector.slyce(3 to 6))
     assertEquals(Vector(), (0 to 9).toVector.slyce(6 to 3))
     assertEquals(Vector(7, 8, 9), (0 to 9).toVector.slyce(-3 to -1))
     assertEquals(List(), (0 to 9).toList.slyce(-3 to 2))
     assertEquals(List(5, 6, 7), (0 to 9).toList.slyce(5 to -3))
     assertEquals(List(4, 5, 6, 7, 8), (0 to 9).toList.slyce(-6 to 8))
+    assertEquals(Vector(6, 7, 8, 9), (0 to 9).toVector.slyce(6 to 12))
 
     //
 
+    assertEqualsIterator(Iterator(0, 1, 2, 3), (0 to 9).iterator.slyce(0, 4))
+    assertEqualsIterator(Iterator(6, 7, 8), (0 to 9).iterator.slyce(6, 9))
     assertEqualsIterator(Iterator(3, 4, 5), (0 to 9).iterator.slyce(3, 6))
     assertEqualsIterator(Iterator(), (0 to 9).iterator.slyce(6, 3))
-    assertEqualsIterator(Iterator(7, 8), (0 to 9).iterator.slyce(-3, -1))
-    assertEqualsIterator(Iterator(), (0 to 9).iterator.slyce(-3, 2))
-    assertEqualsIterator(Iterator(5, 6), (0 to 9).iterator.slyce(5, -3))
-    assertEqualsIterator(Iterator(4, 5, 6, 7), (0 to 9).iterator.slyce(-6, 8))
+    assertException((0 to 9).iterator.slyce(-3, -1)) { case e: IllegalArgumentException => assertEquals("cannot slice Iterator with negative indices", e.getMessage) }
+    assertException((0 to 9).iterator.slyce(-3, 2)) { case e: IllegalArgumentException => assertEquals("cannot slice Iterator with negative indices", e.getMessage) }
+    assertException((0 to 9).iterator.slyce(5, -3)) { case e: IllegalArgumentException => assertEquals("cannot slice Iterator with negative indices", e.getMessage) }
+    assertException((0 to 9).iterator.slyce(-6, 8)) { case e: IllegalArgumentException => assertEquals("cannot slice Iterator with negative indices", e.getMessage) }
+    assertEqualsIterator(Iterator(6, 7, 8, 9), (0 to 9).iterator.slyce(6, 12))
 
+    assertEqualsIterator(Iterator(0, 1, 2, 3), (0 to 9).iterator.slyce(0 until 4))
+    assertEqualsIterator(Iterator(6, 7, 8), (0 to 9).iterator.slyce(6 until 9))
     assertEqualsIterator(Iterator(3, 4, 5), (0 to 9).iterator.slyce(3 until 6))
     assertEqualsIterator(Iterator(), (0 to 9).iterator.slyce(6 until 3))
-    assertEqualsIterator(Iterator(7, 8), (0 to 9).iterator.slyce(-3 until -1))
-    assertEqualsIterator(Iterator(), (0 to 9).iterator.slyce(-3 until 2))
-    assertEqualsIterator(Iterator(5, 6), (0 to 9).iterator.slyce(5 until -3))
-    assertEqualsIterator(Iterator(4, 5, 6, 7), (0 to 9).iterator.slyce(-6 until 8))
+    assertException((0 to 9).iterator.slyce(-3 until -1)) { case e: IllegalArgumentException => assertEquals("cannot slice Iterator with negative indices", e.getMessage) }
+    assertException((0 to 9).iterator.slyce(-3 until 2)) { case e: IllegalArgumentException => assertEquals("cannot slice Iterator with negative indices", e.getMessage) }
+    assertException((0 to 9).iterator.slyce(5 until -3)) { case e: IllegalArgumentException => assertEquals("cannot slice Iterator with negative indices", e.getMessage) }
+    assertException((0 to 9).iterator.slyce(-6 until 8)) { case e: IllegalArgumentException => assertEquals("cannot slice Iterator with negative indices", e.getMessage) }
+    assertEqualsIterator(Iterator(6, 7, 8, 9), (0 to 9).iterator.slyce(6 until 12))
 
+    assertEqualsIterator(Iterator(0, 1, 2, 3, 4), (0 to 9).iterator.slyce(0 to 4))
+    assertEqualsIterator(Iterator(6, 7, 8, 9), (0 to 9).iterator.slyce(6 to 9))
     assertEqualsIterator(Iterator(3, 4, 5, 6), (0 to 9).iterator.slyce(3 to 6))
     assertEqualsIterator(Iterator(), (0 to 9).iterator.slyce(6 to 3))
-    assertEqualsIterator(Iterator(7, 8, 9), (0 to 9).iterator.slyce(-3 to -1))
-    assertEqualsIterator(Iterator(), (0 to 9).iterator.slyce(-3 to 2))
-    assertEqualsIterator(Iterator(5, 6, 7), (0 to 9).iterator.slyce(5 to -3))
-    assertEqualsIterator(Iterator(4, 5, 6, 7, 8), (0 to 9).iterator.slyce(-6 to 8))
+    assertException((0 to 9).iterator.slyce(-3 to -1)) { case e: IllegalArgumentException => assertEquals("cannot slice Iterator with negative indices", e.getMessage) }
+    assertException((0 to 9).iterator.slyce(-3 to 2)) { case e: IllegalArgumentException => assertEquals("cannot slice Iterator with negative indices", e.getMessage) }
+    assertException((0 to 9).iterator.slyce(5 to -3)) { case e: IllegalArgumentException => assertEquals("cannot slice Iterator with negative indices", e.getMessage) }
+    assertException((0 to 9).iterator.slyce(-6 to 8)) { case e: IllegalArgumentException => assertEquals("cannot slice Iterator with negative indices", e.getMessage) }
+    assertEqualsIterator(Iterator(6, 7, 8, 9), (0 to 9).iterator.slyce(6 to 12))
   }
 
   @Test
@@ -716,6 +734,37 @@ class CollectionUtilTests {
     { val v = it; i = 0; assertTrue(v.countCompare(_.apply() % 2 == 0, 3) == 0); assertEquals(8, i); assertFalse(v.hasNext) } //
     { val v = it; i = 0; assertTrue(v.countCompare(_.apply() % 2 == 0, 4) < 0); assertEquals(8, i); assertFalse(v.hasNext) } //
     { val v = it; i = 0; assertTrue(v.countCompare(_.apply() % 2 == 0, 5) < 0); assertEquals(8, i); assertFalse(v.hasNext) } //
+  }
+
+  @Test
+  def test_takeWhileAg() {
+    val v = Vector(Vector(1, 2, 3), Vector(4, 5, 6), Vector(7, 8, 9))
+
+    assertEquals(Vector[Vector[Int]](), v.takeWhileAg(_.map(_.size).sum <= 0))
+    assertEquals(Vector[Vector[Int]](), v.takeWhileAg(_.map(_.size).sum <= 1))
+    assertEquals(Vector[Vector[Int]](), v.takeWhileAg(_.map(_.size).sum <= 2))
+    assertEquals(Vector[Vector[Int]](Vector(1, 2, 3)), v.takeWhileAg(_.map(_.size).sum <= 3))
+    assertEquals(Vector[Vector[Int]](Vector(1, 2, 3)), v.takeWhileAg(_.map(_.size).sum <= 4))
+    assertEquals(Vector[Vector[Int]](Vector(1, 2, 3)), v.takeWhileAg(_.map(_.size).sum <= 5))
+    assertEquals(Vector[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6)), v.takeWhileAg(_.map(_.size).sum <= 6))
+    assertEquals(Vector[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6)), v.takeWhileAg(_.map(_.size).sum <= 7))
+    assertEquals(Vector[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6)), v.takeWhileAg(_.map(_.size).sum <= 8))
+    assertEquals(Vector[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6), Vector(7, 8, 9)), v.takeWhileAg(_.map(_.size).sum <= 9))
+    assertEquals(Vector[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6), Vector(7, 8, 9)), v.takeWhileAg(_.map(_.size).sum <= 10))
+    assertEquals(Vector[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6), Vector(7, 8, 9)), v.takeWhileAg(_.map(_.size).sum <= Int.MaxValue))
+
+    assertEqualsIterator(Iterator[Vector[Int]](), v.iterator.takeWhileAg(_.map(_.size).sum <= 0))
+    assertEqualsIterator(Iterator[Vector[Int]](), v.iterator.takeWhileAg(_.map(_.size).sum <= 1))
+    assertEqualsIterator(Iterator[Vector[Int]](), v.iterator.takeWhileAg(_.map(_.size).sum <= 2))
+    assertEqualsIterator(Iterator[Vector[Int]](Vector(1, 2, 3)), v.iterator.takeWhileAg(_.map(_.size).sum <= 3))
+    assertEqualsIterator(Iterator[Vector[Int]](Vector(1, 2, 3)), v.iterator.takeWhileAg(_.map(_.size).sum <= 4))
+    assertEqualsIterator(Iterator[Vector[Int]](Vector(1, 2, 3)), v.iterator.takeWhileAg(_.map(_.size).sum <= 5))
+    assertEqualsIterator(Iterator[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6)), v.iterator.takeWhileAg(_.map(_.size).sum <= 6))
+    assertEqualsIterator(Iterator[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6)), v.iterator.takeWhileAg(_.map(_.size).sum <= 7))
+    assertEqualsIterator(Iterator[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6)), v.iterator.takeWhileAg(_.map(_.size).sum <= 8))
+    assertEqualsIterator(Iterator[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6), Vector(7, 8, 9)), v.iterator.takeWhileAg(_.map(_.size).sum <= 9))
+    assertEqualsIterator(Iterator[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6), Vector(7, 8, 9)), v.iterator.takeWhileAg(_.map(_.size).sum <= 10))
+    assertEqualsIterator(Iterator[Vector[Int]](Vector(1, 2, 3), Vector(4, 5, 6), Vector(7, 8, 9)), v.iterator.takeWhileAg(_.map(_.size).sum <= Int.MaxValue))
   }
 
   @Test
