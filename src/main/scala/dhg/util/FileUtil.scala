@@ -116,7 +116,7 @@ object FileUtil {
     /**
      * List all files (but not directories), searching recursively through sub-directories.
      */
-    def listFilesRecursive(): Set[File] = {
+    def listFilesRecursive(): Vector[File] = {
       assert(self.exists, s"'$self' does not exist")
       assert(self.isDirectory, s"'$self' is not a directory")
       self.ls.flatMap { f =>
@@ -124,13 +124,13 @@ object FileUtil {
           f.listFilesRecursive
         else
           Set(f)
-      }(breakOut)
+      }
     }
 
     /**
      * List all files (but not directories), searching recursively through sub-directories.
      */
-    def listFilesRecursive(regex: Regex, pathMatch: Boolean = false): Set[File] = {
+    def listFilesRecursive(regex: Regex, pathMatch: Boolean = false): Vector[File] = {
       assert(self.exists, s"'$self' does not exist")
       assert(self.isDirectory, s"'$self' is not a directory")
       self.ls(regex, pathMatch).flatMap { f =>
@@ -138,7 +138,7 @@ object FileUtil {
           f.listFilesRecursive
         else
           Set(f)
-      }(breakOut)
+      }
     }
 
     /**
