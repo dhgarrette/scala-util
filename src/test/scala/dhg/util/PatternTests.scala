@@ -79,6 +79,7 @@ class PatternTests {
     assertEquals(Vector(3, 4, 5), c)
 
     val Coll(d, e, f @ _*) = Set(1, 2, 3, 4, 5)
+    assertEquals(3, f.size)
     assertEquals(Set(1, 2, 3, 4, 5), Set(d, e) ++ f)
   }
 
@@ -118,6 +119,11 @@ class PatternTests {
   def test_RangeString() {
     assertEquals(Vector(1, 2, 3, 5, 6, 7, 8, 9, 11, 12, 13, 14), RangeString("1-3, 5, 6, 7-9,11-12, 13-14"))
     assertEquals("1-3,5-9,11-14", RangeString(Vector(1, 2, 3, 5, 6, 7, 8, 9, 11, 12, 13, 14)))
+
+    assertEquals(Vector(3), RangeString("3"))
+    assertEquals(Vector(3, 4), RangeString("3-4"))
+    assertEquals(Vector(3, 5), RangeString("3,5"))
+    assertEquals(Vector(3, 4, 5), RangeString("3-5"))
 
     val RangeString(a) = Vector(1, 2, 3, 5, 6, 7, 8, 9, 11, 12, 13, 14)
     assertEquals("1-3,5-9,11-14", a)
