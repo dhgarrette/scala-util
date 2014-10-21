@@ -26,4 +26,4 @@ libraryDependencies ++= Seq(
 
 scalacOptions ++= Seq("-deprecation")
 
-initialCommands in console := "import dhg.util.Arm._, dhg.util.Collections._, dhg.util.CollectionUtil._, dhg.util.FileUtil._, dhg.util.NumberUtil._, dhg.util.Pattern._, dhg.util.StringUtil._, dhg.util.Subprocess, dhg.util.Time._, dhg.util.math.LogDouble, dhg.util.math.NumUtil._, scalaz._, Scalaz._"
+initialCommands in console := "import dhg.util._, dhg.util.Arm._, dhg.util.Collections._, dhg.util.CollectionUtil._, dhg.util.FileUtil._, dhg.util.NumberUtil._, dhg.util.Pattern._, dhg.util.StringUtil._, dhg.util.Subprocess, dhg.util.Time._, dhg.util.math.LogDouble, dhg.util.math.NumUtil._, scalaz._, Scalaz._"
