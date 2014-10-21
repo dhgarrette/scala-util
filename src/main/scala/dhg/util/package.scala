@@ -13,7 +13,7 @@ import scalaz.Validation
 
 package object `package` {
 
-  implicit class EnhancedValidation[E, A](val v: Validation[E, A]) extends AnyVal {
+  implicit class Enriched_Validation[E, A](val v: Validation[E, A]) extends AnyVal {
     def getOrElseThrow(): A = v match {
       case Success(a) => a
       case Failure(e) => throw new RuntimeException(e.toString)
