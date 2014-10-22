@@ -123,7 +123,7 @@ object FileUtil {
         if (f.isDirectory)
           f.listFilesRecursive
         else
-          Set(f)
+          Vector(f)
       }
     }
 
@@ -137,7 +137,7 @@ object FileUtil {
         if (f.isDirectory)
           f.listFilesRecursive
         else
-          Set(f)
+          Vector(f)
       }
     }
 
