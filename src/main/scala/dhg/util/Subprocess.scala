@@ -12,16 +12,19 @@ import dhg.util.Subprocess._
  * e.g.
  *   val cmd = Subprocess.findBinary("tr")
  *   cmd.args("l", "L").call("hello")   // "heLLo"
+ *   
+ *   val ls = Subprocess("ls")
+ *   ls(".").call()
  *
  * @author Dan Garrette (dhgarrette@gmail.com)
  */
-case class Subprocess(binary: String, args: Seq[String] = Nil) {
+class Subprocess(binary: String, args: Seq[String]) {
 
   /**
    * Create a callable subprocess object
    *
    * @param args		A list of command-line arguments.
-   * @return stdout
+   * @return new Subprocess
    */
   def args(args: String*) = new Subprocess(binary, args)
 
@@ -29,9 +32,17 @@ case class Subprocess(binary: String, args: Seq[String] = Nil) {
    * Create a callable subprocess object
    *
    * @param newArgs		A list of command-line arguments to be appended to the end of the existing arg list.
-   * @return stdout
+   * @return new Subprocess
    */
   def appendArgs(newArgs: String*) = new Subprocess(binary, args ++ newArgs)
+  
+  /**
+   * Alias for `appendArgs`
+   */
+  def apply(newArgs: String*) = new Subprocess(binary, args ++ newArgs)
+
+  def base() = new Subprocess(binary, Nil)
+  def noargs() = this.base
 
   /**
    * Call the binary
@@ -110,6 +121,8 @@ case class Subprocess(binary: String, args: Seq[String] = Nil) {
 
 object Subprocess {
 
+  def apply(binary: String, args: String*) = new Subprocess(binary, args)
+  
   /**
    * Trait for Appendable classes that can serve as `out` or `err` streams.
    */
@@ -138,5 +151,5 @@ object Subprocess {
    * Look up a binary and create a Subprocess object for it.
    */
   def findBinary(binaryName: String, binDir: Option[String] = None, envar: Option[String] = None) =
-    new Subprocess(FileUtil.findBinary(binaryName, binDir, envar))
+    new Subprocess(FileUtil.findBinary(binaryName, binDir, envar), Nil)
 }
