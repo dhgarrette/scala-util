@@ -524,7 +524,7 @@ object CollectionUtil {
     val bi = b.toIterator
     val bldr = bf(a.asInstanceOf[Repr])
     while (ai.hasNext && bi.hasNext) bldr += ((ai.next, bi.next))
-    assert(!ai.hasNext && !bi.hasNext, s"a=${if (ai.hasNext) "empty" else "nonempty"} b=${if (bi.hasNext) "empty" else "nonempty"}")
+    assert(!ai.hasNext && !bi.hasNext, s"a=${if (ai.hasNext) "nonempty" else "empty"} b=${if (bi.hasNext) "nonempty" else "empty"}")
     bldr.result
   }
 
@@ -534,7 +534,7 @@ object CollectionUtil {
     val ci = c.toIterator
     val bldr = bf(a.asInstanceOf[Repr])
     while (ai.hasNext && bi.hasNext && ci.hasNext) bldr += ((ai.next, bi.next, ci.next))
-    assert(!ai.hasNext && !bi.hasNext && !ci.hasNext, s"a=${if (ai.hasNext) "empty" else "nonempty"} b=${if (bi.hasNext) "empty" else "nonempty"} c=${if (ci.hasNext) "empty" else "nonempty"}")
+    assert(!ai.hasNext && !bi.hasNext && !ci.hasNext, s"a=${if (ai.hasNext) "nonempty" else "empty"} b=${if (bi.hasNext) "nonempty" else "empty"} c=${if (ci.hasNext) "nonempty" else "empty"}")
     bldr.result
   }
 
@@ -545,7 +545,7 @@ object CollectionUtil {
     val di = d.toIterator
     val bldr = bf(a.asInstanceOf[Repr])
     while (ai.hasNext && bi.hasNext && ci.hasNext && di.hasNext) bldr += ((ai.next, bi.next, ci.next, di.next))
-    assert(!ai.hasNext && !bi.hasNext && !ci.hasNext && !di.hasNext, s"a=${if (ai.hasNext) "empty" else "nonempty"} b=${if (bi.hasNext) "empty" else "nonempty"} c=${if (ci.hasNext) "empty" else "nonempty"} d=${if (di.hasNext) "empty" else "nonempty"}")
+    assert(!ai.hasNext && !bi.hasNext && !ci.hasNext && !di.hasNext, s"a=${if (ai.hasNext) "nonempty" else "empty"} b=${if (bi.hasNext) "nonempty" else "empty"} c=${if (ci.hasNext) "nonempty" else "empty"} d=${if (di.hasNext) "nonempty" else "empty"}")
     bldr.result
   }
 
