@@ -1429,7 +1429,7 @@ object CollectionUtil {
     }
 
     /**
-     * @return All but the last n items of the iterator.  Note that the iterator will be consumed after calling unless n <= 0.
+     * @return All but the last n items of the iterator.  Note that the iterator will be consumed after calling.
      */
     def dropRight(n: Int): Vector[A] = self.toVector.dropRight(n)
   }
