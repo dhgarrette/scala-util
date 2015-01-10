@@ -806,32 +806,42 @@ class CollectionUtilTests {
 
   @Test
   def test_Iterator_last() {
-    { val i = Iterator("a", "b", "c"); assertEquals("c", i.last); assertFalse(i.hasNext) }
-    { val i = Iterator("a"); assertEquals("a", i.last); assertFalse(i.hasNext) }
+    { val i = Iterator("a", "b", "c"); assertEquals("c", i.last); assertFalse("expected iterator to be empty", i.hasNext) }
+    { val i = Iterator("a"); assertEquals("a", i.last); assertFalse("expected iterator to be empty", i.hasNext) }
     { val i = Iterator[String](); assertException(i.last) { case e: AssertionError => assertEquals("cannot call Iterator.last on an empty iterator", e.getMessage) } }
   }
 
   @Test
   def test_Iterator_takeRight() {
-    { val i = Iterator("a", "b", "c"); assertEquals(Vector("b", "c"), i.takeRight(2)); assertFalse(i.hasNext) }
-    { val i = Iterator("a"); assertEquals(Vector("a"), i.takeRight(2)); assertFalse(i.hasNext) }
-    { val i = Iterator[String](); assertEquals(Vector[String](), i.takeRight(2)); assertFalse(i.hasNext) }
-    { val i = Iterator("a", "b", "c"); assertEquals(Vector[String](), i.takeRight(0)); assertFalse(i.hasNext) }
+    { val i = Iterator("a", "b", "c", "d"); assertEquals(Vector("c", "d"), i.takeRight(2)); assertFalse("expected iterator to be empty", i.hasNext) }
+    { val i = Iterator("a", "b", "c"); assertEquals(Vector("b", "c"), i.takeRight(2)); assertFalse("expected iterator to be empty", i.hasNext) }
+    { val i = Iterator("a", "b"); assertEquals(Vector[String]("a", "b"), i.takeRight(2)); assertFalse("expected iterator to be empty", i.hasNext) }
+    { val i = Iterator("a"); assertEquals(Vector("a"), i.takeRight(2)); assertFalse("expected iterator to be empty", i.hasNext) }
+    { val i = Iterator[String](); assertEquals(Vector[String](), i.takeRight(2)); assertFalse("expected iterator to be empty", i.hasNext) }
+    { val i = Iterator[String](); assertEquals(Vector[String](), i.takeRight(0)) } //; assertFalse("expected iterator to be empty", i.hasNext) }
+    { val i = Iterator[String](); assertEquals(Vector[String](), i.takeRight(-1)) } //; assertFalse("expected iterator to be empty", i.hasNext) }
+    { val i = Iterator("a", "b", "c"); assertEquals(Vector[String](), i.takeRight(0)) } //; assertFalse("expected iterator to be empty", i.hasNext) }
+    { val i = Iterator("a", "b", "c"); assertEquals(Vector[String](), i.takeRight(-1)) } //; assertFalse("expected iterator to be empty", i.hasNext) }
   }
 
   @Test
   def test_Iterator_dropRight() {
-    { val i = Iterator("a", "b", "c"); assertEquals(Vector("a"), i.dropRight(2)); assertFalse(i.hasNext) }
-    { val i = Iterator("a"); assertEquals(Vector[String](), i.dropRight(2)); assertFalse(i.hasNext) }
-    { val i = Iterator[String](); assertEquals(Vector[String](), i.dropRight(2)); assertFalse(i.hasNext) }
-    { val i = Iterator("a", "b", "c"); assertEquals(Vector("a", "b", "c"), i.dropRight(0)); assertFalse(i.hasNext) }
+    { val i = Iterator("a", "b", "c", "d"); assertEquals(Vector("a", "b"), i.dropRight(2)); assertFalse("expected iterator to be empty", i.hasNext) }
+    { val i = Iterator("a", "b", "c"); assertEquals(Vector("a"), i.dropRight(2)); assertFalse("expected iterator to be empty", i.hasNext) }
+    { val i = Iterator("a", "b"); assertEquals(Vector[String](), i.dropRight(2)); assertFalse("expected iterator to be empty", i.hasNext) }
+    { val i = Iterator("a"); assertEquals(Vector[String](), i.dropRight(2)); assertFalse("expected iterator to be empty", i.hasNext) }
+    { val i = Iterator[String](); assertEquals(Vector[String](), i.dropRight(2)); assertFalse("expected iterator to be empty", i.hasNext) }
+    { val i = Iterator[String](); assertEquals(Vector[String](), i.dropRight(0)); assertFalse("expected iterator to be empty", i.hasNext) }
+    { val i = Iterator[String](); assertEquals(Vector[String](), i.dropRight(-1)); assertFalse("expected iterator to be empty", i.hasNext) }
+    { val i = Iterator("a", "b", "c"); assertEquals(Vector("a", "b", "c"), i.dropRight(0)); assertFalse("expected iterator to be empty", i.hasNext) }
+    { val i = Iterator("a", "b", "c"); assertEquals(Vector("a", "b", "c"), i.dropRight(-1)); assertFalse("expected iterator to be empty", i.hasNext) }
   }
 
   @Test
   def test_only() {
-    { val i = Iterator("a"); assertEquals("a", i.only); assertFalse(i.hasNext) }
-    { val i = Iterator("a", "b"); assertException(i.only) { case e: AssertionError => assertEquals("assertion failed: cannot call `only` on collection with 2 elements.", e.getMessage) }; assertFalse(i.hasNext) }
-    { val i = Iterator("a", "b", "c"); assertException(i.only) { case e: AssertionError => assertEquals("assertion failed: cannot call `only` on collection with 3 elements.", e.getMessage) }; assertFalse(i.hasNext) }
+    { val i = Iterator("a"); assertEquals("a", i.only); assertFalse("expected iterator to be empty", i.hasNext) }
+    { val i = Iterator("a", "b"); assertException(i.only) { case e: AssertionError => assertEquals("assertion failed: cannot call `only` on collection with 2 elements.", e.getMessage) }; assertFalse("expected iterator to be empty", i.hasNext) }
+    { val i = Iterator("a", "b", "c"); assertException(i.only) { case e: AssertionError => assertEquals("assertion failed: cannot call `only` on collection with 3 elements.", e.getMessage) }; assertFalse("expected iterator to be empty", i.hasNext) }
     { val i = Iterator[String](); assertException(i.only) { case e: AssertionError => assertEquals("assertion failed: cannot call `only` on empty collection.", e.getMessage) } }
 
     { val v = Vector("a"); assertEquals("a", v.only) }

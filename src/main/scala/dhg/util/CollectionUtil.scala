@@ -1421,12 +1421,15 @@ object CollectionUtil {
     }
 
     /**
-     * @return The last n items of the iterator.  Note that the iterator will be consumed after calling.
+     * @return The last n items of the iterator.  Note that the iterator will be consumed after calling unless n <= 0.
      */
-    def takeRight(n: Int): Vector[A] = self.sliding(n).last.toVector
+    def takeRight(n: Int): Vector[A] = {
+      if (self.hasNext && n > 0) self.sliding(n).last.toVector
+      else Vector.empty
+    }
 
     /**
-     * @return The all but the last n items of the iterator.  Note that the iterator will be consumed after calling.
+     * @return All but the last n items of the iterator.  Note that the iterator will be consumed after calling unless n <= 0.
      */
     def dropRight(n: Int): Vector[A] = self.toVector.dropRight(n)
   }
