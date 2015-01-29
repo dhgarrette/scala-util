@@ -1453,6 +1453,18 @@ object CollectionUtil {
     }
   }
 
+  final implicit class Enriched_only_Array[A](val self: Array[A]) extends AnyVal {
+    /**
+     * Return the only element in the collection, or error if there is not exactly one element.
+     *
+     * @return the only element
+     */
+    def only(): A = {
+      assert(self.size == 1, f"cannot call `only` on collection with ${self.size + 1} elements.")
+      self(0)
+    }
+  }
+
   //////////////////////////////////////////////////////
   // No-Op
   //////////////////////////////////////////////////////
