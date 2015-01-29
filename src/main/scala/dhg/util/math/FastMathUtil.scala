@@ -98,7 +98,7 @@ object FastMathUtil {
    * The length parameter is used to make things faster.
    *
    * This method needs to be fast. Don't scala-ify it.
-   * 
+   *
    * log(\sum^length exp(a_i))
    *
    * stolen from breeze
@@ -230,8 +230,8 @@ object FastMathUtil {
     assert(count <= dist.length, s"Passed in a count of $count to choose, for an array of length ${dist.length}")
 
     if (count == 1) return 0
-    val r = rand.nextDouble
     val pSum = sum(dist, count)
+    val r = rand.nextDouble
     var s = pSum * r
     var i = 0
     while (i < count) {
@@ -240,7 +240,50 @@ object FastMathUtil {
       i += 1
     }
     assert(!pSum.isInfinite, f"in choose, pSum=$pSum")
-    sys.error(f"No value chosen!  ${dist.mkString("[", ", ", "]")}, r=$r%.2f")
+    sys.error(f"No value chosen in choose!  ${dist.mkString("[", ", ", "]")}, r=$r%.2f")
+  }
+
+  /**
+   * sample from the distribution
+   */
+  def activeChoose(dist: Array[Double], active: Array[Int], activeCount: Int, rand: RandomGenerator): Int = {
+    assert(activeCount != 0, s"Cannot activeChoose for an activeCount of zero. (Active array has length ${active.length})")
+    assert(activeCount <= active.length, s"Passed in an activeCount of $activeCount to activeChoose, for an active array of length ${active.length}")
+    assert(activeCount <= dist.length, s"Passed in an activeCount of $activeCount to activeChoose, for a dist array of length ${dist.length}")
+
+    if (activeCount == 1) return active(0)
+    val pSum = activeSum(dist, active, activeCount)
+    val r = rand.nextDouble
+    var s = pSum * r
+    var i = 0
+    while (i < activeCount) {
+      val ai = active(i)
+      s -= dist(ai)
+      if (s < 0) return ai
+      i += 1
+    }
+    sys.error(f"No value chosen in activeChoose!  ${dist.mkString("[", ", ", "]")}, ${active.take(activeCount).mkString("[[", ", ", "]]")}${active.drop(activeCount).mkString("", " ", "]")}")
+  }
+
+  /**
+   * Don't let all active values to be log(0)
+   */
+  def logChoose(logDist: Array[Double], count: Int, rand: RandomGenerator): Int = {
+    assert(count != 0, s"Cannot logChoose for a count of zero. (Array has length ${logDist.length})")
+    assert(count <= logDist.length, s"Passed in a count of $count to logChoose, for an array of length ${logDist.length}")
+
+    if (count == 1) return 0
+    val logProbSum = logSum(logDist, count)
+    val r = rand.nextDouble
+    var prob = r
+    var i = 0
+    while (i < count) {
+      prob -= exp(logDist(i) - logProbSum)
+      if (prob < 0) return i
+      i += 1
+    }
+    assert(!logProbSum.isInfinite, f"in logChoose, logProbSum=$logProbSum")
+    sys.error(f"No value chosen in logChoose!  ${logDist.mkString("[", ", ", "]")}, r=$r%.2f")
   }
 
   /**
@@ -261,7 +304,7 @@ object FastMathUtil {
       if (prob < 0) return ai
       i += 1
     }
-    sys.error(f"No value chosen!  ${logDist.mkString("[", ", ", "]")}, ${active.take(activeCount).mkString("[[", ", ", "]]")}${active.drop(activeCount).mkString("", " ", "]")}")
+    sys.error(f"No value chosen in activeLogChoose!  ${logDist.mkString("[", ", ", "]")}, ${active.take(activeCount).mkString("[[", ", ", "]]")}${active.drop(activeCount).mkString("", " ", "]")}")
   }
 
   /**

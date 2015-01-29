@@ -178,15 +178,129 @@ class FastMathUtilTests {
     assertEquals(1, choose(Array[Double](4, 6, 8, 2), 4, r(0.4)))
     assertEquals(2, choose(Array[Double](4, 6, 8, 2), 4, r(0.6)))
     assertEquals(3, choose(Array[Double](4, 6, 8, 2), 4, r(0.95)))
-    assertExceptionMsg("No value chosen! .*".r)(choose(Array[Double](4, 6, 8, 2), 4, r(1.2)))
-    assertExceptionMsg("No value chosen! .*".r)(choose(Array[Double](4, 6, 8, 2), 4, r(1.0)))
+    assertExceptionMsg("No value chosen in choose! .*".r)(choose(Array[Double](4, 6, 8, 2), 4, r(1.2)))
+    assertExceptionMsg("No value chosen in choose! .*".r)(choose(Array[Double](4, 6, 8, 2), 4, r(1.0)))
 
     assertEquals(0, choose(Array[Double](4, 6, 8, 2, arb, arb), 4, r(0.1)))
     assertEquals(1, choose(Array[Double](4, 6, 8, 2, arb, arb), 4, r(0.4)))
     assertEquals(2, choose(Array[Double](4, 6, 8, 2, arb, arb), 4, r(0.6)))
     assertEquals(3, choose(Array[Double](4, 6, 8, 2, arb, arb), 4, r(0.95)))
-    assertExceptionMsg("No value chosen! .*".r)(choose(Array[Double](4, 6, 8, 2, arb, arb), 4, r(1.2)))
-    assertExceptionMsg("No value chosen! .*".r)(choose(Array[Double](4, 6, 8, 2, arb, arb), 4, r(1.0)))
+    assertExceptionMsg("No value chosen in choose! .*".r)(choose(Array[Double](4, 6, 8, 2, arb, arb), 4, r(1.2)))
+    assertExceptionMsg("No value chosen in choose! .*".r)(choose(Array[Double](4, 6, 8, 2, arb, arb), 4, r(1.0)))
+  }
+
+  
+    @Test
+  def test_activeChoose {
+
+    def r(d: Double) = DoubleIteratorRandomGenerator(Iterator(d))
+
+    assertException(activeChoose(Array[Double](), Array[Int](), 0, r(0.1))) { case e: AssertionError => assertEquals("assertion failed: Cannot activeChoose for an activeCount of zero. (Active array has length 0)", e.getMessage) }
+    assertException(activeChoose(Array(arb, arb), Array(0, 1), 0, r(0.1))) { case e: AssertionError => assertEquals("assertion failed: Cannot activeChoose for an activeCount of zero. (Active array has length 2)", e.getMessage) }
+    assertException(activeChoose(Array(arb, arb), Array(0, 1, 2, 3), 4, r(0.1))) { case e: AssertionError => assertEquals("assertion failed: Passed in an activeCount of 4 to activeChoose, for a dist array of length 2", e.getMessage) }
+    assertException(activeChoose(Array(arb, arb, arb, arb), Array(0, 1), 4, r(0.1))) { case e: AssertionError => assertEquals("assertion failed: Passed in an activeCount of 4 to activeChoose, for an active array of length 2", e.getMessage) }
+
+    //  0   1   2   3   4   5   6   7   8   9  10
+    //  0   2   4   6   8  10  12  14  16  18  20
+    //  0       4           6               8   2
+    // 0.0 --- 0.2 ------- 0.5 ----------- 0.9 1.0   
+
+    assertEquals(0, activeChoose(Array[Double](4), Array(0), 1, r(0.1)))
+    assertEquals(0, activeChoose(Array[Double](4), Array(0, 3, 4, 5), 1, r(0.1)))
+    assertEquals(1, activeChoose(Array[Double](4, 6, 8), Array(1), 1, r(0.1)))
+    assertEquals(1, activeChoose(Array[Double](4, 6, 8), Array(1), 1, r(0.1)))
+    assertEquals(1, activeChoose(Array[Double](4, 6, 8), Array(1, 3, 4, 5), 1, r(0.1)))
+
+    assertEquals(0, activeChoose(Array[Double](4, 6, 8, 2), Array(0, 1, 2, 3), 4, r(0.1)))
+    assertEquals(1, activeChoose(Array[Double](4, 6, 8, 2), Array(0, 1, 2, 3), 4, r(0.4)))
+    assertEquals(2, activeChoose(Array[Double](4, 6, 8, 2), Array(0, 1, 2, 3), 4, r(0.6)))
+    assertEquals(3, activeChoose(Array[Double](4, 6, 8, 2), Array(0, 1, 2, 3), 4, r(0.95)))
+    assertExceptionMsg("No value chosen in activeChoose! .*".r)(activeChoose(Array[Double](4, 6, 8, 2), Array(0, 1, 2, 3), 4, r(1.0)))
+
+    assertEquals(2, activeChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2), Array(2, 4, 5, 7), 4, r(0.1)))
+    assertEquals(4, activeChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2), Array(2, 4, 5, 7), 4, r(0.4)))
+    assertEquals(5, activeChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2), Array(2, 4, 5, 7), 4, r(0.6)))
+    assertEquals(7, activeChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2), Array(2, 4, 5, 7), 4, r(0.95)))
+    assertExceptionMsg("No value chosen in activeChoose! .*".r)(activeChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2), Array(2, 4, 5, 7), 4, r(1.0)))
+
+    assertEquals(0, activeChoose(Array(4, arb, 6, 8, arb, 2), Array(0, 2, 3, 5), 4, r(0.1)))
+    assertEquals(2, activeChoose(Array(4, arb, 6, 8, arb, 2), Array(0, 2, 3, 5), 4, r(0.4)))
+    assertEquals(3, activeChoose(Array(4, arb, 6, 8, arb, 2), Array(0, 2, 3, 5), 4, r(0.6)))
+    assertEquals(5, activeChoose(Array(4, arb, 6, 8, arb, 2), Array(0, 2, 3, 5), 4, r(0.95)))
+    assertExceptionMsg("No value chosen in activeChoose! .*".r)(activeChoose(Array(4, arb, 6, 8, arb, 2), Array(0, 2, 3, 5), 4, r(1.0)))
+
+    assertEquals(0, activeChoose(Array(4, arb, 6, 8, arb, 2, arb, arb), Array(0, 2, 3, 5), 4, r(0.1)))
+    assertEquals(2, activeChoose(Array(4, arb, 6, 8, arb, 2, arb, arb), Array(0, 2, 3, 5), 4, r(0.4)))
+    assertEquals(3, activeChoose(Array(4, arb, 6, 8, arb, 2, arb, arb), Array(0, 2, 3, 5), 4, r(0.6)))
+    assertEquals(5, activeChoose(Array(4, arb, 6, 8, arb, 2, arb, arb), Array(0, 2, 3, 5), 4, r(0.95)))
+    assertExceptionMsg("No value chosen in activeChoose! .*".r)(activeChoose(Array(4, arb, 6, 8, arb, 2, arb, arb), Array(0, 2, 3, 5), 4, r(1.0)))
+
+    assertEquals(2, activeChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2, arb, arb), Array(2, 4, 5, 7), 4, r(0.1)))
+    assertEquals(4, activeChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2, arb, arb), Array(2, 4, 5, 7), 4, r(0.4)))
+    assertEquals(5, activeChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2, arb, arb), Array(2, 4, 5, 7), 4, r(0.6)))
+    assertEquals(7, activeChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2, arb, arb), Array(2, 4, 5, 7), 4, r(0.95)))
+    assertExceptionMsg("No value chosen in activeChoose! .*".r)(activeChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2, arb, arb), Array(2, 4, 5, 7), 4, r(1.0)))
+
+    assertEquals(0, activeChoose(Array[Double](4, 6, 8, 2), Array(0, 1, 2, 3, 8, 9), 4, r(0.1)))
+    assertEquals(1, activeChoose(Array[Double](4, 6, 8, 2), Array(0, 1, 2, 3, 8, 9), 4, r(0.4)))
+    assertEquals(2, activeChoose(Array[Double](4, 6, 8, 2), Array(0, 1, 2, 3, 8, 9), 4, r(0.6)))
+    assertEquals(3, activeChoose(Array[Double](4, 6, 8, 2), Array(0, 1, 2, 3, 8, 9), 4, r(0.95)))
+    assertExceptionMsg("No value chosen in activeChoose! .*".r)(activeChoose(Array[Double](4, 6, 8, 2), Array(0, 1, 2, 3, 8, 9), 4, r(1.0)))
+
+    assertEquals(2, activeChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2), Array(2, 4, 5, 7, 8, 9), 4, r(0.1)))
+    assertEquals(4, activeChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2), Array(2, 4, 5, 7, 8, 9), 4, r(0.4)))
+    assertEquals(5, activeChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2), Array(2, 4, 5, 7, 8, 9), 4, r(0.6)))
+    assertEquals(7, activeChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2), Array(2, 4, 5, 7, 8, 9), 4, r(0.95)))
+    assertExceptionMsg("No value chosen in activeChoose! .*".r)(activeChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2), Array(2, 4, 5, 7, 8, 9), 4, r(1.0)))
+
+    assertEquals(0, activeChoose(Array(4, arb, 6, 8, arb, 2), Array(0, 2, 3, 5, 8, 9), 4, r(0.1)))
+    assertEquals(2, activeChoose(Array(4, arb, 6, 8, arb, 2), Array(0, 2, 3, 5, 8, 9), 4, r(0.4)))
+    assertEquals(3, activeChoose(Array(4, arb, 6, 8, arb, 2), Array(0, 2, 3, 5, 8, 9), 4, r(0.6)))
+    assertEquals(5, activeChoose(Array(4, arb, 6, 8, arb, 2), Array(0, 2, 3, 5, 8, 9), 4, r(0.95)))
+    assertExceptionMsg("No value chosen in activeChoose! .*".r)(activeChoose(Array(4, arb, 6, 8, arb, 2), Array(0, 2, 3, 5, 8, 9), 4, r(1.0)))
+
+    assertEquals(0, activeChoose(Array(4, arb, 6, 8, arb, 2, arb, arb), Array(0, 2, 3, 5, 8, 9), 4, r(0.1)))
+    assertEquals(2, activeChoose(Array(4, arb, 6, 8, arb, 2, arb, arb), Array(0, 2, 3, 5, 8, 9), 4, r(0.4)))
+    assertEquals(3, activeChoose(Array(4, arb, 6, 8, arb, 2, arb, arb), Array(0, 2, 3, 5, 8, 9), 4, r(0.6)))
+    assertEquals(5, activeChoose(Array(4, arb, 6, 8, arb, 2, arb, arb), Array(0, 2, 3, 5, 8, 9), 4, r(0.95)))
+    assertExceptionMsg("No value chosen in activeChoose! .*".r)(activeChoose(Array(4, arb, 6, 8, arb, 2, arb, arb), Array(0, 2, 3, 5, 8, 9), 4, r(1.0)))
+
+    assertEquals(2, activeChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2, arb, arb), Array(2, 4, 5, 7, 8, 9), 4, r(0.1)))
+    assertEquals(4, activeChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2, arb, arb), Array(2, 4, 5, 7, 8, 9), 4, r(0.4)))
+    assertEquals(5, activeChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2, arb, arb), Array(2, 4, 5, 7, 8, 9), 4, r(0.6)))
+    assertEquals(7, activeChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2, arb, arb), Array(2, 4, 5, 7, 8, 9), 4, r(0.95)))
+    assertExceptionMsg("No value chosen in activeChoose! .*".r)(activeChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2, arb, arb), Array(2, 4, 5, 7), 4, r(1.0)))
+  }
+    
+  @Test
+  def test_logChoose {
+
+    def r(d: Double) = DoubleIteratorRandomGenerator(Iterator(d))
+
+    assertException(logChoose(Array[Double](), 0, r(0.1))) { case e: AssertionError => assertEquals("assertion failed: Cannot logChoose for a count of zero. (Array has length 0)", e.getMessage) }
+    assertException(logChoose(Array(1.0, 2.0).map(log), 0, r(0.1))) { case e: AssertionError => assertEquals("assertion failed: Cannot logChoose for a count of zero. (Array has length 2)", e.getMessage) }
+    assertException(logChoose(Array(1.0, 2.0).map(log), 4, r(0.1))) { case e: AssertionError => assertEquals("assertion failed: Passed in a count of 4 to logChoose, for an array of length 2", e.getMessage) }
+
+    //  0   1   2   3   4   5   6   7   8   9  10
+    //  0   2   4   6   8  10  12  14  16  18  20
+    //  0       4           6               8   2
+    // 0.0 --- 0.2 ------- 0.5 ----------- 0.9 1.0   
+
+    assertEquals(0, logChoose(Array[Double](4).map(log), 1, r(0.1)))
+
+    assertEquals(0, logChoose(Array[Double](4, 6, 8, 2).map(log), 4, r(0.1)))
+    assertEquals(1, logChoose(Array[Double](4, 6, 8, 2).map(log), 4, r(0.4)))
+    assertEquals(2, logChoose(Array[Double](4, 6, 8, 2).map(log), 4, r(0.6)))
+    assertEquals(3, logChoose(Array[Double](4, 6, 8, 2).map(log), 4, r(0.95)))
+    assertExceptionMsg("No value chosen in logChoose! .*".r)(logChoose(Array[Double](4, 6, 8, 2).map(log), 4, r(1.2)))
+    assertExceptionMsg("No value chosen in logChoose! .*".r)(logChoose(Array[Double](4, 6, 8, 2).map(log), 4, r(1.0)))
+
+    assertEquals(0, logChoose(Array[Double](4, 6, 8, 2, arb, arb).map(log), 4, r(0.1)))
+    assertEquals(1, logChoose(Array[Double](4, 6, 8, 2, arb, arb).map(log), 4, r(0.4)))
+    assertEquals(2, logChoose(Array[Double](4, 6, 8, 2, arb, arb).map(log), 4, r(0.6)))
+    assertEquals(3, logChoose(Array[Double](4, 6, 8, 2, arb, arb).map(log), 4, r(0.95)))
+    assertExceptionMsg("No value chosen in logChoose! .*".r)(logChoose(Array[Double](4, 6, 8, 2, arb, arb).map(log), 4, r(1.2)))
+    assertExceptionMsg("No value chosen in logChoose! .*".r)(logChoose(Array[Double](4, 6, 8, 2, arb, arb).map(log), 4, r(1.0)))
   }
 
   @Test
@@ -195,9 +309,9 @@ class FastMathUtilTests {
     def r(d: Double) = DoubleIteratorRandomGenerator(Iterator(d))
 
     assertException(activeLogChoose(Array[Double](), Array[Int](), 0, r(0.1))) { case e: AssertionError => assertEquals("assertion failed: Cannot activeLogChoose for an activeCount of zero. (Active array has length 0)", e.getMessage) }
-    assertException(activeLogChoose(Array(arb, arb), Array(0, 1), 0, r(0.1))) { case e: AssertionError => assertEquals("assertion failed: Cannot activeLogChoose for an activeCount of zero. (Active array has length 2)", e.getMessage) }
-    assertException(activeLogChoose(Array(arb, arb), Array(0, 1, 2, 3), 4, r(0.1))) { case e: AssertionError => assertEquals("assertion failed: Passed in an activeCount of 4 to activeLogChoose, for a logDist array of length 2", e.getMessage) }
-    assertException(activeLogChoose(Array(arb, arb, arb, arb), Array(0, 1), 4, r(0.1))) { case e: AssertionError => assertEquals("assertion failed: Passed in an activeCount of 4 to activeLogChoose, for an active array of length 2", e.getMessage) }
+    assertException(activeLogChoose(Array(arb, arb).map(log), Array(0, 1), 0, r(0.1))) { case e: AssertionError => assertEquals("assertion failed: Cannot activeLogChoose for an activeCount of zero. (Active array has length 2)", e.getMessage) }
+    assertException(activeLogChoose(Array(arb, arb).map(log), Array(0, 1, 2, 3), 4, r(0.1))) { case e: AssertionError => assertEquals("assertion failed: Passed in an activeCount of 4 to activeLogChoose, for a logDist array of length 2", e.getMessage) }
+    assertException(activeLogChoose(Array(arb, arb, arb, arb).map(log), Array(0, 1), 4, r(0.1))) { case e: AssertionError => assertEquals("assertion failed: Passed in an activeCount of 4 to activeLogChoose, for an active array of length 2", e.getMessage) }
 
     //  0   1   2   3   4   5   6   7   8   9  10
     //  0   2   4   6   8  10  12  14  16  18  20
@@ -214,62 +328,61 @@ class FastMathUtilTests {
     assertEquals(1, activeLogChoose(Array[Double](4, 6, 8, 2).map(log), Array(0, 1, 2, 3), 4, r(0.4)))
     assertEquals(2, activeLogChoose(Array[Double](4, 6, 8, 2).map(log), Array(0, 1, 2, 3), 4, r(0.6)))
     assertEquals(3, activeLogChoose(Array[Double](4, 6, 8, 2).map(log), Array(0, 1, 2, 3), 4, r(0.95)))
-    assertExceptionMsg("No value chosen! .*".r)(activeLogChoose(Array[Double](4, 6, 8, 2).map(log), Array(0, 1, 2, 3), 4, r(1.0)))
+    assertExceptionMsg("No value chosen in activeLogChoose! .*".r)(activeLogChoose(Array[Double](4, 6, 8, 2).map(log), Array(0, 1, 2, 3), 4, r(1.0)))
 
     assertEquals(2, activeLogChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2).map(log), Array(2, 4, 5, 7), 4, r(0.1)))
     assertEquals(4, activeLogChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2).map(log), Array(2, 4, 5, 7), 4, r(0.4)))
     assertEquals(5, activeLogChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2).map(log), Array(2, 4, 5, 7), 4, r(0.6)))
     assertEquals(7, activeLogChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2).map(log), Array(2, 4, 5, 7), 4, r(0.95)))
-    assertExceptionMsg("No value chosen! .*".r)(activeLogChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2).map(log), Array(2, 4, 5, 7), 4, r(1.0)))
+    assertExceptionMsg("No value chosen in activeLogChoose! .*".r)(activeLogChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2).map(log), Array(2, 4, 5, 7), 4, r(1.0)))
 
     assertEquals(0, activeLogChoose(Array(4, arb, 6, 8, arb, 2).map(log), Array(0, 2, 3, 5), 4, r(0.1)))
     assertEquals(2, activeLogChoose(Array(4, arb, 6, 8, arb, 2).map(log), Array(0, 2, 3, 5), 4, r(0.4)))
     assertEquals(3, activeLogChoose(Array(4, arb, 6, 8, arb, 2).map(log), Array(0, 2, 3, 5), 4, r(0.6)))
     assertEquals(5, activeLogChoose(Array(4, arb, 6, 8, arb, 2).map(log), Array(0, 2, 3, 5), 4, r(0.95)))
-    assertExceptionMsg("No value chosen! .*".r)(activeLogChoose(Array(4, arb, 6, 8, arb, 2).map(log), Array(0, 2, 3, 5), 4, r(1.0)))
+    assertExceptionMsg("No value chosen in activeLogChoose! .*".r)(activeLogChoose(Array(4, arb, 6, 8, arb, 2).map(log), Array(0, 2, 3, 5), 4, r(1.0)))
 
     assertEquals(0, activeLogChoose(Array(4, arb, 6, 8, arb, 2, arb, arb).map(log), Array(0, 2, 3, 5), 4, r(0.1)))
     assertEquals(2, activeLogChoose(Array(4, arb, 6, 8, arb, 2, arb, arb).map(log), Array(0, 2, 3, 5), 4, r(0.4)))
     assertEquals(3, activeLogChoose(Array(4, arb, 6, 8, arb, 2, arb, arb).map(log), Array(0, 2, 3, 5), 4, r(0.6)))
     assertEquals(5, activeLogChoose(Array(4, arb, 6, 8, arb, 2, arb, arb).map(log), Array(0, 2, 3, 5), 4, r(0.95)))
-    assertExceptionMsg("No value chosen! .*".r)(activeLogChoose(Array(4, arb, 6, 8, arb, 2, arb, arb).map(log), Array(0, 2, 3, 5), 4, r(1.0)))
+    assertExceptionMsg("No value chosen in activeLogChoose! .*".r)(activeLogChoose(Array(4, arb, 6, 8, arb, 2, arb, arb).map(log), Array(0, 2, 3, 5), 4, r(1.0)))
 
     assertEquals(2, activeLogChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2, arb, arb).map(log), Array(2, 4, 5, 7), 4, r(0.1)))
     assertEquals(4, activeLogChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2, arb, arb).map(log), Array(2, 4, 5, 7), 4, r(0.4)))
     assertEquals(5, activeLogChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2, arb, arb).map(log), Array(2, 4, 5, 7), 4, r(0.6)))
     assertEquals(7, activeLogChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2, arb, arb).map(log), Array(2, 4, 5, 7), 4, r(0.95)))
-    assertExceptionMsg("No value chosen! .*".r)(activeLogChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2, arb, arb).map(log), Array(2, 4, 5, 7), 4, r(1.0)))
+    assertExceptionMsg("No value chosen in activeLogChoose! .*".r)(activeLogChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2, arb, arb).map(log), Array(2, 4, 5, 7), 4, r(1.0)))
 
     assertEquals(0, activeLogChoose(Array[Double](4, 6, 8, 2).map(log), Array(0, 1, 2, 3, 8, 9), 4, r(0.1)))
     assertEquals(1, activeLogChoose(Array[Double](4, 6, 8, 2).map(log), Array(0, 1, 2, 3, 8, 9), 4, r(0.4)))
     assertEquals(2, activeLogChoose(Array[Double](4, 6, 8, 2).map(log), Array(0, 1, 2, 3, 8, 9), 4, r(0.6)))
     assertEquals(3, activeLogChoose(Array[Double](4, 6, 8, 2).map(log), Array(0, 1, 2, 3, 8, 9), 4, r(0.95)))
-    assertExceptionMsg("No value chosen! .*".r)(activeLogChoose(Array[Double](4, 6, 8, 2).map(log), Array(0, 1, 2, 3, 8, 9), 4, r(1.0)))
+    assertExceptionMsg("No value chosen in activeLogChoose! .*".r)(activeLogChoose(Array[Double](4, 6, 8, 2).map(log), Array(0, 1, 2, 3, 8, 9), 4, r(1.0)))
 
     assertEquals(2, activeLogChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2).map(log), Array(2, 4, 5, 7, 8, 9), 4, r(0.1)))
     assertEquals(4, activeLogChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2).map(log), Array(2, 4, 5, 7, 8, 9), 4, r(0.4)))
     assertEquals(5, activeLogChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2).map(log), Array(2, 4, 5, 7, 8, 9), 4, r(0.6)))
     assertEquals(7, activeLogChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2).map(log), Array(2, 4, 5, 7, 8, 9), 4, r(0.95)))
-    assertExceptionMsg("No value chosen! .*".r)(activeLogChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2).map(log), Array(2, 4, 5, 7, 8, 9), 4, r(1.0)))
+    assertExceptionMsg("No value chosen in activeLogChoose! .*".r)(activeLogChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2).map(log), Array(2, 4, 5, 7, 8, 9), 4, r(1.0)))
 
     assertEquals(0, activeLogChoose(Array(4, arb, 6, 8, arb, 2).map(log), Array(0, 2, 3, 5, 8, 9), 4, r(0.1)))
     assertEquals(2, activeLogChoose(Array(4, arb, 6, 8, arb, 2).map(log), Array(0, 2, 3, 5, 8, 9), 4, r(0.4)))
     assertEquals(3, activeLogChoose(Array(4, arb, 6, 8, arb, 2).map(log), Array(0, 2, 3, 5, 8, 9), 4, r(0.6)))
     assertEquals(5, activeLogChoose(Array(4, arb, 6, 8, arb, 2).map(log), Array(0, 2, 3, 5, 8, 9), 4, r(0.95)))
-    assertExceptionMsg("No value chosen! .*".r)(activeLogChoose(Array(4, arb, 6, 8, arb, 2).map(log), Array(0, 2, 3, 5, 8, 9), 4, r(1.0)))
+    assertExceptionMsg("No value chosen in activeLogChoose! .*".r)(activeLogChoose(Array(4, arb, 6, 8, arb, 2).map(log), Array(0, 2, 3, 5, 8, 9), 4, r(1.0)))
 
     assertEquals(0, activeLogChoose(Array(4, arb, 6, 8, arb, 2, arb, arb).map(log), Array(0, 2, 3, 5, 8, 9), 4, r(0.1)))
     assertEquals(2, activeLogChoose(Array(4, arb, 6, 8, arb, 2, arb, arb).map(log), Array(0, 2, 3, 5, 8, 9), 4, r(0.4)))
     assertEquals(3, activeLogChoose(Array(4, arb, 6, 8, arb, 2, arb, arb).map(log), Array(0, 2, 3, 5, 8, 9), 4, r(0.6)))
     assertEquals(5, activeLogChoose(Array(4, arb, 6, 8, arb, 2, arb, arb).map(log), Array(0, 2, 3, 5, 8, 9), 4, r(0.95)))
-    assertExceptionMsg("No value chosen! .*".r)(activeLogChoose(Array(4, arb, 6, 8, arb, 2, arb, arb).map(log), Array(0, 2, 3, 5, 8, 9), 4, r(1.0)))
+    assertExceptionMsg("No value chosen in activeLogChoose! .*".r)(activeLogChoose(Array(4, arb, 6, 8, arb, 2, arb, arb).map(log), Array(0, 2, 3, 5, 8, 9), 4, r(1.0)))
 
     assertEquals(2, activeLogChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2, arb, arb).map(log), Array(2, 4, 5, 7, 8, 9), 4, r(0.1)))
     assertEquals(4, activeLogChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2, arb, arb).map(log), Array(2, 4, 5, 7, 8, 9), 4, r(0.4)))
     assertEquals(5, activeLogChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2, arb, arb).map(log), Array(2, 4, 5, 7, 8, 9), 4, r(0.6)))
     assertEquals(7, activeLogChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2, arb, arb).map(log), Array(2, 4, 5, 7, 8, 9), 4, r(0.95)))
-    assertExceptionMsg("No value chosen! .*".r)(activeLogChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2, arb, arb).map(log), Array(2, 4, 5, 7), 4, r(1.0)))
-
+    assertExceptionMsg("No value chosen in activeLogChoose! .*".r)(activeLogChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2, arb, arb).map(log), Array(2, 4, 5, 7), 4, r(1.0)))
   }
 
   @Test
