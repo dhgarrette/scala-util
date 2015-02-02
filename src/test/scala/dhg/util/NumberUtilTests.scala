@@ -3,10 +3,8 @@ package dhg.util
 import scala.collection.mutable.Buffer
 import org.junit.Assert._
 import org.junit.Test
-import dhg.util.CollectionUtil._
-import dhg.util.Collections._
 import dhg.util.TestUtil._
-import dhg.util.NumberUtil._
+import dhg.util.Util._
 
 /**
  * @author Dan Garrette (dhgarrette@gmail.com)

@@ -1,9 +1,9 @@
-package dhg.util.math
+package dhg.util
 
 import scala.math._
 import org.junit.Assert._
 import org.junit.Test
-import dhg.util.math.NumUtil._
+import dhg.util.Util._
 
 /**
  * @author Dan Garrette (dhgarrette@gmail.com)

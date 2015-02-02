@@ -1,11 +1,11 @@
-package dhg.util.math
+package dhg.util
 
 import scala.math._
 import org.junit.Assert._
 import org.junit.Test
-import dhg.util.math.LogDouble._
 import scalaz._
-import Scalaz._
+import scalaz.Scalaz._
+import dhg.util.Util._
 
 /**
  * @author Dan Garrette (dhgarrette@gmail.com)

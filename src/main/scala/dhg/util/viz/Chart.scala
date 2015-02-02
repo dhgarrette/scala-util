@@ -1,6 +1,6 @@
 package dhg.util.viz
 
-import dhg.util.CollectionUtil._
+import dhg.util._
 import java.awt.Color
 import org.jfree.chart.ChartFactory
 import org.jfree.chart.ChartPanel

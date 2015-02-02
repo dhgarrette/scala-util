@@ -1,6 +1,6 @@
 package dhg.util.viz
 
-import dhg.util.CollectionUtil._
+import dhg.util._
 import java.lang.Comparable
 import org.jfree.data.xy.XYSeriesCollection
 import org.jfree.data.xy.XYSeries

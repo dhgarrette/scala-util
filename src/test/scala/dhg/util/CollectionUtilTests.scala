@@ -7,8 +7,8 @@ import scala.collection.mutable.SetBuilder
 import org.junit.Assert._
 import org.junit.Test
 
-import dhg.util.CollectionUtil._
 import dhg.util.TestUtil._
+import dhg.util.Util._
 
 /**
  * @author Dan Garrette (dhgarrette@gmail.com)
@@ -135,7 +135,6 @@ class CollectionUtilTests {
 
   @Test
   def test_split() {
-    import KeepDelimiter._
 
     // "12345".split('9')  -->  Array(12345)
     assertEqualsIterator(Iterator(Vector(1, 2, 3, 4, 5)), Vector(1, 2, 3, 4, 5).split(9))

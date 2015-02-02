@@ -1,13 +1,11 @@
 package dhg.util
 
 import org.junit.Assert._
-import dhg.util.CollectionUtil._
-import dhg.util.StringUtil._
-import dhg.util.math.LogDouble
-import dhg.util.math.LogDouble._
 import scala.math.log
 import java.lang.AssertionError
 import scala.util.matching.Regex
+import dhg.util.Util._
+import org.apache.commons.math3.random.RandomGenerator
 
 /**
  * Test utilities
@@ -143,5 +141,23 @@ object TestUtil {
 
   //  def assertPath(expected: String, filename: String) =
   //    assertEquals(File(expected).getAbsolutePath, File(filename).getAbsolutePath)
+
+  trait MockableRandomGenerator extends RandomGenerator {
+    override def setSeed(seed: Int): Unit = ???
+    override def setSeed(seed: Array[Int]): Unit = ???
+    override def setSeed(seed: Long): Unit = ???
+    override def nextBytes(bytes: Array[Byte]): Unit = ???
+    override def nextInt(): Int = ???
+    override def nextInt(n: Int): Int = ???
+    override def nextLong(): Long = ???
+    override def nextBoolean(): Boolean = ???
+    override def nextFloat(): Float = ???
+    override def nextDouble(): Double = ???
+    override def nextGaussian(): Double = ???
+  }
+
+  case class DoubleIteratorRandomGenerator(it: Iterator[Double]) extends MockableRandomGenerator {
+    override def nextDouble() = it.next()
+  }
 
 }

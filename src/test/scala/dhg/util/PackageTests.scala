@@ -5,6 +5,7 @@ import org.junit.Test
 import dhg.util.TestUtil._
 import scalaz._
 import Scalaz._
+import dhg.util.Util._
 
 class PackageTests {
 

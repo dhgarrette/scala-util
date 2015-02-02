@@ -1,15 +1,15 @@
-package dhg.util.math
+package dhg.util
 
 import org.junit.Test
 import dhg.util.TestUtil._
-import dhg.util.StringUtil._
-import dhg.util.CollectionUtil._
-import math.{ log, exp, abs, pow }
+import scala.math.{log, exp}
 import org.junit.Assert._
-import Double.NaN
 import scala.util.Random
-import dhg.util.math.FastMathUtil._
+import dhg.util.FastMathUtil._
 import org.apache.commons.math3.random.{ MersenneTwister, RandomGenerator }
+import scala.Iterator
+import scala.Vector
+import dhg.util.Util._
 
 class FastMathUtilTests {
 
@@ -529,22 +529,4 @@ class FastMathUtilTests {
 
   //
 
-  trait MockableRandomGenerator extends RandomGenerator {
-    override def setSeed(seed: Int): Unit = ???
-    override def setSeed(seed: Array[Int]): Unit = ???
-    override def setSeed(seed: Long): Unit = ???
-    override def nextBytes(bytes: Array[Byte]): Unit = ???
-    override def nextInt(): Int = ???
-    override def nextInt(n: Int): Int = ???
-    override def nextLong(): Long = ???
-    override def nextBoolean(): Boolean = ???
-    override def nextFloat(): Float = ???
-    override def nextDouble(): Double = ???
-    override def nextGaussian(): Double = ???
   }
-
-  case class DoubleIteratorRandomGenerator(it: Iterator[Double]) extends MockableRandomGenerator {
-    override def nextDouble() = it.next()
-  }
-
-}

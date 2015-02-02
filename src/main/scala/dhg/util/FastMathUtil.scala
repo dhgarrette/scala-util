@@ -1,9 +1,5 @@
-package dhg.util.math
+package dhg.util
 
-import dhg.util.CollectionUtil._
-import dhg.util.Time._
-import dhg.util.FileUtil._
-import dhg.util.StringUtil._
 import scala.annotation.tailrec
 import scala.math.{ pow, exp, log }
 import org.apache.commons.math3.random.{ RandomGenerator }

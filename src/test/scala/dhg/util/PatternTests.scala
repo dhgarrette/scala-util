@@ -2,11 +2,8 @@ package dhg.util
 
 import org.junit.Assert._
 import org.junit.Test
-import dhg.util.CollectionUtil._
-import dhg.util.CollectionUtil.KeepDelimiter._
-import dhg.util.Collections._
 import dhg.util.TestUtil._
-import dhg.util.Pattern._
+import dhg.util.Util._
 
 /**
  * @author Dan Garrette (dhgarrette@gmail.com)

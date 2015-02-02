@@ -2,8 +2,7 @@ package dhg.util
 
 import org.junit.Assert._
 import org.junit.Test
-
-import dhg.util.FileUtil._
+import dhg.util.Util._
 
 /**
  * @author Dan Garrette (dhgarrette@gmail.com)
