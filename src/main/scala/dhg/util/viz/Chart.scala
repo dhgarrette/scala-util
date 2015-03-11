@@ -100,7 +100,7 @@ case class MultiChart(
   def allCharts = charts.flatMap(_.allCharts)
 }
 
-object Chart {
+object VizChart {
   def apply(
     dataset: JXYDataset,
     renderer: XYItemRenderer) = {
@@ -159,7 +159,7 @@ object ShadedHistogram {
     color: Color = Color.blue) = {
     val numBins = histData.numBins
     assert(numBins == darkness.size, "histogram data and darkness vector are not the same size.")
-    Chart((histData.binArray zip darkness).zipWithIndex.map {
+    VizChart((histData.binArray zip darkness).zipWithIndex.map {
       case ((count, dark), binNumber) =>
         val dataset = new SingleHistogramBarDataset(count, binNumber, numBins, histData.rangeStart, histData.binWidth)
         val Array(r, g, b) = color.getRGBColorComponents(null).map(v => v + (1 - v) * (1 - dark.toFloat))
