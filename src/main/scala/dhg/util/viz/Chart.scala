@@ -35,7 +35,7 @@ import scala.collection.GenTraversableOnce
  *
  * @author Dan Garrette (dhgarrette@gmail.com)
  */
-trait Chart {
+trait VizChart {
   def allCharts: Vector[SingleChart]
 
   def draw(
@@ -90,13 +90,13 @@ trait Chart {
 case class SingleChart(
   dataset: JXYDataset,
   renderer: XYItemRenderer)
-  extends Chart {
+  extends VizChart {
   def allCharts = Vector(this)
 }
 
 case class MultiChart(
-  charts: Vector[Chart])
-  extends Chart {
+  charts: Vector[VizChart])
+  extends VizChart {
   def allCharts = charts.flatMap(_.allCharts)
 }
 
@@ -108,12 +108,12 @@ object Chart {
   }
 
   def apply(
-    charts: Chart*) = {
+    charts: VizChart*) = {
     MultiChart(charts.toVector)
   }
 
   def apply(
-    charts: GenTraversableOnce[Chart]) = {
+    charts: GenTraversableOnce[VizChart]) = {
     MultiChart(charts.toVector)
   }
 }
@@ -124,13 +124,13 @@ object Chart {
 
 object BarChart {
   def apply[A](data: TraversableOnce[(A, Double)],
-    color: Color = Color.blue): Chart = {
+    color: Color = Color.blue): VizChart = {
     ???
   }
 
   def indexed(
     data: TraversableOnce[Double],
-    color: Color = Color.blue): Chart = {
+    color: Color = Color.blue): VizChart = {
     SingleChart(XYDataset(data.toIterator.zipWithIndex.map { case (x, i) => i.toDouble -> x }), BarRenderer(color))
   }
 }
@@ -139,7 +139,7 @@ object Histogram {
   def apply(
     data: Vector[Double],
     numBins: Int,
-    color: Color = Color.blue): Chart = {
+    color: Color = Color.blue): VizChart = {
     SingleChart(HistogramDataset(data, numBins), BarRenderer(color))
   }
 }
@@ -148,7 +148,7 @@ object ShadedHistogram {
   def apply(
     data: Vector[Double],
     darkness: Vector[Double], // values 0.0 to 1.0, one for each bin
-    color: Color = Color.blue): Chart = {
+    color: Color = Color.blue): VizChart = {
     val numBins = darkness.size
     fromHistDataset(HistogramDataset(data, numBins), darkness, color)
   }
@@ -174,7 +174,7 @@ object LineGraph {
     data: TraversableOnce[(Double, Double)],
     color: Color = Color.blue,
     lineThickness: Int = 2,
-    shape: Option[JShape] = None): Chart = {
+    shape: Option[JShape] = None): VizChart = {
     SingleChart(LineGraphDataset(data), LineRenderer(color = color, lineThickness = lineThickness))
   }
 
@@ -182,7 +182,7 @@ object LineGraph {
     data: TraversableOnce[Double],
     color: Color = Color.blue,
     lineThickness: Int = 2,
-    shape: Option[JShape] = None): Chart = {
+    shape: Option[JShape] = None): VizChart = {
     apply(data.toIterator.zipWithIndex.map { case (y, x) => x.toDouble -> y }, color, lineThickness)
   }
 }
@@ -191,14 +191,14 @@ object ScatterGraph {
   def apply(
     data: TraversableOnce[(Double, Double)],
     color: Color = Color.blue,
-    shape: JShape = Shape.circle): Chart = {
+    shape: JShape = Shape.circle): VizChart = {
     SingleChart(XYDataset(data), ScatterRenderer(color = color, shape = shape))
   }
 
   def indexed(
     data: TraversableOnce[Double],
     color: Color = Color.blue,
-    shape: JShape = Shape.circle): Chart = {
+    shape: JShape = Shape.circle): VizChart = {
     apply(data.toIterator.zipWithIndex.map { case (y, x) => x.toDouble -> y }, color, shape)
   }
 }
