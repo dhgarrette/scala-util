@@ -26,4 +26,4 @@ libraryDependencies ++= Seq(
 
 scalacOptions ++= Seq("-deprecation")
 
-initialCommands in console := "import dhg.util.Util._, scalaz._, Scalaz._"
+initialCommands in console := "import dhg.util._, scalaz._, Scalaz._"

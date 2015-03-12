@@ -1,11 +1,13 @@
-package dhg.util
+package dhg.utiltest
 
 import scala.math._
+
 import org.junit.Assert._
 import org.junit.Test
+
 import scalaz._
 import scalaz.Scalaz._
-import dhg.util.Util._
+import dhg.util._
 
 /**
  * @author Dan Garrette (dhgarrette@gmail.com)

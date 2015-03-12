@@ -1,10 +1,12 @@
-package dhg.util
+package dhg.utiltest
 
 import scala.collection.mutable.Buffer
+
 import org.junit.Assert._
 import org.junit.Test
+
 import dhg.util.TestUtil._
-import dhg.util.Util._
+import dhg.util._
 
 /**
  * @author Dan Garrette (dhgarrette@gmail.com)

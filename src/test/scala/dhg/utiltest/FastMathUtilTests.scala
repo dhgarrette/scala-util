@@ -1,15 +1,18 @@
-package dhg.util
+package dhg.utiltest
 
 import org.junit.Test
+
 import dhg.util.TestUtil._
-import scala.math.{log, exp}
+import scala.math.{ log, exp }
+
 import org.junit.Assert._
+
 import scala.util.Random
 import dhg.util.FastMathUtil._
 import org.apache.commons.math3.random.{ MersenneTwister, RandomGenerator }
 import scala.Iterator
 import scala.Vector
-import dhg.util.Util._
+import dhg.util._
 
 class FastMathUtilTests {
 
@@ -189,8 +192,7 @@ class FastMathUtilTests {
     assertExceptionMsg("No value chosen in choose! .*".r)(choose(Array[Double](4, 6, 8, 2, arb, arb), 4, r(1.0)))
   }
 
-  
-    @Test
+  @Test
   def test_activeChoose {
 
     def r(d: Double) = DoubleIteratorRandomGenerator(Iterator(d))
@@ -271,7 +273,7 @@ class FastMathUtilTests {
     assertEquals(7, activeChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2, arb, arb), Array(2, 4, 5, 7, 8, 9), 4, r(0.95)))
     assertExceptionMsg("No value chosen in activeChoose! .*".r)(activeChoose(Array(arb, arb, 4, arb, 6, 8, arb, 2, arb, arb), Array(2, 4, 5, 7), 4, r(1.0)))
   }
-    
+
   @Test
   def test_logChoose {
 
@@ -529,4 +531,4 @@ class FastMathUtilTests {
 
   //
 
-  }
+}

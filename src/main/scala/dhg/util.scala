@@ -1,5 +1,17 @@
-package dhg.util
+package dhg
 
+import java.awt.BorderLayout
+
+import org.abego.treelayout.netbeans.AbegoTreeLayoutForNetbeans
+import org.netbeans.api.visual.anchor.AnchorFactory
+import org.netbeans.api.visual.graph.GraphScene
+import org.netbeans.api.visual.layout.LayoutFactory
+import org.netbeans.api.visual.widget.ConnectionWidget
+import org.netbeans.api.visual.widget.LabelWidget
+import org.netbeans.api.visual.widget.LayerWidget
+import org.netbeans.api.visual.widget.Widget
+import javax.swing.JDialog
+import javax.swing.JScrollPane
 import java.io.Closeable
 import scala.io.Source
 import scala.collection.generic.CanBuildFrom
@@ -7,7 +19,7 @@ import scala.collection.GenTraversableOnce
 import scala.collection.GenTraversableLike
 import scala.collection.Parallel
 import scala.collection.GenTraversable
-import scalaz._
+import scalaz.{ Ordering => _, _ }
 import Scalaz._
 import scala.annotation.tailrec
 import scala.collection.GenSeqLike
@@ -51,7 +63,7 @@ import scala.sys.process._
 import java.io.PrintStream
 import scala.collection.generic.Growable
 import java.io.Writer
-import dhg.util.Util.Subprocess._
+import dhg.util.Subprocess._
 import scala.annotation.tailrec
 import scala.collection.GenSeqLike
 import scala.collection.GenTraversable
@@ -68,9 +80,71 @@ import scala.collection.mutable
 import scala.collection.mutable.Builder
 import scala.collection.mutable.ListBuffer
 import scala.util.Random
+import scala.annotation.tailrec
+import scala.math.{ pow, exp, log }
+import org.apache.commons.math3.random.{ RandomGenerator }
+import dhg.util._
+import java.awt.Color
+import org.jfree.chart.ChartFactory
+import org.jfree.chart.ChartPanel
+import org.jfree.chart.JFreeChart
+import org.jfree.chart.plot.Plot
+import org.jfree.chart.plot.PlotOrientation
+import org.jfree.chart.plot.XYPlot
+import org.jfree.chart.renderer.AbstractRenderer
+import org.jfree.chart.renderer.category.StandardBarPainter
+import org.jfree.chart.renderer.xy.StandardXYBarPainter
+import org.jfree.chart.renderer.xy.XYBarRenderer
+import org.jfree.data.category.DefaultCategoryDataset
+import javax.swing.JFrame
+import org.jfree.data.xy.XYSeriesCollection
+import org.jfree.data.xy.XYSeries
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer
+import org.jfree.chart.axis.NumberAxis
+import org.jfree.chart.plot.CategoryPlot
+import org.jfree.data.general.Dataset
+import org.jfree.chart.LegendItemSource
+import org.jfree.chart.renderer.xy.XYItemRenderer
+import org.jfree.chart.plot.DatasetRenderingOrder
+import org.jfree.data.xy.{ XYDataset => JXYDataset }
+import org.jfree.chart.axis.ValueAxis
+import org.jfree.chart.axis.DateAxis
+import scala.collection.GenTraversable
+import java.awt.{ Shape => JShape }
+import scala.collection.GenTraversableOnce
+import dhg.util._
+import java.lang.Comparable
+import org.jfree.data.xy.XYSeriesCollection
+import org.jfree.data.xy.XYSeries
+import org.jfree.data.category.DefaultCategoryDataset
+import org.jfree.data.statistics.{ HistogramDataset => JfcHistogramDataset }
+import org.jfree.data.xy.XYIntervalSeries
+import org.jfree.data.xy.IntervalXYDataset
+import org.jfree.data.xy.XYIntervalSeriesCollection
+import scala.collection.GenTraversable
+import scala.collection.mutable
+import scala.collection.GenTraversableOnce
+import java.awt.Color
+import org.jfree.chart.renderer.xy.StandardXYBarPainter
+import org.jfree.chart.renderer.xy.XYBarRenderer
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer
+import java.awt.BasicStroke
+import java.awt.{ Shape => JShape }
+import org.jfree.util.ShapeUtilities
+import java.awt.geom.Ellipse2D
+import org.junit.Assert._
+import scala.math.log
+import java.lang.AssertionError
+import scala.util.matching.Regex
+import org.apache.commons.math3.random.RandomGenerator
 
-
-object Util {
+/**
+ * The entire `util` package, basically.
+ * It's like this so that you can just do `import dhg.util._`
+ *
+ * @author Dan Garrette (dhgarrette@gmail.com)
+ */
+object util {
 
   //////////////////////////////////
   // Arm.scala: Automatic Resource Management (ARM) utility.
@@ -2758,7 +2832,7 @@ object Util {
      * Look up a binary and create a Subprocess object for it.
      */
     def findBinary(binaryName: String, binDir: Option[String] = None, envar: Option[String] = None): Subprocess =
-      new Subprocess(dhg.util.Util.findBinary(binaryName, binDir, envar), Nil)
+      new Subprocess(dhg.util.findBinary(binaryName, binDir, envar), Nil)
   }
 
   /**
@@ -2793,6 +2867,1183 @@ object Util {
     def getOrElseThrow(): A = v match {
       case Success(a) => a
       case Failure(e) => throw new RuntimeException(e.toString)
+    }
+  }
+
+  //////////////////////////////////
+  // FastMathUtil.scala
+  //////////////////////////////////
+
+  object FastMathUtil {
+
+    def sum(a: Array[Double], length: Int): Double = {
+      assert(length <= a.length, s"Passed in a length of $length to sum, for an array of length ${a.length}")
+      var accum = 0.0
+      var i = 0
+      while (i < length) {
+        accum += a(i)
+        i += 1
+      }
+      accum
+    }
+
+    def activeSum(a: Array[Double], active: Array[Int], activeCount: Int): Double = {
+      assert(activeCount <= active.length, s"Passed in an activeCount of $activeCount to activeSum, for an active array of length ${active.length}")
+      assert(activeCount <= a.length, s"Passed in an activeCount of $activeCount to activeSum, for an array of length ${a.length}")
+      var accum = 0.0
+      var i = 0
+      while (i < activeCount) {
+        accum += a(active(i))
+        i += 1
+      }
+      accum
+    }
+
+    /**
+     * Sums together things in log space.
+     * @return log(exp(a) + exp(b))
+     *
+     * stolen from breeze
+     */
+    def logSum(a: Double, b: Double) = {
+      if (a.isNegInfinity) b
+      else if (b.isNegInfinity) a
+      else if (a < b) b + scala.math.log1p(exp(a - b))
+      else a + scala.math.log1p(exp(b - a))
+    }
+
+    /**
+     * Sums together things in log space.
+     * @return log(\sum exp(a_i))
+     *
+     * stolen from breeze
+     */
+    def logSum(a: Double, b: Double, c: Double*): Double = {
+      logSum(logSum(a, b) +: c)
+    }
+
+    /**
+     * Sums together things in log space.
+     * @return log(\sum exp(a_i))
+     *
+     * stolen from breeze
+     */
+    def logSum(iter: Iterator[Double], max: Double): Double = {
+      require(iter.hasNext)
+      if (max.isInfinite) {
+        max
+      }
+      else {
+        val aux = (0.0 /: iter) {
+          (acc, x) => if (x.isNegInfinity) acc else acc + exp(x - max)
+        }
+        if (aux != 0)
+          max + scala.math.log(aux)
+        else
+          max
+      }
+    }
+
+    /**
+     * Sums together things in log space.
+     * @return log(\sum exp(a_i))
+     *
+     * stolen from breeze
+     */
+    def logSum(a: Seq[Double]): Double = {
+      a.length match {
+        case 0 => Double.NegativeInfinity
+        case 1 => a(0)
+        case 2 => logSum(a(0), a(1))
+        case _ => logSum(a.iterator, a reduceLeft (_ max _))
+      }
+    }
+
+    /**
+     * Sums together the first length elements in log space.
+     * The length parameter is used to make things faster.
+     *
+     * This method needs to be fast. Don't scala-ify it.
+     *
+     * log(\sum^length exp(a_i))
+     *
+     * stolen from breeze
+     */
+    def logSum(a: Array[Double], length: Int): Double = {
+      assert(length <= a.length, s"Passed in a length of $length to logSum, for an array of length ${a.length}")
+      if (length == 0) Double.NegativeInfinity
+      else if (length == 1) a(0)
+      else if (length == 2) logSum(a(0), a(1))
+      else {
+        val m = max(a, length)
+        if (m.isInfinite) m // avoids NaN issue
+        else {
+          var i = 0
+          var accum = 0.0
+          while (i < length) {
+            accum += scala.math.exp(a(i) - m)
+            i += 1
+          }
+          m + scala.math.log(accum)
+        }
+      }
+    }
+
+    def activeLogSum(a: Array[Double], active: Array[Int], activeCount: Int): Double = {
+      assert(activeCount <= active.length, s"Passed in an activeCount of $activeCount to activeLogSum, for an active array of length ${active.length}")
+      assert(activeCount <= a.length, s"Passed in an activeCount of $activeCount to activeLogSum, for an array of length ${a.length}")
+
+      if (activeCount == 0) Double.NegativeInfinity
+      else if (activeCount == 1) a(active(0))
+      else if (activeCount == 2) logSum(a(active(0)), a(active(1)))
+      else {
+        val m = activeMax(a, active, activeCount)
+        if (m.isInfinite) m // avoids NaN issue
+        else {
+          var i = 0
+          var accum = 0.0
+          while (i < activeCount) {
+            accum += scala.math.exp(a(active(i)) - m)
+            i += 1
+          }
+          m + scala.math.log(accum)
+        }
+      }
+    }
+
+    /**
+     * fast versions of max. Useful for the fast logsum.
+     *
+     * stolen from breeze
+     */
+    def max(a: Array[Double], length: Int) = {
+      assert(length != 0, s"Cannot compute max for a length of zero. (Array has length ${a.length})")
+      assert(length <= a.length, s"Passed in a length of $length to max, for an array of length ${a.length}")
+
+      var i = 1
+      var max = a(0)
+      while (i < length) {
+        if (a(i) > max) max = a(i)
+        i += 1
+      }
+      max
+    }
+
+    /**
+     *
+     */
+    def activeMax(a: Array[Double], active: Array[Int], activeCount: Int) = {
+      assert(activeCount != 0, s"Cannot compute activeMax for an activeCount of zero. (Active array has length ${active.length})")
+      assert(activeCount <= active.length, s"Passed in an activeCount of $activeCount to activeMax, for an active array of length ${active.length}")
+      assert(activeCount <= a.length, s"Passed in an activeCount of $activeCount to activeMax, for an array of length ${a.length}")
+
+      var max = a(active(0))
+      var i = 1
+      while (i < activeCount) {
+        if (a(active(i)) > max)
+          max = a(active(i))
+        i += 1
+      }
+      max
+    }
+
+    /**
+     *
+     */
+    def argmax(a: Array[Double], length: Int) = {
+      assert(length != 0, s"Cannot compute argmax for a length of zero. (Array has length ${a.length})")
+      assert(length <= a.length, s"Passed in a length of $length to argmax, for an array of length ${a.length}")
+
+      var max = a(0)
+      var maxIdx = 0
+      var i = 1
+      while (i < length) {
+        if (a(i) > max) {
+          max = a(i)
+          maxIdx = i
+        }
+        i += 1
+      }
+      maxIdx
+    }
+
+    /**
+     *
+     */
+    def activeArgmax(a: Array[Double], active: Array[Int], activeCount: Int) = {
+      assert(activeCount != 0, s"Cannot compute activeArgmax for an activeCount of zero. (Active array has length ${active.length})")
+      assert(activeCount <= active.length, s"Passed in an activeCount of $activeCount to activeArgmax, for an active array of length ${active.length}")
+      assert(activeCount <= a.length, s"Passed in an activeCount of $activeCount to activeArgmax, for an array of length ${a.length}")
+
+      var maxIdx = active(0)
+      var max = a(maxIdx)
+      var i = 1
+      while (i < activeCount) {
+        if (a(active(i)) > max) {
+          maxIdx = active(i)
+          max = a(maxIdx)
+        }
+        i += 1
+      }
+      maxIdx
+    }
+
+    /**
+     * sample from the distribution
+     */
+    def choose(dist: Array[Double], count: Int, rand: RandomGenerator): Int = {
+      assert(count != 0, s"Cannot choose for a count of zero. (Array has length ${dist.length})")
+      assert(count <= dist.length, s"Passed in a count of $count to choose, for an array of length ${dist.length}")
+
+      if (count == 1) return 0
+      val pSum = sum(dist, count)
+      val r = rand.nextDouble
+      var s = pSum * r
+      var i = 0
+      while (i < count) {
+        s -= dist(i)
+        if (s < 0) return i
+        i += 1
+      }
+      assert(!pSum.isInfinite, f"in choose, pSum=$pSum")
+      sys.error(f"No value chosen in choose!  ${dist.mkString("[", ", ", "]")}, r=$r%.2f")
+    }
+
+    /**
+     * sample from the distribution
+     */
+    def activeChoose(dist: Array[Double], active: Array[Int], activeCount: Int, rand: RandomGenerator): Int = {
+      assert(activeCount != 0, s"Cannot activeChoose for an activeCount of zero. (Active array has length ${active.length})")
+      assert(activeCount <= active.length, s"Passed in an activeCount of $activeCount to activeChoose, for an active array of length ${active.length}")
+      assert(activeCount <= dist.length, s"Passed in an activeCount of $activeCount to activeChoose, for a dist array of length ${dist.length}")
+
+      if (activeCount == 1) return active(0)
+      val pSum = activeSum(dist, active, activeCount)
+      val r = rand.nextDouble
+      var s = pSum * r
+      var i = 0
+      while (i < activeCount) {
+        val ai = active(i)
+        s -= dist(ai)
+        if (s < 0) return ai
+        i += 1
+      }
+      sys.error(f"No value chosen in activeChoose!  ${dist.mkString("[", ", ", "]")}, ${active.take(activeCount).mkString("[[", ", ", "]]")}${active.drop(activeCount).mkString("", " ", "]")}")
+    }
+
+    /**
+     * Don't let all active values to be log(0)
+     */
+    def logChoose(logDist: Array[Double], count: Int, rand: RandomGenerator): Int = {
+      assert(count != 0, s"Cannot logChoose for a count of zero. (Array has length ${logDist.length})")
+      assert(count <= logDist.length, s"Passed in a count of $count to logChoose, for an array of length ${logDist.length}")
+
+      if (count == 1) return 0
+      val logProbSum = logSum(logDist, count)
+      val r = rand.nextDouble
+      var prob = r
+      var i = 0
+      while (i < count) {
+        prob -= exp(logDist(i) - logProbSum)
+        if (prob < 0) return i
+        i += 1
+      }
+      assert(!logProbSum.isInfinite, f"in logChoose, logProbSum=$logProbSum")
+      sys.error(f"No value chosen in logChoose!  ${logDist.mkString("[", ", ", "]")}, r=$r%.2f")
+    }
+
+    /**
+     * Don't let all active values to be log(0)
+     */
+    def activeLogChoose(logDist: Array[Double], active: Array[Int], activeCount: Int, rand: RandomGenerator): Int = {
+      assert(activeCount != 0, s"Cannot activeLogChoose for an activeCount of zero. (Active array has length ${active.length})")
+      assert(activeCount <= active.length, s"Passed in an activeCount of $activeCount to activeLogChoose, for an active array of length ${active.length}")
+      assert(activeCount <= logDist.length, s"Passed in an activeCount of $activeCount to activeLogChoose, for a logDist array of length ${logDist.length}")
+
+      if (activeCount == 1) return active(0)
+      val logSum = activeLogSum(logDist, active, activeCount)
+      var prob = rand.nextDouble
+      var i = 0
+      while (i < activeCount) {
+        val ai = active(i)
+        prob -= exp(logDist(ai) - logSum)
+        if (prob < 0) return ai
+        i += 1
+      }
+      sys.error(f"No value chosen in activeLogChoose!  ${logDist.mkString("[", ", ", "]")}, ${active.take(activeCount).mkString("[[", ", ", "]]")}${active.drop(activeCount).mkString("", " ", "]")}")
+    }
+
+    /**
+     * In-place normalization of elements up to length
+     */
+    def normalize(a: Array[Double], length: Int): Unit = {
+      assert(length != 0, s"Cannot normalize for a length of zero. (Array has length ${a.length})")
+      // length <= a.length
+      var s = sum(a, length)
+      var i = 0
+      while (i < length) {
+        a(i) /= s
+        i += 1
+      }
+    }
+
+    /**
+     * In-place normalization of active elements
+     */
+    def activeNormalize(a: Array[Double], active: Array[Int], activeCount: Int): Unit = {
+      assert(activeCount != 0, s"Cannot activeNormalize for an activeCount of zero. (Active array has length ${active.length})")
+      // activeCount <= active.length
+      // activeCount <= a.length
+      var s = activeSum(a, active, activeCount)
+      var i = 0
+      while (i < activeCount) {
+        val ai = active(i)
+        a(ai) /= s
+        i += 1
+      }
+    }
+
+    /**
+     * In-place normalization, then logging, of elements up to length
+     */
+    def normalizeAndLog(a: Array[Double], length: Int): Unit = {
+      assert(length != 0, s"Cannot normalizeAndLog for a length of zero. (Array has length ${a.length})")
+      // length <= a.length
+      var s = sum(a, length)
+      var i = 0
+      while (i < length) {
+        a(i) = log(a(i) / s)
+        i += 1
+      }
+    }
+
+    /**
+     * In-place normalization, then logging, of active elements
+     */
+    def activeNormalizeAndLog(a: Array[Double], active: Array[Int], activeCount: Int): Unit = {
+      assert(activeCount != 0, s"Cannot activeNormalizeAndLog for an activeCount of zero. (Active array has length ${active.length})")
+      // activeCount <= active.length
+      // activeCount <= a.length
+      var s = activeSum(a, active, activeCount)
+      var i = 0
+      while (i < activeCount) {
+        val ai = active(i)
+        a(ai) = log(a(ai) / s)
+        i += 1
+      }
+    }
+
+    /**
+     * In-place normalization of log-valued elements up to length
+     */
+    def logNormalize(logData: Array[Double], length: Int): Unit = {
+      assert(length != 0, s"Cannot logNormalize for a length of zero. (Array has length ${logData.length})")
+      // length <= a.length
+      var logsum = logSum(logData, length)
+      var i = 0
+      while (i < length) {
+        logData(i) = logData(i) - logsum
+        i += 1
+      }
+    }
+
+    /**
+     * In-place normalization of active log-valued elements
+     */
+    def activeLogNormalize(logData: Array[Double], active: Array[Int], activeCount: Int): Unit = {
+      assert(activeCount != 0, s"Cannot activeLogNormalize for an activeCount of zero. (Active array has length ${active.length})")
+      // activeCount <= active.length
+      // activeCount <= a.length
+      var logSum = activeLogSum(logData, active, activeCount)
+      var i = 0
+      while (i < activeCount) {
+        val ai = active(i)
+        logData(ai) = logData(ai) - logSum
+        i += 1
+      }
+    }
+
+    /**
+     * makes log-normalized probabilities
+     */
+    def convertToLogDirichletDraw(counts: Array[Double], length: Int, rand: RandomGenerator): Unit = {
+      assert(length != 0, s"Cannot convertToLogDirichletDraw for a length of zero. (Array has length ${counts.length})")
+      assert(length <= counts.length, s"Passed in a length of $length to convertToLogDirichletDraw, for an array of length ${counts.length}")
+
+      var i = 0
+      while (i < length) {
+        val gd = gammaLogDraw(counts(i), rand)
+        counts(i) = gd
+        i += 1
+      }
+      logNormalize(counts, length)
+    }
+
+    /**
+     * makes log-normalized probabilities
+     */
+    def convertActiveToLogDirichletDraw(counts: Array[Double], active: Array[Int], activeCount: Int, rand: RandomGenerator): Unit = {
+      assert(activeCount != 0, s"Cannot convertActiveToLogDirichletDraw for an activeCount of zero. (Active array has length ${active.length})")
+      assert(activeCount <= active.length, s"Passed in an activeCount of $activeCount to convertActiveToLogDirichletDraw, for an active array of length ${active.length}")
+      assert(activeCount <= counts.length, s"Passed in an activeCount of $activeCount to convertActiveToLogDirichletDraw, for an array of length ${counts.length}")
+
+      var i = 0
+      while (i < activeCount) {
+        val ai = active(i)
+        val gd = gammaLogDraw(counts(ai), rand)
+        counts(ai) = gd
+        i += 1
+      }
+      activeLogNormalize(counts, active, activeCount)
+    }
+
+    def gammaLogDraw(shape: Double, rand: RandomGenerator): Double = {
+      if (shape < 1) {
+        // adapted from numpy distributions.c which is Copyright 2005 Robert Kern (robert.kern@gmail.com) under BSD
+        @tailrec
+        def rec: Double = {
+          val u = rand.nextDouble
+          val v = -math.log(rand.nextDouble)
+          val logU = log(u)
+          if (logU <= math.log1p(-shape)) {
+            val logV = log(v)
+            val logX = logU / shape
+            if (logX <= logV) logX
+            else rec
+          }
+          else {
+            val y = -log((1 - u) / shape)
+            val logX = math.log(1.0 - shape + shape * y) / shape
+            if (logX <= math.log(v + y)) logX
+            else rec
+          }
+        }
+        rec
+      }
+      else math.log(gammaDraw(shape, rand))
+    }
+
+    def gammaDraw(shape: Double, rand: RandomGenerator): Double = {
+      if (shape == 1.0) {
+        -math.log(rand.nextDouble)
+      }
+      else if (shape < 1.0) {
+        // from numpy distributions.c which is Copyright 2005 Robert Kern (robert.kern@gmail.com) under BSD
+        @tailrec
+        def rec: Double = {
+          val u = rand.nextDouble
+          val v = -math.log(rand.nextDouble)
+          if (u <= 1.0 - shape) {
+            val x = pow(u, 1.0 / shape)
+            if (x <= v) x
+            else rec
+          }
+          else {
+            val y = -log((1 - u) / shape)
+            val x = pow(1.0 - shape + shape * y, 1.0 / shape)
+            if (x <= (v + y)) x
+            else rec
+          }
+        }
+        rec
+      }
+      else {
+        // from numpy distributions.c which is Copyright 2005 Robert Kern (robert.kern@gmail.com) under BSD
+        val d = shape - 1.0 / 3.0
+        val c = 1.0 / math.sqrt(9.0 * d)
+        var r = 0.0
+        var ok = false
+        while (!ok) {
+          var v = 0.0
+          var x = 0.0
+          do {
+            x = rand.nextGaussian
+            v = 1.0 + c * x
+          } while (v <= 0)
+
+          v = v * v * v
+          val x2 = x * x
+          val u = rand.nextDouble
+          if (u < 1.0 - 0.0331 * (x2 * x2)
+            || log(u) < 0.5 * x2 + d * (1.0 - v + log(v))) {
+            r = d * v
+            ok = true
+          }
+        }
+        r
+      }
+    }
+
+  }
+
+  //////////////////////////////////
+  // TestUtil.scala
+  //////////////////////////////////
+
+  object TestUtil {
+
+    private[this] class TestUtilExceptionNotFound extends RuntimeException("exception expected, but no exception thrown")
+
+    def assertEqualsDouble(expected: Double, actual: Double) {
+      assertEquals(expected, actual, 0.000000001)
+    }
+
+    def assertException(block: => Unit)(handle: PartialFunction[Throwable, Unit]) {
+      try { block; throw new TestUtilExceptionNotFound } catch {
+        case e: TestUtilExceptionNotFound => fail(e.getMessage)
+        case e: Throwable => handle(e)
+      }
+    }
+
+    def assertExceptionAny(block: => Unit) {
+      try { block; throw new TestUtilExceptionNotFound } catch {
+        case e: TestUtilExceptionNotFound => fail(e.getMessage)
+        case e: Throwable =>
+      }
+    }
+
+    def assertExceptionMsg(expectedMessage: String)(block: => Unit) {
+      try { block; throw new TestUtilExceptionNotFound } catch {
+        case e: TestUtilExceptionNotFound => fail(e.getMessage)
+        case e: Throwable => assertEquals(expectedMessage, e.getMessage)
+      }
+    }
+
+    def assertExceptionMsg(expectedMessageRe: Regex)(block: => Unit) {
+      try { block; throw new TestUtilExceptionNotFound } catch {
+        case e: TestUtilExceptionNotFound => fail(e.getMessage)
+        case e: Throwable => assertMatch(expectedMessageRe, e.getMessage)
+      }
+    }
+
+    def assertMatch(expectedRe: Regex, result: String) = {
+      if (!expectedRe.matches(result))
+        throw new AssertionError(s"expected match: $expectedRe but was: $result")
+    }
+
+    def assertEqualsArray[A](expected: Array[A], result: Array[A]) {
+      if (expected.size != result.size || (expected zip result).exists(p => p._1 != p._2))
+        throw new AssertionError(s"expected: Array(${expected.mkString(",")}) but was: Array(${result.mkString(",")})")
+    }
+
+    def assertEqualsIterator[A](expected: Iterator[A], result: Iterator[A]) {
+      var i = 0
+      while (expected.hasNext && result.hasNext) {
+        assertEquals("mismatch on element " + i, expected.next, result.next)
+        i += 1
+      }
+      if (expected.hasNext)
+        fail("expected still contains: [%s]".format(expected.toSeq.mkString(", ")))
+      if (result.hasNext)
+        fail("result still contains: [%s]".format(result.toSeq.mkString(", ")))
+    }
+
+    def assertEqualsSameElements[T: Ordering](expected: Seq[T], actual: Seq[T]) {
+      assertEquals("%s vs %s: DIFFERENCE: (%s)".format(expected, actual, (expected ++ actual).toSet -- (expected.toSet & actual.toSet)), expected.sorted.size, actual.sorted.size)
+      for ((e, a) <- expected.sorted zipSafe actual.sorted)
+        assertEquals(e, a)
+    }
+
+    def assertEqualsSmart[T](expected: (T, Double), actual: (T, Double)) {
+      assertEquals(expected._1, actual._1)
+      assertEqualsDouble(expected._2, actual._2)
+    }
+
+    def assertEqualsSmartLog[T](expected: (T, Double), actual: (T, LogDouble)) {
+      assertEquals(expected._1, actual._1)
+      assertEqualsDouble(log(expected._2), actual._2.logValue)
+    }
+
+    def assertEqualsSmart[T](expected: Double, actual: LogDouble) {
+      assertEqualsDouble(log(expected), actual.logValue)
+    }
+
+    def assertEqualsSmart[T](expected: Map[T, Double], actual: Map[T, Double]) {
+      def keystr(m: Map[T, Double]) = s"${m.keys.toVector.map(_.toString).sorted.mkString(", ")}"
+      assertEquals("Wrong keys.", keystr(expected), keystr(actual))
+      for ((k, ev) <- expected)
+        assertEqualsDouble(ev, actual(k))
+    }
+
+    def assertEqualsSmartLog[T](expected: Map[T, Double], actual: Map[T, LogDouble]) {
+      def keystr(m: Map[T, _]) = s"${m.keys.toVector.map(_.toString).sorted.mkString(", ")}"
+      assertEquals("Wrong keys.", keystr(expected), keystr(actual))
+      for ((k, ev) <- expected)
+        assertEqualsDouble(log(ev), actual(k).logValue)
+    }
+
+    def assertEqualsSmart[A](expected: Option[Map[A, Double]], actual: Option[Map[A, Double]]) {
+      assertEquals(expected.isDefined, actual.isDefined)
+      if (expected.isDefined) assertEqualsSmart(expected.get, actual.get)
+    }
+
+    def assertEqualsSmart[A, B](expected: Vector[(A, Map[B, Double])], actual: Vector[(A, Map[B, Double])]) {
+      assertEquals(expected.size, actual.size)
+      for (((eA, eB), (aA, aB)) <- expected zip actual) {
+        assertEquals(eA, aA)
+        assertEqualsSmart(eB, aB)
+      }
+    }
+
+    //  def dumpToFile(lines: TraversableOnce[String]): String = {
+    //    val tempFile = mktemp("tmp")
+    //    writeUsing(tempFile) { f => lines.foreach(l => f.write(l + "\n")) }
+    //    tempFile.path
+    //  }
+
+    //  def dumpToFile(lines: String): String =
+    //    dumpToFile(lines.split("\n").map(_.trim).filter(_.nonEmpty))
+
+    //  def printFile(filename: String) =
+    //    File(filename).readLines.foreach(println)
+
+    //  def readFile(filename: String) =
+    //    File(filename).readLines.mkString("\n")
+
+    //  def assertFile(expected: String, filename: String) = {
+    //    val e = expected.split("\n").map(_.trim).filter(_.nonEmpty).mkString("\n")
+    //    val f = readFile(filename).split("\n").map(_.trim).filter(_.nonEmpty).mkString("\n")
+    //    //e.zip(f).zipWithIndex.foreach { case ((a, b), i) => assertEquals(a, b) } //"char at [%d]: [%s] vs [%s]".format(i,a,b)
+    //    assertEquals(e, f)
+    //  }
+
+    //  def assertPath(expected: String, filename: String) =
+    //    assertEquals(File(expected).getAbsolutePath, File(filename).getAbsolutePath)
+
+    trait MockableRandomGenerator extends RandomGenerator {
+      override def setSeed(seed: Int): Unit = ???
+      override def setSeed(seed: Array[Int]): Unit = ???
+      override def setSeed(seed: Long): Unit = ???
+      override def nextBytes(bytes: Array[Byte]): Unit = ???
+      override def nextInt(): Int = ???
+      override def nextInt(n: Int): Int = ???
+      override def nextLong(): Long = ???
+      override def nextBoolean(): Boolean = ???
+      override def nextFloat(): Float = ???
+      override def nextDouble(): Double = ???
+      override def nextGaussian(): Double = ???
+    }
+
+    case class DoubleIteratorRandomGenerator(it: Iterator[Double]) extends MockableRandomGenerator {
+      override def nextDouble() = it.next()
+    }
+
+  }
+
+  //////////////////////////////////
+  // viz package
+  //////////////////////////////////
+
+  object viz {
+
+    //////////////////////////////////
+    // Dataset.scala
+    //////////////////////////////////
+
+    /**
+     * Factories for constructing datasets for charts
+     *
+     * @author Dan Garrette (dhgarrette@gmail.com)
+     */
+
+    object XYDataset {
+      def apply(xyPairs: TraversableOnce[(Double, Double)], name: String = "") = {
+        val series1 = new XYSeries(name)
+        for ((x, y) <- xyPairs)
+          series1.add(x, y)
+        val collection1 = new XYSeriesCollection()
+        collection1.addSeries(series1)
+        collection1
+      }
+    }
+
+    object LineGraphDataset {
+      def apply(xyPairs: TraversableOnce[(Double, Double)], name: String = "") = XYDataset(xyPairs, name)
+    }
+
+    case class HistogramDatasetBuilder private (
+        data: Option[GenTraversable[Double]] = None,
+        numBins: Option[Int] = None,
+        rangeStart: Option[Double] = None,
+        rangeEnd: Option[Double] = None,
+        binWidth: Option[Double] = None) {
+
+      def withData(data: GenTraversable[Double]) = this.copy(data = Some(data))
+      def withNumBins(numBins: Int) = this.copy(numBins = Some(numBins))
+      def withRangeStart(rangeStart: Double) = this.copy(rangeStart = Some(rangeStart))
+      def withRangeEnd(rangeEnd: Double) = this.copy(rangeEnd = Some(rangeEnd))
+      def withBinWidth(binWidth: Double) = this.copy(binWidth = Some(binWidth))
+
+      def d(data: GenTraversable[Double]) = withData(data)
+      def n(numBins: Int) = withNumBins(numBins)
+      def s(rangeStart: Double) = withRangeStart(rangeStart)
+      def e(rangeEnd: Double) = withRangeEnd(rangeEnd)
+      def w(binWidth: Double) = withBinWidth(binWidth)
+
+      def build: HistogramDataset = {
+        assert(data.isDefined)
+        this match {
+          case HistogramDatasetBuilder(Some(data), Some(numBins), None, None, None) => this.withRangeStart(data.min).withRangeEnd(data.max).build
+          case HistogramDatasetBuilder(Some(data), Some(numBins), Some(rangeStart), None, None) => this.withRangeEnd(data.max).build
+          case HistogramDatasetBuilder(Some(data), Some(numBins), None, Some(rangeEnd), None) => this.withRangeStart(data.min).build
+          case HistogramDatasetBuilder(Some(data), Some(numBins), Some(rangeStart), Some(rangeEnd), None) =>
+            val binWidth = (rangeEnd - rangeStart) / numBins
+            HistogramDataset.make(data, numBins, rangeStart, binWidth)
+          case HistogramDatasetBuilder(Some(data), None, None, None, Some(binWidth)) => this.withRangeStart(data.min).withRangeEnd(data.max).build
+          case HistogramDatasetBuilder(Some(data), None, Some(rangeStart), None, Some(binWidth)) => this.withRangeEnd(data.max).build
+          case HistogramDatasetBuilder(Some(data), None, None, Some(rangeEnd), Some(binWidth)) => this.withRangeStart(data.min).build
+          case HistogramDatasetBuilder(Some(data), None, Some(rangeStart), Some(rangeEnd), Some(binWidth)) =>
+            val numBins = ((rangeEnd - rangeStart) / binWidth).toInt + 1
+            HistogramDataset.make(data, numBins, rangeStart, binWidth)
+          case HistogramDatasetBuilder(Some(data), Some(numBins), None, Some(rangeEnd), Some(binWidth)) =>
+            val rangeStart = rangeEnd - (numBins * binWidth)
+            HistogramDataset.make(data, numBins, rangeStart, binWidth)
+          case HistogramDatasetBuilder(Some(data), Some(numBins), Some(rangeStart), None, Some(binWidth)) =>
+            HistogramDataset.make(data, numBins, rangeStart, binWidth)
+          case HistogramDatasetBuilder(Some(data), Some(numBins), Some(rangeStart), Some(rangeEnd), Some(binWidth)) =>
+            sys.error("Cannot specify numBins, rangeStart, rangeEnd, and binWidth together.")
+        }
+      }
+
+      implicit def toDataset(hdb: HistogramDatasetBuilder) = hdb.build.dataset
+    }
+    object HistogramDatasetBuilder {
+      def apply() = new HistogramDatasetBuilder()
+      def apply(data: GenTraversable[Double]) = new HistogramDatasetBuilder(data = Some(data))
+    }
+
+    object HistogramDataset {
+      def apply(data: GenTraversable[Double], numBins: Int): HistogramDataset = {
+        val rangeStart = data.min
+        val rangeEnd = data.max
+        make(data, numBins, rangeStart, binWidth(numBins, rangeStart, rangeEnd))
+      }
+
+      def byWidth(data: GenTraversable[Double], binWidth: Double): HistogramDataset = {
+        val rangeStart = data.min
+        val rangeEnd = data.max
+        val numBins = ((rangeEnd - rangeStart) / binWidth).toInt + 1
+        make(data, numBins, rangeStart, binWidth)
+      }
+
+      def make(data: GenTraversableOnce[Double], numBins: Int, rangeStart: Double, binWidth: Double) = {
+        val binArray = makeBinArray(data, numBins, rangeStart, binWidth)
+        HistogramDataset(binArray, rangeStart, binWidth)
+      }
+
+      def byStartEnd(data: GenTraversableOnce[Double], numBins: Int, rangeStart: Double, rangeEnd: Double) = {
+        val binwidth = binWidth(numBins, rangeStart, rangeEnd)
+        val binArray = makeBinArray(data, numBins, rangeStart, binwidth)
+        HistogramDataset(binArray, rangeStart, binwidth)
+      }
+
+      def binWidth(numBins: Int, rangeStart: Double, rangeEnd: Double) = (rangeEnd - rangeStart) / numBins
+
+      def binData[A](data: GenTraversableOnce[(A, Double)], numBins: Int, rangeStart: Double, binWidth: Double): Vector[Vector[A]] = {
+        val bins = Vector.fill(numBins)(Vector.newBuilder[A])
+        data.foreach {
+          case (a, t) =>
+            val b = ((t - rangeStart) / binWidth).toInt
+            val bin = if (b == numBins) b - 1 else b
+            bins(bin) += a
+        }
+        bins.map(_.result)
+      }
+
+      def makeBinArray(data: GenTraversableOnce[Double], numBins: Int, rangeStart: Double, binWidth: Double): Vector[Int] = {
+        binData(data.toIterator.map(t => (t, t)), numBins, rangeStart, binWidth).map(_.size)
+      }
+
+      implicit def toDataset(hd: HistogramDataset) = hd.dataset
+    }
+
+    case class HistogramDataset(binArray: Vector[Int], rangeStart: Double, binWidth: Double) {
+
+      val numBins = binArray.size
+      val rangeEnd = rangeStart + numBins * binWidth
+
+      def dataset = {
+        val halfBinWidth = binWidth / 2
+        val xyPairs = binArray.zipWithIndex.map { case (count, i) => (rangeStart + i * binWidth, count.toDouble) }
+        val series1 = new XYIntervalSeries("")
+        for ((x, y) <- xyPairs)
+          series1.add(x + halfBinWidth, x, x + binWidth, y, 0, y)
+        val collection1 = new XYIntervalSeriesCollection()
+        collection1.addSeries(series1)
+        collection1
+      }
+
+    }
+
+    case class SingleHistogramBarDataset(count: Int, binNumber: Int, numBins: Int, rangeStart: Double, binWidth: Double) {
+
+      def dataset = {
+        val halfBinWidth = binWidth / 2
+        val x = rangeStart + binNumber * binWidth
+        val y = count.toDouble
+        val series1 = new XYIntervalSeries("")
+        series1.add(x + halfBinWidth, x, x + binWidth, y, 0, y)
+        val collection1 = new XYIntervalSeriesCollection()
+        collection1.addSeries(series1)
+        collection1
+      }
+
+    }
+
+    //////////////////////////////////
+    // VizChart.scala
+    //////////////////////////////////
+
+    /**
+     * A chart for visualizing data
+     *
+     * @author Dan Garrette (dhgarrette@gmail.com)
+     */
+    trait VizChart {
+      def allCharts: Vector[SingleChart]
+
+      def draw(
+        a: Int = 10, b: Int = 10,
+        width: Int = 800, height: Int = 500,
+        title: String = "",
+        xaxisLabel: String = "",
+        yaxisLabel: String = "",
+        showLegend: Boolean = false,
+        includeXZero: Boolean = true,
+        includeYZero: Boolean = true,
+        xaxisDates: Boolean = false,
+        exitOnClose: Boolean = true) {
+
+        val plot = new XYPlot()
+
+        val xaxis = if (xaxisDates) {
+          new DateAxis(xaxisLabel)
+        }
+        else {
+          val a = new NumberAxis(xaxisLabel)
+          a.setAutoRangeIncludesZero(includeXZero)
+          a
+        }
+
+        val yaxis = new NumberAxis(yaxisLabel)
+        yaxis.setAutoRangeIncludesZero(includeYZero)
+
+        plot.setDomainAxis(0, xaxis)
+        plot.setRangeAxis(0, yaxis)
+        plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD)
+
+        for ((SingleChart(dataset, renderer), i) <- allCharts.zipWithIndex) {
+          plot.setDataset(i, dataset)
+          plot.setRenderer(i, renderer)
+          plot.mapDatasetToDomainAxis(i, 0)
+          plot.mapDatasetToRangeAxis(i, 0)
+        }
+
+        val chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, showLegend)
+
+        val frame = new JFrame(title)
+        frame.setContentPane(new ChartPanel(chart))
+
+        //frame.pack()
+        frame.setBounds(a, b, width, height)
+        frame.setVisible(true)
+        if (exitOnClose) frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
+      }
+    }
+
+    case class SingleChart(
+      dataset: JXYDataset,
+      renderer: XYItemRenderer)
+        extends VizChart {
+      def allCharts = Vector(this)
+    }
+
+    case class MultiChart(
+      charts: Vector[VizChart])
+        extends VizChart {
+      def allCharts = charts.flatMap(_.allCharts)
+    }
+
+    object VizChart {
+      def apply(
+        dataset: JXYDataset,
+        renderer: XYItemRenderer) = {
+        SingleChart(dataset, renderer)
+      }
+
+      def apply(
+        charts: VizChart*) = {
+        MultiChart(charts.toVector)
+      }
+
+      def apply(
+        charts: GenTraversableOnce[VizChart]) = {
+        MultiChart(charts.toVector)
+      }
+    }
+
+    //
+    //
+    //
+
+    object BarChart {
+      def apply[A](data: TraversableOnce[(A, Double)],
+        color: Color = Color.blue): VizChart = {
+        ???
+      }
+
+      def indexed(
+        data: TraversableOnce[Double],
+        color: Color = Color.blue): VizChart = {
+        SingleChart(XYDataset(data.toIterator.zipWithIndex.map { case (x, i) => i.toDouble -> x }), BarRenderer(color))
+      }
+    }
+
+    object Histogram {
+      def apply(
+        data: Vector[Double],
+        numBins: Int,
+        color: Color = Color.blue): VizChart = {
+        SingleChart(HistogramDataset(data, numBins), BarRenderer(color))
+      }
+    }
+
+    object ShadedHistogram {
+      def apply(
+        data: Vector[Double],
+        darkness: Vector[Double], // values 0.0 to 1.0, one for each bin
+        color: Color = Color.blue): VizChart = {
+        val numBins = darkness.size
+        fromHistDataset(HistogramDataset(data, numBins), darkness, color)
+      }
+
+      def fromHistDataset(
+        histData: HistogramDataset,
+        darkness: Vector[Double], // values 0.0 to 1.0, one for each bin
+        color: Color = Color.blue) = {
+        val numBins = histData.numBins
+        assert(numBins == darkness.size, "histogram data and darkness vector are not the same size.")
+        VizChart((histData.binArray zip darkness).zipWithIndex.map {
+          case ((count, dark), binNumber) =>
+            val dataset = new SingleHistogramBarDataset(count, binNumber, numBins, histData.rangeStart, histData.binWidth)
+            val Array(r, g, b) = color.getRGBColorComponents(null).map(v => v + (1 - v) * (1 - dark.toFloat))
+            val newColor = new Color(r, g, b)
+            SingleChart(dataset.dataset, BarRenderer(newColor))
+        })
+      }
+    }
+
+    object LineGraph {
+      def apply(
+        data: TraversableOnce[(Double, Double)],
+        color: Color = Color.blue,
+        lineThickness: Int = 2,
+        shape: Option[JShape] = None): VizChart = {
+        SingleChart(LineGraphDataset(data), LineRenderer(color = color, lineThickness = lineThickness))
+      }
+
+      def makeIndexed(
+        data: TraversableOnce[Double],
+        color: Color = Color.blue,
+        lineThickness: Int = 2,
+        shape: Option[JShape] = None): VizChart = {
+        apply(data.toIterator.zipWithIndex.map { case (y, x) => x.toDouble -> y }, color, lineThickness)
+      }
+    }
+
+    object ScatterGraph {
+      def apply(
+        data: TraversableOnce[(Double, Double)],
+        color: Color = Color.blue,
+        shape: JShape = Shape.circle): VizChart = {
+        SingleChart(XYDataset(data), ScatterRenderer(color = color, shape = shape))
+      }
+
+      def indexed(
+        data: TraversableOnce[Double],
+        color: Color = Color.blue,
+        shape: JShape = Shape.circle): VizChart = {
+        apply(data.toIterator.zipWithIndex.map { case (y, x) => x.toDouble -> y }, color, shape)
+      }
+    }
+
+    //////////////////////////////////
+    // Renderer.scala
+    //////////////////////////////////
+
+    /**
+     * Factories for constructing renderers for charts
+     *
+     * @author Dan Garrette (dhgarrette@gmail.com)
+     */
+
+    object BarRenderer {
+      def apply(
+        color: Color = Color.blue) = {
+        val r = new XYBarRenderer
+        r.setBarPainter(new StandardXYBarPainter())
+        r.setShadowVisible(false)
+        r.setSeriesPaint(0, color)
+        r
+      }
+    }
+
+    object LineRenderer {
+      def apply(
+        color: Color = Color.blue,
+        lineThickness: Int = 2,
+        shape: Option[JShape] = None) = {
+        require(lineThickness > 0 || shape.isDefined)
+        val r = new XYLineAndShapeRenderer(lineThickness > 0, shape.isDefined)
+        r.setSeriesPaint(0, color)
+        r.setSeriesStroke(0, new BasicStroke(lineThickness))
+        shape.foreach(s => r.setSeriesShape(0, s))
+        r
+      }
+    }
+
+    object ScatterRenderer {
+      def apply(
+        color: Color = Color.blue,
+        shape: JShape = Shape.circle) = {
+        LineRenderer(color, 0, Some(shape))
+      }
+    }
+
+    object InvisibleXyRenderer {
+      def apply() = new XYLineAndShapeRenderer(false, false)
+    }
+
+    //
+    //
+    //
+
+    object Shape {
+      def circle: JShape = circle(5)
+      def circle(size: Double) = new Ellipse2D.Double(-size / 2, -size / 2, size, size)
+    }
+
+    //////////////////////////////////
+    // Tree.scala
+    //////////////////////////////////
+
+    trait VizTree {
+      def label: String
+      def children: Vector[VizTree]
+
+      final def pretty: String = prettyLines.mkString("\n")
+      private def prettyLines: Vector[String] = {
+        children.flatMap(_.prettyLines) match {
+          case Vector(childLine) => Vector(label + " " + childLine)
+          case childLines => label +: childLines.map("  " + _)
+        }
+      }
+    }
+
+    object TreeViz {
+
+      //case class NodeObj(label: String, index: Int)
+      type NodeObj = String
+      def NodeObj(label: String) = label
+
+      private[this] class TreeScene(root: NodeObj) extends GraphScene[NodeObj, String] {
+
+        private[this] val mainLayer = new LayerWidget(this)
+        private[this] val connectionLayer = new LayerWidget(this)
+
+        addChild(mainLayer)
+        addChild(connectionLayer)
+
+        def addEdge(a: NodeObj, b: NodeObj): Unit = {
+          addEdge(a + "->" + b)
+          setEdgeSource(a + "->" + b, a)
+          setEdgeTarget(a + "->" + b, b)
+        }
+
+        def attachNodeWidget(n: NodeObj): Widget = {
+          val w = new LabelWidget(this)
+          w.setLabel(" " + n + " ")
+          mainLayer.addChild(w)
+          w
+        }
+
+        def attachEdgeWidget(e: String): Widget = {
+          val connectionWidget = new ConnectionWidget(this)
+          //connectionWidget.setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
+          connectionLayer.addChild(connectionWidget)
+          connectionWidget
+        }
+
+        def attachEdgeSourceAnchor(edge: String, oldSourceNode: NodeObj, sourceNode: NodeObj): Unit = {
+          val edgeWidget = findWidget(edge).asInstanceOf[ConnectionWidget]
+          val sourceNodeWidget = findWidget(sourceNode)
+          val sourceAnchor = AnchorFactory.createRectangularAnchor(sourceNodeWidget)
+          edgeWidget.setSourceAnchor(sourceAnchor)
+        }
+
+        def attachEdgeTargetAnchor(edge: String, oldTargetNode: NodeObj, targetNode: NodeObj): Unit = {
+          val edgeWidget = findWidget(edge).asInstanceOf[ConnectionWidget]
+          val targetNodeWidget = findWidget(targetNode)
+          val targetAnchor = AnchorFactory.createRectangularAnchor(targetNodeWidget)
+          edgeWidget.setTargetAnchor(targetAnchor)
+        }
+      }
+
+      private[this] def showScene(scene: TreeScene, title: String): Unit = {
+        val panel = new JScrollPane(scene.createView())
+        val dialog = new JDialog()
+        dialog.setModal(true)
+        dialog.setTitle(title)
+        dialog.add(panel, BorderLayout.CENTER)
+        dialog.setSize(800, 600)
+        dialog.setVisible(true)
+        dialog.dispose()
+      }
+
+      private[this] def layoutScene(scene: GraphScene[NodeObj, String], root: NodeObj): Unit = {
+        val graphLayout = new AbegoTreeLayoutForNetbeans[NodeObj, String](root, 100, 100, 50, 50, true)
+        val sceneLayout = LayoutFactory.createSceneGraphLayout(scene, graphLayout)
+        sceneLayout.invokeLayoutImmediately()
+      }
+
+      private[this] class Counter(start: Int = 0) {
+        private[this] var i = start
+        def get = { val c = i; i += 1; c }
+      }
+
+      private[this] def createScene(t: VizTree): TreeScene = {
+        val scene = new TreeScene(NodeObj(t.label))
+        def addTree(t: VizTree): Unit = {
+          scene.addNode(NodeObj(t.label))
+          for (c <- t.children) {
+            addTree(c)
+            scene.addEdge(NodeObj(t.label), NodeObj(c.label))
+          }
+        }
+        addTree(t)
+        scene
+      }
+
+      def drawTree(t: VizTree): Unit = {
+        val counter = new Counter
+        def relabel(t: VizTree): (VizTree, (Int, Int)) = {
+          if (t.children.isEmpty) {
+            val i = counter.get
+            (new VizTree { val label = f"${i}_${t.label}"; val children = Vector() }, (i, i))
+          }
+          else {
+            val (newchildren, indexPairs) = t.children.map(relabel).unzip
+            val (i, j) = (indexPairs.map(_._1).min, indexPairs.map(_._2).max)
+            (new VizTree { val label = f"${i}-${j}_${t.label}"; val children = newchildren }, (i, j))
+          }
+        }
+
+        val t2 = relabel(t)._1
+        val s = createScene(t2)
+        layoutScene(s, NodeObj(t2.label))
+        showScene(s, "")
+      }
+
     }
   }
 
