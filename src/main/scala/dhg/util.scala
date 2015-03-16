@@ -201,6 +201,24 @@ object util {
     def apply[A]() = new UniversalSet[A]
   }
 
+  /**
+   * Iterator.grouped(7).map(_.par.map(_.apply).seq).next
+   */
+  implicit class ChunkingParIterator[A](val self: Iterator[() => A]) extends AnyVal {
+    def parChunked(chunkSize: Int) = new Iterator[A] {
+      var currentChunk: Iterator[A] = Iterator.empty
+
+      def next() = {
+        if (!currentChunk.hasNext) {
+          val v = (Array.newBuilder[() => A] ++= (for (_ <- 0 until chunkSize if self.hasNext) yield self.next())).result
+          currentChunk = v.par.map(_.apply).seq.iterator
+        }
+        currentChunk.next()
+      }
+      def hasNext() = currentChunk.hasNext || self.hasNext
+    }
+  }
+
   //  /**
   //   *
   //   */
