@@ -504,6 +504,18 @@ object util {
   }
 
   //////////////////////////////////////////////////////
+  // groupedAsVector(n: Int): Iterator[Vector[A]]
+  //   - same as Iterator.grouped(n).map(_.toVector)
+  //////////////////////////////////////////////////////
+
+  implicit class GroupedAsVectorIterator[A](val self: Iterator[A]) {
+    def groupedAsVector(n: Int): Iterator[Vector[A]] = new Iterator[Vector[A]] {
+      def next() = (Vector.newBuilder[A] ++= (for (_ <- 1 to n if self.hasNext) yield self.next())).result
+      def hasNext = self.hasNext
+    }
+  }
+
+  //////////////////////////////////////////////////////
   // dropRightWhile(p: A => Boolean): Repr
   //////////////////////////////////////////////////////
 
