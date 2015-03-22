@@ -510,8 +510,19 @@ object util {
 
   implicit class GroupedAsVectorIterator[A](val self: Iterator[A]) {
     def groupedAsVector(n: Int): Iterator[Vector[A]] = new Iterator[Vector[A]] {
-      def next() = (Vector.newBuilder[A] ++= (for (_ <- 1 to n if self.hasNext) yield self.next())).result
+      def next() = self.nextN(n)
       def hasNext = self.hasNext
+    }
+  }
+
+  //////////////////////////////////////////////////////
+  // nextN(n: Int): Vector[A]
+  //   - sort of like Vector.fill(n)(itr.next), but never calls `next` on empty
+  //////////////////////////////////////////////////////
+
+  implicit class NextNIterator[A](val self: Iterator[A]) {
+    def nextN(n: Int): Vector[A] = {
+      (Vector.newBuilder[A] ++= (for (_ <- 1 to n if self.hasNext) yield self.next())).result
     }
   }
 
