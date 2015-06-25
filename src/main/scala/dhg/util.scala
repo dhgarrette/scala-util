@@ -1893,7 +1893,7 @@ object util {
 
     val arguments = argumentList.map(_._2).toVector // arguments are a Vector
     val options = optionList.groupByKey.map { case (opt, Coll(v)) => opt -> v; case (opt, _) => sys.error(f"option --${opt} given twice") } // options are a Map
-    (arguments, options)
+    (arguments, CommandLineOptions(options))
   }
 
   case class CommandLineOptions(options: Map[String, String]) {
