@@ -2032,7 +2032,7 @@ object util {
       assert(self.isDirectory, s"'$self' is not a directory")
       self.ls(regex, pathMatch).flatMap { f =>
         if (f.isDirectory)
-          f.listFilesRecursive
+          f.listFilesRecursive(regex, pathMatch)
         else
           Vector(f)
       }
