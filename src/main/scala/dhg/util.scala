@@ -2030,11 +2030,11 @@ object util {
     def listFilesRecursive(regex: Regex, pathMatch: Boolean = false): Vector[File] = {
       assert(self.exists, s"'$self' does not exist")
       assert(self.isDirectory, s"'$self' is not a directory")
-      self.ls(regex, pathMatch).flatMap { f =>
+      self.ls(regex, pathMatch) ++ self.ls.flatMap { f =>
         if (f.isDirectory)
           f.listFilesRecursive(regex, pathMatch)
         else
-          Vector(f)
+          Vector()
       }
     }
 
