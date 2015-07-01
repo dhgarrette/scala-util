@@ -1585,6 +1585,20 @@ object util {
     }
   }
 
+  final implicit class Enriched_slyce_String(val self: String) extends AnyVal {
+    def slyce(from: Int, until: Int): String = {
+      val start = if (from >= 0) from else self.size + from
+      val end = if (until >= 0) until else self.size + until
+      self.slice(start, end)
+    }
+
+    def slyce(range: Range): String = {
+      val start = if (range.start >= 0) range.start else self.size + range.start
+      val end = (if (range.end >= 0) range.end else self.size + range.end) + (if (range.isInclusive) 1 else 0)
+      self.slice(start, end)
+    }
+  }
+
   //////////////////////////////////////////////////////
   // countCompare(p: A => Boolean, count: Int): Int
   //   - Compares the number of items satisfying a predicate to a test value.

@@ -712,6 +712,38 @@ class CollectionUtilTests {
     assertException((0 to 9).iterator.slyce(5 to -3)) { case e: IllegalArgumentException => assertEquals("cannot slice Iterator with negative indices", e.getMessage) }
     assertException((0 to 9).iterator.slyce(-6 to 8)) { case e: IllegalArgumentException => assertEquals("cannot slice Iterator with negative indices", e.getMessage) }
     assertEqualsIterator(Iterator(6, 7, 8, 9), (0 to 9).iterator.slyce(6 to 12))
+    
+    //
+    
+    assertEquals("0123", "0123456789".slyce(0, 4))
+    assertEquals("678", "0123456789".slyce(6, 9))
+    assertEquals("345", "0123456789".slyce(3, 6))
+    assertEquals("", "0123456789".slyce(6, 3))
+    assertEquals("78", "0123456789".slyce(-3, -1))
+    assertEquals("", "0123456789".slyce(-3, 2))
+    assertEquals("56", "0123456789".slyce(5, -3))
+    assertEquals("4567", "0123456789".slyce(-6, 8))
+    assertEquals("6789", "0123456789".slyce(6, 12))
+
+    assertEquals("0123", "0123456789".slyce(0 until 4))
+    assertEquals("678", "0123456789".slyce(6 until 9))
+    assertEquals("345", "0123456789".slyce(3 until 6))
+    assertEquals("", "0123456789".slyce(6 until 3))
+    assertEquals("78", "0123456789".slyce(-3 until -1))
+    assertEquals("", "0123456789".slyce(-3 until 2))
+    assertEquals("56", "0123456789".slyce(5 until -3))
+    assertEquals("4567", "0123456789".slyce(-6 until 8))
+    assertEquals("6789", "0123456789".slyce(6 until 12))
+
+    assertEquals("01234", "0123456789".slyce(0 to 4))
+    assertEquals("6789", "0123456789".slyce(6 to 9))
+    assertEquals("3456", "0123456789".slyce(3 to 6))
+    assertEquals("", "0123456789".slyce(6 to 3))
+    assertEquals("789", "0123456789".slyce(-3 to -1))
+    assertEquals("", "0123456789".slyce(-3 to 2))
+    assertEquals("567", "0123456789".slyce(5 to -3))
+    assertEquals("45678", "0123456789".slyce(-6 to 8))
+    assertEquals("6789", "0123456789".slyce(6 to 12))
   }
 
   @Test
