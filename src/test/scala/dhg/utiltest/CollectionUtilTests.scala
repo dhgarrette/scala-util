@@ -379,6 +379,21 @@ class CollectionUtilTests {
   }
 
   @Test
+  def test_flatCollect() {
+    val coll1 = List(1,2,3,4,5)
+    val res1: List[Int] = coll1.flatCollect { case i if i % 2 == 0 => (0 to i).map(_ + (10*i)) }
+    assertEquals(List(20, 21, 22, 40, 41, 42, 43, 44), res1)
+
+    val coll2 = Set(1, 2, 3, 4)
+    val res2: Set[Int] = coll2.flatCollect { case i if i % 2 == 0 => (0 to i).map(_ + (10*i)) }
+    assertEquals(Set(20, 21, 22, 40, 41, 42, 43, 44), res2)
+
+    val coll3 = Iterator(1, 2, 3, 4)
+    val res3: Iterator[Int] = coll3.flatCollect { case i if i % 2 == 0 => (0 to i).map(_ + (10*i)) }
+    assertEqualsIterator(Iterator(20, 21, 22, 40, 41, 42, 43, 44), res3)
+  }
+
+  @Test
   def test_mapTo() {
     val coll1 = List(1, 2, 3, 4)
     val res1: List[(Int, Int)] = coll1.mapTo(_ + 2)

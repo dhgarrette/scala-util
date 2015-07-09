@@ -35,6 +35,7 @@ import scala.collection.immutable
 import scala.collection.immutable.BitSet
 import scala.collection.mutable
 import scala.collection.mutable.Builder
+import scala.collection.mutable.ArrayBuilder
 import scala.collection.mutable.ListBuffer
 import scala.util.Random
 import java.io.BufferedWriter
@@ -819,6 +820,23 @@ object util {
     }
   }
 
+  final implicit class Enriched_zipSafe_Array[A](val self: Array[A]) extends AnyVal {
+    /**
+     * zip this collection with another, throwing an exception if they
+     * are not of equal length.
+     *
+     * @param that  the collection with which to zip
+     * @return an iterator of pairs
+     * @throws RuntimeException thrown if collections differ in length
+     */
+    def zipSafe[B, That](that: GenTraversableOnce[B]): Array[(A, B)] = {
+      val b = ArrayBuilder.make[(A,B)]()
+      b.sizeHint(self.size)
+      b ++= (self.toIterator zipSafe that)
+      b.result
+    }
+  }
+
   final implicit class Enriched_zipSafe_Tuple_of_Iterator[A, B](val self: (Iterator[A], GenTraversableOnce[B])) extends AnyVal {
     /**
      * zip this collection with another, throwing an exception if they
@@ -970,6 +988,37 @@ object util {
       val aItr = new SwappingQueuedPairIterator(self, aQueue, bQueue)
       val bItr = new NonSwpngQueuedPairIterator(self, aQueue, bQueue)
       (aItr, bItr)
+    }
+  }
+
+  //////////////////////////////////////////////////////
+  // flatCollect[B](pf: A => B): Repr[B]
+  //   - Functionally equivalent to:
+  //         collect(x => x -> f(x)).flatten
+  //////////////////////////////////////////////////////
+
+  final implicit class Enriched_flatCollect_TraversableLike[A, Repr](val self: TraversableLike[A, Repr]) extends AnyVal {
+    /**
+     * Functionally equivalent to: collect(x => x -> f(x)).flatten
+     */
+    def flatCollect[B, That](pf: PartialFunction[A, GenTraversableOnce[B]])(implicit bf: CanBuildFrom[Repr, B, That]): That = {
+      def builder = bf(self.asInstanceOf[Repr]) // extracted to keep method size under 35 bytes, so that it can be JIT-inlined
+      val b = builder
+      self.foreach(pf.runWith(b ++= _.seq))
+      b.result
+    }
+  }
+
+  final implicit class Enriched_flatCollect_Iterator[A](val itr: Iterator[A]) extends AnyVal {
+    /**
+     * Functionally equivalent to: collect(x => x -> f(x)).flatten
+     */
+    def flatCollect[B](pf: PartialFunction[A, GenTraversableOnce[B]]): Iterator[B] = new scala.collection.AbstractIterator[B] {
+      private var cur: Iterator[B] = Iterator.empty
+      val self = itr.buffered
+      private def skip() = while (self.hasNext && !pf.isDefinedAt(self.head)) self.next()
+      def hasNext = { skip(); cur.hasNext || self.hasNext && { cur = pf(self.next()).toIterator; hasNext } }
+      def next(): B = { skip(); (if (hasNext) cur else Iterator.empty).next() }
     }
   }
 
