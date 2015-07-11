@@ -2259,7 +2259,7 @@ object util {
     /**
      * Shorthand for a range from this Int to the max integer value.
      */
-    def up: Range = self to Int.MaxValue
+    def up: Range = self to (if (self > 0) Int.MaxValue else (Int.MaxValue + (self - 1)))
     def upi: Iterator[Int] = Iterator.from(self)
 
     /**
