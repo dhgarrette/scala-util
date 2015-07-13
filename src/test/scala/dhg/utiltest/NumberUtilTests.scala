@@ -41,4 +41,12 @@ class NumberUtilTests {
     assertEquals(3.0, Iterator(1.0, 3.0, -5) dot Seq(4.0, -2, -1.0), 1e-9)
   }
 
+  @Test
+  def test_stdev() {
+    assertEquals(2.0, Vector(2, 4, 4, 4, 5, 5, 7, 9).stdev, 1e-9)
+    assertEquals(2.0, Vector(2.0, 4, 4, 4, 5, 5, 7, 9).stdev, 1e-9)
+    assertEquals(2.0, Iterator(2, 4, 4, 4, 5, 5, 7, 9).stdev, 1e-9)
+    assertEquals(2.0, Iterator(2.0, 4, 4, 4, 5, 5, 7, 9).stdev, 1e-9)
+  }
+
 }
