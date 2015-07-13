@@ -2255,7 +2255,6 @@ object util {
   //////////////////////////////////
 
   implicit class Enriched_Int(val self: Int) extends AnyVal {
-
     /**
      * Shorthand for a range from this Int to the max integer value.
      */
@@ -2266,6 +2265,22 @@ object util {
      * Shorthand for a range from this to n by -1
      */
     def downto(n: Int): Range = self to n by -1
+
+    def pow(e: Int): Int = (1 until e).foldLeft(self)((z, _) => z * self)
+    def **(e: Int): Int = pow(e)
+    def pow(e: Double): Double = scala.math.pow(self, e)
+    def **(e: Double): Double = scala.math.pow(self, e)
+
+    def toLogDouble: LogDouble = LogDouble(self)
+    def log: LogDouble = toLogDouble
+  }
+
+  implicit class Enriched_Double(val self: Double) extends AnyVal {
+    def pow(e: Double): Double = scala.math.pow(self, e)
+    def **(e: Double): Double = scala.math.pow(self, e)
+
+    def toLogDouble: LogDouble = LogDouble(self)
+    def log: LogDouble = toLogDouble
   }
 
   /**
@@ -2275,6 +2290,18 @@ object util {
     def this()(implicit num: Numeric[N]) = this(num.zero)
     def +=(o: N) = { i = num.plus(i, o); this }
     def get = i
+  }
+
+  final implicit class Enriched_dot_GenTraversableOnce[A](val self: GenTraversableOnce[A])(implicit num: Numeric[A]) {
+    /**
+     * Find the dot product of the two vectors.
+     *
+     * @return the dot product
+     * @throws RuntimeException thrown if collections differ in length
+     */
+    def dot(other: GenTraversableOnce[A]): A = {
+      (self.toIterator zipSafe other).foldLeft(num.zero) { case (z, (a, b)) => num.plus(z, num.times(a, b)) }
+    }
   }
 
   //////////////////////////////////
@@ -2665,28 +2692,6 @@ object util {
     val startTime = System.currentTimeMillis()
     val r = block
     (r, (System.currentTimeMillis() - startTime) / 1000.0)
-  }
-
-  //////////////////////////////////
-  // NumUtil.scala
-  //////////////////////////////////
-
-  implicit class EnrichedInt(val self: Int) extends AnyVal {
-    def pow(e: Int): Int = (1 until e).foldLeft(self)((z, _) => z * self)
-    def **(e: Int): Int = pow(e)
-    def pow(e: Double): Double = scala.math.pow(self, e)
-    def **(e: Double): Double = scala.math.pow(self, e)
-
-    def toLogDouble: LogDouble = LogDouble(self)
-    def log: LogDouble = toLogDouble
-  }
-
-  implicit class EnrichedDouble(val self: Double) extends AnyVal {
-    def pow(e: Double): Double = scala.math.pow(self, e)
-    def **(e: Double): Double = scala.math.pow(self, e)
-
-    def toLogDouble: LogDouble = LogDouble(self)
-    def log: LogDouble = toLogDouble
   }
 
   //  implicit class NumericWithToLogDouble[N](self: N)(implicit num: Numeric[N]) {
