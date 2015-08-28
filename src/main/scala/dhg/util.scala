@@ -690,7 +690,7 @@ object util {
   //   - Extend Traversable.splitAt to Iterator
   //////////////////////////////////////////////////////
 
-  private[this] class Counter(startAt: Int = 0) { private[this] var i = startAt; def get = i; def inc() = { i += 1; this }; override def toString = f"Counter($i)" }
+  class Counter(startAt: Int = 0) { private[this] var i = startAt; def get = i; def inc() = { i += 1; this }; override def toString = f"Counter($i)" }
   private[this] class Enriched_splitAt_Iterator_FirstItr[A](self: Iterator[A], n: Int, c: Counter) extends Iterator[A] {
     def next(): A = {
       assert(hasNext, "first has already been read completely")
@@ -952,7 +952,7 @@ object util {
      * @throws RuntimeException thrown if collections differ in length
      */
     def zipSafe[B, That](that: GenTraversableOnce[B]): Array[(A, B)] = {
-      val b = ArrayBuilder.make[(A,B)]()
+      val b = ArrayBuilder.make[(A, B)]()
       b.sizeHint(self.size)
       b ++= (self.toIterator zipSafe that)
       b.result
@@ -3668,6 +3668,68 @@ object util {
 
     case class DoubleIteratorRandomGenerator(it: Iterator[Double]) extends MockableRandomGenerator {
       override def nextDouble() = it.next()
+    }
+
+  }
+
+  //////////////////////////////////
+  // GraphUtil
+  //////////////////////////////////
+
+  object GraphUtil {
+
+    def toDagOrder[A](allLinks: Set[(A, A)]): Vector[A] = toDagOrder(allLinks, allLinks.flatMap { case (a, b) => Set(a, b) })
+    def toDagOrder[A](allLinks: Set[(A, A)], allElements: Set[A]): Vector[A] = {
+      def rec[A](remainingLinks: Set[(A, A)], remainingElements: Set[A]): Vector[A] = {
+        if (remainingLinks.isEmpty) remainingElements.toVector
+        else {
+          val haveIncomingLink = remainingLinks.map(_._2)
+          val noIncoming = (remainingElements -- haveIncomingLink) // find elements with no incoming links
+          //println(f"dagOrder: reminaingLinks=$remainingLinks, remainingElements=$remainingElements, haveIncomingLink=$haveIncomingLink, noIncoming=$noIncoming")
+          noIncoming.toVector ++ rec(remainingLinks.filterNot { case (a, b) => noIncoming(a) }, remainingElements -- noIncoming) // delete any outgoing links from e (thus removing it from the graph entirely), and recurse
+        }
+      }
+      assert(!hasCycles(allLinks), "Cannot compute dagOrder due to cycle!")
+      rec(allLinks, allElements | allLinks.flatMap { case (a, b) => Set(a, b) })
+    }
+
+    @tailrec final def hasCycles[A](allLinks: Set[(A, A)]): Boolean = {
+      allLinks match {
+        case SetHeadTail((a, b), otherLinks) =>
+          if (allLinks(b -> a)) true
+          else {
+            // replace 'b' links with 'a's
+            hasCycles(otherLinks ++ otherLinks.collect { case (`b`, c) => a -> c })
+          }
+        case _ => false
+      }
+    }
+
+    def findCycles[A](allLinks: Set[(A, A)]): Set[Vector[A]] = {
+      if (hasCycles(allLinks)) {
+        val edgeMap = allLinks.groupByKey.withDefaultValue(Set.empty)
+        def inner(path: Vector[A]): Set[Vector[A]] = {
+          val nexts = edgeMap(path.last)
+          nexts.flatMap { n =>
+            val nIdx = path.indexOf(n)
+            if (nIdx == -1) inner(path :+ n)
+            else Set(path.drop(nIdx))
+          }
+        }
+        val allNodes = allLinks.flatMap { case (a, b) => Set(a, b) }
+        allNodes.flatMap { n =>
+          inner(Vector(n))
+        }
+      }
+      else {
+        Set.empty
+      }
+    }
+
+    def findUniqueCycles[A](allLinks: Set[(A, A)]): Set[Vector[A]] = {
+      findCycles(allLinks).map { path =>
+        path.toSet -> path
+      }.toMap.values.toSet
     }
 
   }
