@@ -2066,33 +2066,43 @@ object util {
 
   case class CommandLineOptions(options: ListMap[String, String]) {
     private[this] val retrieved = collection.mutable.Set.empty[String]
-    private[this] val seenValues = collection.mutable.LinkedHashMap[String, String]() ++ options.toVector
+    private[this] val seenEntries = collection.mutable.LinkedHashMap[String, String]() ++ options.toVector
 
-    private[this] def get[T](key: String)(f: String => T): T = {
-      get(key, throw new NoSuchElementException(f"--$key not specified : ${options}"))(f)
+    def apply(key: String): String = s(key)
+    def get(key: String): Option[String] = options.get(key)
+    def fold[T](key: String)(f: String => T): Option[T] = get(key).map(f)
+
+    private[this] def getInternal[T](key: String)(f: String => T): T = {
+      getInternal(key, throw new NoSuchElementException(f"--$key not specified : ${options}"))(f)
     }
-    private[this] def get[T](key: String, default: => T)(f: String => T): T = {
+    private[this] def getInternal[T](key: String, default: => T)(f: String => T): T = {
       retrieved += key
       val r: T = options.get(key).fold(default)(f)
-      seenValues(key) = r.toString
+      seenEntries(key) = r.toString
       r
     }
-    def s(key: String) = get(key)(identity)
-    def i(key: String) = get(key)(_.toInt)
-    def l(key: String) = get(key)(_.toLong)
-    def d(key: String) = get(key)(_.toDouble)
-    def b(key: String) = get(key)(_.toBoolean)
+    def s(key: String) = getInternal(key)(identity)
+    def i(key: String) = getInternal(key)(_.toInt)
+    def l(key: String) = getInternal(key)(_.toLong)
+    def d(key: String) = getInternal(key)(_.toDouble)
+    def b(key: String) = getInternal(key)(_.toBoolean)
 
-    def s(key: String, default: String) = get(key, default)(identity)
-    def i(key: String, default: Int) = get(key, default)(_.toInt)
-    def l(key: String, default: Long) = get(key, default)(_.toLong)
-    def d(key: String, default: Double) = get(key, default)(_.toDouble)
-    def b(key: String, default: Boolean) = get(key, default)(_.toBoolean)
+    def getS(key: String) = fold(key)(identity)
+    def getI(key: String) = fold(key)(_.toInt)
+    def getL(key: String) = fold(key)(_.toLong)
+    def getD(key: String) = fold(key)(_.toDouble)
+    def getB(key: String) = fold(key)(_.toBoolean)
+
+    def s(key: String, default: String) = getInternal(key, default)(identity)
+    def i(key: String, default: Int) = getInternal(key, default)(_.toInt)
+    def l(key: String, default: Long) = getInternal(key, default)(_.toLong)
+    def d(key: String, default: Double) = getInternal(key, default)(_.toDouble)
+    def b(key: String, default: Boolean) = getInternal(key, default)(_.toBoolean)
 
     def contains(key: String) = options.contains(key)
 
     def unusedOptions = options.keySet -- retrieved
-    def getSeenValues = ListMap() ++ seenValues
+    def getSeenEntries = ListMap() ++ seenEntries
 
     def toVector = options.toVector
     def toMap = options
