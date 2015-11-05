@@ -1,8 +1,79 @@
 package dhg
 
+import java.awt.BasicStroke
 import java.awt.BorderLayout
+import java.awt.Color
+import java.awt.{ Shape => JShape }
+import java.awt.geom.Ellipse2D
+import java.io.BufferedReader
+import java.io.BufferedWriter
+import java.io.Closeable
+import java.io.File.createTempFile
+import java.io.File.separator
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.InputStreamReader
+import java.io.OutputStreamWriter
+import java.io.PrintStream
+import java.io.Writer
+import java.net.URI
+import java.util.zip.GZIPInputStream
+
+import scala.Iterator
+import scala.Vector
+import scala.annotation.tailrec
+import scala.collection.GenSeqLike
+import scala.collection.GenTraversable
+import scala.collection.GenTraversableLike
+import scala.collection.GenTraversableOnce
+import scala.collection.Parallel
+import scala.collection.Parallelizable
+import scala.collection.SeqLike
+import scala.collection.TraversableLike
+import scala.collection.TraversableOnce.MonadOps
+import scala.collection.generic.CanBuildFrom
+import scala.collection.generic.Growable
+import scala.collection.immutable
+import scala.collection.immutable.BitSet
+import scala.collection.immutable.ListMap
+import scala.collection.mutable
+import scala.collection.mutable.ArrayBuilder
+import scala.collection.mutable.Builder
+import scala.collection.mutable.ListBuffer
+import scala.io.BufferedSource
+import scala.io.Source
+import scala.math.Fractional
+import scala.math.Numeric
+import scala.math.Ordered
+import scala.math.Ordering
+import scala.math.exp
+import scala.math.log
+import scala.math.log1p
+import scala.math.pow
+import scala.math.sqrt
+import scala.sys.process.Process
+import scala.sys.process.ProcessLogger
+import scala.util.Random
+import scala.util.matching.Regex
 
 import org.abego.treelayout.netbeans.AbegoTreeLayoutForNetbeans
+import org.apache.commons.math3.random.RandomGenerator
+import org.jfree.chart.ChartPanel
+import org.jfree.chart.JFreeChart
+import org.jfree.chart.axis.DateAxis
+import org.jfree.chart.axis.NumberAxis
+import org.jfree.chart.plot.DatasetRenderingOrder
+import org.jfree.chart.plot.XYPlot
+import org.jfree.chart.renderer.xy.StandardXYBarPainter
+import org.jfree.chart.renderer.xy.XYBarRenderer
+import org.jfree.chart.renderer.xy.XYItemRenderer
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer
+import org.jfree.data.xy.{ XYDataset => JXYDataset }
+import org.jfree.data.xy.XYIntervalSeries
+import org.jfree.data.xy.XYIntervalSeriesCollection
+import org.jfree.data.xy.XYSeries
+import org.jfree.data.xy.XYSeriesCollection
+import org.junit.Assert._
 import org.netbeans.api.visual.anchor.AnchorFactory
 import org.netbeans.api.visual.graph.GraphScene
 import org.netbeans.api.visual.layout.LayoutFactory
@@ -10,134 +81,11 @@ import org.netbeans.api.visual.widget.ConnectionWidget
 import org.netbeans.api.visual.widget.LabelWidget
 import org.netbeans.api.visual.widget.LayerWidget
 import org.netbeans.api.visual.widget.Widget
+
 import javax.swing.JDialog
-import javax.swing.JScrollPane
-import java.io.Closeable
-import scala.io.Source
-import scala.collection.generic.CanBuildFrom
-import scala.collection.GenTraversableOnce
-import scala.collection.GenTraversableLike
-import scala.collection.Parallel
-import scala.collection.GenTraversable
-import scalaz.{ Ordering => _, _ }
-import Scalaz._
-import scala.annotation.tailrec
-import scala.collection.GenSeqLike
-import scala.collection.GenTraversable
-import scala.collection.GenTraversableLike
-import scala.collection.GenTraversableOnce
-import scala.collection.Parallel
-import scala.collection.Parallelizable
-import scala.collection.SeqLike
-import scala.collection.TraversableLike
-import scala.collection.generic.CanBuildFrom
-import scala.collection.immutable
-import scala.collection.immutable.BitSet
-import scala.collection.mutable
-import scala.collection.mutable.Builder
-import scala.collection.mutable.ArrayBuilder
-import scala.collection.mutable.ListBuffer
-import scala.util.Random
-import java.io.BufferedWriter
-import java.io.File
-import java.io.File.createTempFile
-import java.io.File.separator
-import java.io.FileOutputStream
-import java.io.FileWriter
-import java.io.OutputStreamWriter
-import java.io.Writer
-import java.net.URI
-import scala.collection.breakOut
-import scala.io.BufferedSource
-import scala.io.Source
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.util.zip.GZIPInputStream
-import java.io.FileInputStream
-import scala.util.matching.Regex
-import scala.math._
-import scala.sys.process._
-import java.io.PrintStream
-import scala.collection.generic.Growable
-import java.io.Writer
-import scala.sys.process._
-import java.io.PrintStream
-import scala.collection.generic.Growable
-import java.io.Writer
-import dhg.util.Subprocess._
-import scala.annotation.tailrec
-import scala.collection.GenSeqLike
-import scala.collection.GenTraversable
-import scala.collection.GenTraversableLike
-import scala.collection.GenTraversableOnce
-import scala.collection.Parallel
-import scala.collection.Parallelizable
-import scala.collection.SeqLike
-import scala.collection.TraversableLike
-import scala.collection.generic.CanBuildFrom
-import scala.collection.immutable
-import scala.collection.immutable.BitSet
-import scala.collection.mutable
-import scala.collection.mutable.Builder
-import scala.collection.mutable.ListBuffer
-import scala.util.Random
-import scala.annotation.tailrec
-import scala.math.{ pow, exp, log }
-import org.apache.commons.math3.random.{ RandomGenerator }
-import dhg.util._
-import java.awt.Color
-import org.jfree.chart.ChartFactory
-import org.jfree.chart.ChartPanel
-import org.jfree.chart.JFreeChart
-import org.jfree.chart.plot.Plot
-import org.jfree.chart.plot.PlotOrientation
-import org.jfree.chart.plot.XYPlot
-import org.jfree.chart.renderer.AbstractRenderer
-import org.jfree.chart.renderer.category.StandardBarPainter
-import org.jfree.chart.renderer.xy.StandardXYBarPainter
-import org.jfree.chart.renderer.xy.XYBarRenderer
-import org.jfree.data.category.DefaultCategoryDataset
 import javax.swing.JFrame
-import org.jfree.data.xy.XYSeriesCollection
-import org.jfree.data.xy.XYSeries
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer
-import org.jfree.chart.axis.NumberAxis
-import org.jfree.chart.plot.CategoryPlot
-import org.jfree.data.general.Dataset
-import org.jfree.chart.LegendItemSource
-import org.jfree.chart.renderer.xy.XYItemRenderer
-import org.jfree.chart.plot.DatasetRenderingOrder
-import org.jfree.data.xy.{ XYDataset => JXYDataset }
-import org.jfree.chart.axis.ValueAxis
-import org.jfree.chart.axis.DateAxis
-import scala.collection.GenTraversable
-import java.awt.{ Shape => JShape }
-import scala.collection.GenTraversableOnce
-import dhg.util._
-import java.lang.Comparable
-import org.jfree.data.xy.XYSeriesCollection
-import org.jfree.data.xy.XYSeries
-import org.jfree.data.category.DefaultCategoryDataset
-import org.jfree.data.statistics.{ HistogramDataset => JfcHistogramDataset }
-import org.jfree.data.xy.XYIntervalSeries
-import org.jfree.data.xy.IntervalXYDataset
-import org.jfree.data.xy.XYIntervalSeriesCollection
-import scala.collection.GenTraversable
-import scala.collection.mutable
-import scala.collection.GenTraversableOnce
-import java.awt.Color
-import org.jfree.chart.renderer.xy.StandardXYBarPainter
-import org.jfree.chart.renderer.xy.XYBarRenderer
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer
-import java.awt.BasicStroke
-import java.awt.{ Shape => JShape }
-import org.jfree.util.ShapeUtilities
-import java.awt.geom.Ellipse2D
-import org.junit.Assert._
-import scala.math.log
-import java.lang.AssertionError
-import scala.util.matching.Regex
-import org.apache.commons.math3.random.RandomGenerator
+import javax.swing.JScrollPane
+import scalaz._
 
 /**
  * The entire `util` package, basically.
@@ -2096,7 +2044,7 @@ object util {
   def parseArgs(args: Array[String]) = {
     val parsedArgs =
       ("" +: args.toVector) // prepend an empty arg so sliding will work
-        .sliding(2).flatMap {
+        .sliding(2).toVector.flatMap {
           case Seq(OptionRegex(option), argument) => Some(option, argument) // if the first thing is an option
           case Seq(_, OptionRegex(_)) => None // if the second thing is an option
           case Seq(_, argument) => Some("argument", argument) // if no options are involved, then it's a normal argument
@@ -2110,28 +2058,41 @@ object util {
       }
 
     val arguments = argumentList.map(_._2).toVector // arguments are a Vector
-    val options = optionList.groupByKey.map { case (opt, Coll(v)) => opt -> v; case (opt, _) => sys.error(f"option --${opt} given twice") } // options are a Map
+    optionList.map(_._1).counts.foreach { case (opt,count) if count > 1 => sys.error(f"option --${opt} given twice"); case _ => }
+    val options = ListMap() ++ optionList
+    
     (arguments, CommandLineOptions(options))
   }
 
-  case class CommandLineOptions(options: Map[String, String]) {
+  case class CommandLineOptions(options: ListMap[String, String]) {
     private[this] val retrieved = collection.mutable.Set.empty[String]
+    private[this] val seenValues = collection.mutable.LinkedHashMap[String, String]() ++ options.toVector
 
-    def get(key: String) = { retrieved += key; options.get(key) }
-    def apply(key: String) = get(key).getOrElse(throw new NoSuchElementException(f"--$key not specified : ${options}"))
-    def s(key: String) = apply(key)
-    def s(key: String, default: String) = get(key).getOrElse(default)
-    def i(key: String) = apply(key).toInt
-    def i(key: String, default: Int) = get(key).fold(default)(_.toInt)
-    def l(key: String) = apply(key).toLong
-    def l(key: String, default: Long) = get(key).fold(default)(_.toLong)
-    def d(key: String) = apply(key).toDouble
-    def d(key: String, default: Double) = get(key).fold(default)(_.toDouble)
-    def b(key: String) = apply(key).toBoolean
-    def b(key: String, default: Boolean) = get(key).fold(default)(_.toBoolean)
-    def contains(key: String) = options.get(key).isDefined
+    private[this] def get[T](key: String)(f: String => T): T = {
+      get(key, throw new NoSuchElementException(f"--$key not specified : ${options}"))(f)
+    }
+    private[this] def get[T](key: String, default: => T)(f: String => T): T = {
+      retrieved += key
+      val r: T = options.get(key).fold(default)(f)
+      seenValues(key) = r.toString
+      r
+    }
+    def s(key: String) = get(key)(identity)
+    def i(key: String) = get(key)(_.toInt)
+    def l(key: String) = get(key)(_.toLong)
+    def d(key: String) = get(key)(_.toDouble)
+    def b(key: String) = get(key)(_.toBoolean)
+
+    def s(key: String, default: String) = get(key, default)(identity)
+    def i(key: String, default: Int) = get(key, default)(_.toInt)
+    def l(key: String, default: Long) = get(key, default)(_.toLong)
+    def d(key: String, default: Double) = get(key, default)(_.toDouble)
+    def b(key: String, default: Boolean) = get(key, default)(_.toBoolean)
+
+    def contains(key: String) = options.contains(key)
 
     def unusedOptions = options.keySet -- retrieved
+    def getSeenValues = ListMap() ++ seenValues
 
     def toVector = options.toVector
     def toMap = options
