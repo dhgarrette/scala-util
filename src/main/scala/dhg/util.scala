@@ -2068,36 +2068,55 @@ object util {
     private[this] val retrieved = collection.mutable.Set.empty[String]
     private[this] val seenEntries = collection.mutable.LinkedHashMap[String, String]() ++ options.toVector
 
-    def apply(key: String): String = s(key)
-    def get(key: String): Option[String] = options.get(key)
-    def fold[T](key: String)(f: String => T): Option[T] = get(key).map(f)
-
-    private[this] def getInternal[T](key: String)(f: String => T): T = {
-      getInternal(key, throw new NoSuchElementException(f"--$key not specified : ${options}"))(f)
+    /* `apply` methods always return a T.
+     * Without a default, a missing key will result in an exception.
+     * Whether or not a default is given, a transformation method is allowed.
+     * `seenEntries` will store the result after any transformation.
+     */
+    def apply[T](key: String, f: String => T): T = {
+      apply(key, throw new NoSuchElementException(f"--$key not specified : ${options}"), f)
     }
-    private[this] def getInternal[T](key: String, default: => T)(f: String => T): T = {
+    def apply[T](key: String, default: => T, f: String => T): T = {
       retrieved += key
       val r: T = options.get(key).fold(default)(f)
       seenEntries(key) = r.toString
       r
     }
-    def s(key: String) = getInternal(key)(identity)
-    def i(key: String) = getInternal(key)(_.toInt)
-    def l(key: String) = getInternal(key)(_.toLong)
-    def d(key: String) = getInternal(key)(_.toDouble)
-    def b(key: String) = getInternal(key)(_.toBoolean)
 
-    def getS(key: String) = fold(key)(identity)
-    def getI(key: String) = fold(key)(_.toInt)
-    def getL(key: String) = fold(key)(_.toLong)
-    def getD(key: String) = fold(key)(_.toDouble)
-    def getB(key: String) = fold(key)(_.toBoolean)
+    /* `get` methods always return a Option[T].
+     * A default is never used, since the default is always None.
+     * A transformation method is allowed.
+     * If the key is present, `seenEntries` will store the result after any transformation.
+     */
+    def get[T](key: String, f: String => T): Option[T] = {
+      retrieved += key
+      options.get(key).map { v =>
+        val r: T = f(v)
+        seenEntries(key) = r.toString
+        r
+      }
+    }
+    
+    def apply(key: String): String = s(key)
+    def i(key: String): Int = apply(key, _.toInt)
+    def l(key: String): Long = apply(key, _.toLong)
+    def d(key: String): Double = apply(key, _.toDouble)
+    def s(key: String): String = apply(key, (v: String) => v)
+    def b(key: String): Boolean = apply(key, _.toBoolean)
 
-    def s(key: String, default: String) = getInternal(key, default)(identity)
-    def i(key: String, default: Int) = getInternal(key, default)(_.toInt)
-    def l(key: String, default: Long) = getInternal(key, default)(_.toLong)
-    def d(key: String, default: Double) = getInternal(key, default)(_.toDouble)
-    def b(key: String, default: Boolean) = getInternal(key, default)(_.toBoolean)
+    def apply(key: String, default: String): String = s(key, default)
+    def i(key: String, default: Int) = apply(key, default, _.toInt)
+    def l(key: String, default: Long) = apply(key, default, _.toLong)
+    def d(key: String, default: Double) = apply(key, default, _.toDouble)
+    def s(key: String, default: String) = apply(key, default, (v: String) => v)
+    def b(key: String, default: Boolean) = apply(key, default, _.toBoolean)
+
+    def get(key: String): Option[String] = getS(key)
+    def getI(key: String): Option[Int] = get(key, _.toInt)
+    def getL(key: String): Option[Long] = get(key, _.toLong)
+    def getD(key: String): Option[Double] = get(key, _.toDouble)
+    def getS(key: String): Option[String] = get(key, (v: String) => v)
+    def getB(key: String): Option[Boolean] = get(key, _.toBoolean)
 
     def contains(key: String) = options.contains(key)
 

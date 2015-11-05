@@ -42,28 +42,28 @@ class CommandLineUtilTests {
     assertExceptionMsg("--f6 not specified.*".r)(options("f6"))
 
     assertEquals(Some(2), options.getI("b2"))
-    assertEquals(Set("b2", "c3", "d4", "e5a", "e5b"), options.unusedOptions)
+    assertEquals(Set("c3", "d4", "e5a", "e5b"), options.unusedOptions)
     assertEquals(Vector("a1" -> "1a", "b2" -> "2", "c3" -> "3", "d4" -> "4.4", "e5a" -> "true", "e5b" -> "false"), options.getSeenEntries.toVector)
 
     assertEquals(None, options.getB("f6"))
-    assertEquals(Set("b2", "c3", "d4", "e5a", "e5b"), options.unusedOptions)
+    assertEquals(Set("c3", "d4", "e5a", "e5b"), options.unusedOptions)
     assertEquals(Vector("a1" -> "1a", "b2" -> "2", "c3" -> "3", "d4" -> "4.4", "e5a" -> "true", "e5b" -> "false"), options.getSeenEntries.toVector)
 
     assertEquals(Some("2"), options.get("b2"))
-    assertEquals(Set("b2", "c3", "d4", "e5a", "e5b"), options.unusedOptions)
+    assertEquals(Set("c3", "d4", "e5a", "e5b"), options.unusedOptions)
     assertEquals(Vector("a1" -> "1a", "b2" -> "2", "c3" -> "3", "d4" -> "4.4", "e5a" -> "true", "e5b" -> "false"), options.getSeenEntries.toVector)
 
     assertEquals(None, options.get("f6"))
-    assertEquals(Set("b2", "c3", "d4", "e5a", "e5b"), options.unusedOptions)
+    assertEquals(Set("c3", "d4", "e5a", "e5b"), options.unusedOptions)
     assertEquals(Vector("a1" -> "1a", "b2" -> "2", "c3" -> "3", "d4" -> "4.4", "e5a" -> "true", "e5b" -> "false"), options.getSeenEntries.toVector)
 
-    assertEquals(Some(12), options.fold("b2")(_.toInt + 10))
-    assertEquals(Set("b2", "c3", "d4", "e5a", "e5b"), options.unusedOptions)
+    assertEquals(None, options.get("f6", _.toInt + 10))
+    assertEquals(Set("c3", "d4", "e5a", "e5b"), options.unusedOptions)
     assertEquals(Vector("a1" -> "1a", "b2" -> "2", "c3" -> "3", "d4" -> "4.4", "e5a" -> "true", "e5b" -> "false"), options.getSeenEntries.toVector)
 
-    assertEquals(None, options.fold("f6")(_.toInt + 10))
-    assertEquals(Set("b2", "c3", "d4", "e5a", "e5b"), options.unusedOptions)
-    assertEquals(Vector("a1" -> "1a", "b2" -> "2", "c3" -> "3", "d4" -> "4.4", "e5a" -> "true", "e5b" -> "false"), options.getSeenEntries.toVector)
+    assertEquals(Some(12), options.get("b2", _.toInt + 10))
+    assertEquals(Set("c3", "d4", "e5a", "e5b"), options.unusedOptions)
+    assertEquals(Vector("a1" -> "1a", "b2" -> "12", "c3" -> "3", "d4" -> "4.4", "e5a" -> "true", "e5b" -> "false"), options.getSeenEntries.toVector)
 
     assertEquals(2, options.i("b2"))
     assertEquals(Set("c3", "d4", "e5a", "e5b"), options.unusedOptions)
