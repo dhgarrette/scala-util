@@ -20,3 +20,6 @@ project/plugins/project/
 .worksheet
 
 /bin/
+
+.DS_Store
+
