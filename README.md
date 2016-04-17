@@ -11,3 +11,7 @@ Put the following in `build.sbt`:
     libraryDependencies += "dhg" % "scala-util_2.11" % "0.0.2-SNAPSHOT"
     
 API available here: http://www.cs.utexas.edu/~dhg/maven-repository/snapshots/dhg/scala-util_2.11/0.0.2-SNAPSHOT/api
+
+Use the library by simply importing everything in the package:
+
+    import dhg.util._
