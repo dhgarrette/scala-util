@@ -1,5 +1,7 @@
 package dhg
 
+import collection.mutable.LinkedHashMap
+import collection.immutable.ListMap
 import java.awt.BasicStroke
 import java.awt.BorderLayout
 import java.awt.Color
@@ -524,12 +526,12 @@ object util {
      * @return Map from `k`s to collections of `v`s
      */
     def groupByKey[That](implicit bf: CanBuildFrom[Repr, V, That]): Map[K, That] = {
-      val m = mutable.Map.empty[K, Builder[V, That]]
+      val m = mutable.LinkedHashMap.empty[K, Builder[V, That]]
       for ((key, value) <- self) {
         val bldr = m.getOrElseUpdate(key, bf(self.asInstanceOf[Repr]))
         bldr += value
       }
-      val b = immutable.Map.newBuilder[K, That]
+      val b = immutable.ListMap.newBuilder[K, That]
       for ((k, v) <- m)
         b += ((k, v.result))
       b.result
@@ -2801,11 +2803,11 @@ object util {
 
   implicit class EnrichedRegex(val self: Regex) extends AnyVal {
     def matches(s: String): Boolean = self.pattern.matcher(s).matches
-    def apply(s: String) = groups(s)
-    def groups(s: String) = groupsOption(s).getOrElse(sys.error(self.pattern.matcher(s).group))
-    def groupsOption(s: String) = self.unapplySeq(s)
-    def firstGroup(s: String) = self.findFirstMatchIn(s).map(_.subgroups)
-    def allGroups(s: String) = self.findAllMatchIn(s).map(_.subgroups)
+    def apply(s: String): List[String] = groups(s)
+    def groups(s: String): List[String] = groupsOption(s).getOrElse(sys.error(self.pattern.matcher(s).group))
+    def groupsOption(s: String): Option[List[String]] = self.unapplySeq(s)
+    def firstGroup(s: String): Option[List[String]] = self.findFirstMatchIn(s).map(_.subgroups)
+    def allGroups(s: String): Iterator[List[String]] = self.findAllMatchIn(s).map(_.subgroups)
   }
 
   //////////////////////////////////
