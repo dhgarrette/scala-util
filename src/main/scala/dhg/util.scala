@@ -2612,6 +2612,7 @@ object util {
      * Split on whitespace
      */
     def splitWhitespace: Vector[String] = self.lsplit("\\s+")
+    def sw = splitWhitespace
 
     /**
      * Split a string into `limit` pieces, starting from the left side.
