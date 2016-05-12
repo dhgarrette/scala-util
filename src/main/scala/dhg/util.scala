@@ -1,3 +1,4 @@
+
 package dhg
 
 import collection.mutable.LinkedHashMap
@@ -2127,6 +2128,13 @@ object util {
 
     def toVector = options.toVector
     def toMap = options
+    
+    def printOptions(align: Boolean = false): Unit = {
+      val maxOptWidth = if (align) options.keys.map(_.size).max else 0
+      for ((o,v) <- options) {
+        println(s"--${o.padRight(maxOptWidth)} $v")
+      }
+    }
   }
 
   //////////////////////////////////
@@ -2449,6 +2457,10 @@ object util {
     def dot(other: GenTraversableOnce[A]): A = {
       (self.toIterator zipSafe other).foldLeft(num.zero) { case (z, (a, b)) => num.plus(z, num.times(a, b)) }
     }
+  }
+
+  implicit class Enriched_Boolean(val self: Boolean) extends AnyVal {
+    def -->(consequent: Boolean): Boolean = !self || consequent
   }
 
   //////////////////////////////////
