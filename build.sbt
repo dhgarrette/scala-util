@@ -4,7 +4,7 @@ version := "0.0.2-SNAPSHOT"
 
 organization := "dhg"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.8"
 
 libraryDependencies ++= Seq(
   "org.apache.commons" % "commons-math3" % "3.4",
