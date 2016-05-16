@@ -2061,7 +2061,7 @@ object util {
       }
 
     val arguments = argumentList.map(_._2).toVector // arguments are a Vector
-    optionList.map(_._1).counts.foreach { case (opt,count) if count > 1 => sys.error(f"option --${opt} given twice"); case _ => }
+    optionList.map(_._1.toLowerCase).counts.foreach { case (opt,count) if count > 1 => sys.error(f"option --${opt} given twice"); case _ => }
     val options = ListMap() ++ optionList
     
     (arguments, CommandLineOptions(options))
@@ -2077,12 +2077,14 @@ object util {
      * `seenEntries` will store the result after any transformation.
      */
     def apply[T](key: String, f: String => T): T = {
-      apply(key, throw new NoSuchElementException(f"--$key not specified : ${options}"), f)
+      val lowerKey = key.toLowerCase
+      apply(lowerKey, throw new NoSuchElementException(f"--$key not specified : ${options}"), f)
     }
     def apply[T](key: String, default: => T, f: String => T): T = {
-      retrieved += key
-      val r: T = options.get(key).fold(default)(f)
-      seenEntries(key) = r.toString
+      val lowerKey = key.toLowerCase
+      retrieved += lowerKey
+      val r: T = options.get(lowerKey).fold(default)(f)
+      seenEntries(lowerKey) = r.toString
       r
     }
 
@@ -2129,10 +2131,13 @@ object util {
     def toVector = options.toVector
     def toMap = options
     
-    def printOptions(align: Boolean = false): Unit = {
-      val maxOptWidth = if (align) options.keys.map(_.size).max else 0
-      for ((o,v) <- options) {
-        println(s"--${o.padRight(maxOptWidth)} $v")
+    def printOptions(givenOnly: Boolean = false, align: Boolean = false): Unit = {
+  		val optionsToUse = options ++ (if (!givenOnly) seenEntries -- options.keys else Map.empty) 
+      if (optionsToUse.nonEmpty) {
+        val maxOptWidth = if (align) optionsToUse.keys.map(_.size).max else 0
+        for ((o,v) <- optionsToUse) {
+          println(s"--${o.padRight(maxOptWidth)}  $v")
+        }
       }
     }
   }
@@ -2618,7 +2623,7 @@ object util {
     /**
      * Split on newlines
      */
-    def splitlines: Vector[String] = self.lsplit("\n")
+    def splitlines: Vector[String] = self.lines.toVector
 
     /**
      * Split on whitespace
