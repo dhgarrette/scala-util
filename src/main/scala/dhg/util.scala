@@ -2181,24 +2181,20 @@ object util {
 
   implicit class EnhancedFile(val self: File) extends AnyVal {
 
-    def path = {
-      self.getPath
-    }
-
-    def name = {
-      self.getName
-    }
-
-    def parent = {
-      Option(self.getParentFile)
-    }
+    def path = self.getPath
+    def name = self.getName
+    def baseext = name.rsplit("\\.", 2) match { case Seq(base,ext) => (base,ext); case Seq(base) => (base, "") }
+    def basename = baseext._1
+    def ext = baseext._2
+    def parentFile: Option[File] = Option(self.getParentFile)
+    def parent: Option[File] = parentFile
 
     /**
      * Separate the filename from the parent directory.
      * Return Some(parentDir, filename) if there is a parent directory,
      * and None otherwise.
      */
-    def parentFilename = {
+    def parentFilename: (Option[File], String) = {
       (self.parent, self.name)
     }
 
@@ -2213,7 +2209,7 @@ object util {
     /**
      * Creating the file's containing directory structure if necessary.
      */
-    def mkParentDir() {
+    def mkParentDir(): Unit = {
       self.parent.foreach(_.mkdirs())
     }
 
