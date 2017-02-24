@@ -2300,6 +2300,7 @@ object util {
   case class BufferedReaderIterator(reader: BufferedReader) extends Iterator[String] {
     override def hasNext() = reader.ready
     override def next() = reader.readLine()
+    def close() = reader.close()
   }
 
   /**
@@ -2342,11 +2343,11 @@ object util {
       }
     }
     def close() = {
-      reader.close();
+      reader.close()
     }
   }
   object SelfClosingBufferedReaderIterator {
-    def apply(reader: BufferedReader) = new SelfClosingBufferedReaderIterator(reader);
+    def apply(reader: BufferedReader) = new SelfClosingBufferedReaderIterator(reader)
   }
 
   def bufferedWriter(file: File, encoding: String = "UTF-8") = {
