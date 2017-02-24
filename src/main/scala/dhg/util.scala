@@ -2276,7 +2276,7 @@ object util {
      * Read the contents of this file, making sure to close the file after all
      * lines have been read.
      */
-    def readLines: Iterator[String] = {
+    def readLines: SelfClosingBufferedReaderIterator = {
       readLines("UTF-8")
     }
 
@@ -2284,7 +2284,7 @@ object util {
      * Read the contents of this file, making sure to close the file after all
      * lines have been read.
      */
-    def readLines(encoding: String): Iterator[String] = {
+    def readLines(encoding: String): SelfClosingBufferedReaderIterator = {
       SelfClosingBufferedReaderIterator(bufferedReader(self, encoding))
     }
 
@@ -2319,8 +2319,8 @@ object util {
    * automatically close itself when the end is reached.  This gets around the
    * problem of having to all of your processing inside the `using` block.
    */
-  case class SelfClosingBufferedReaderIterator(bufferedReader: BufferedReader) extends Iterator[String] {
-    private[this] val blockItr = BufferedReaderIterator(bufferedReader)
+  class SelfClosingBufferedReaderIterator(reader: BufferedReader) extends Iterator[String] {
+    private[this] val blockItr = BufferedReaderIterator(reader)
     private[this] var finished = false
     override def next() = {
       hasNext()
@@ -2336,11 +2336,17 @@ object util {
         val hn = blockItr.hasNext
         if (!hn) {
           finished = true
-          bufferedReader.close()
+          close()
         }
         hn
       }
     }
+    def close() = {
+      reader.close();
+    }
+  }
+  object SelfClosingBufferedReaderIterator {
+    def apply(reader: BufferedReader) = new SelfClosingBufferedReaderIterator(reader);
   }
 
   def bufferedWriter(file: File, encoding: String = "UTF-8") = {
