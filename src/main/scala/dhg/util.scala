@@ -219,6 +219,11 @@ object util {
   implicit object LogDoubleSemigroup extends Semigroup[LogDouble] {
     override def append(f1: LogDouble, f2: => LogDouble) = f1 + f2
   }
+  
+//  implicit val doubleSemigroup: Semigroup[Double] = Semigroup.instance[Double](_+_);
+  implicit object DoubleSemigroup extends Semigroup[Double] {
+    override def append(f1: Double, f2: => Double) = f1 + f2
+  }
 
   //////////////////////////////////
   // Arm.scala: Automatic Resource Management (ARM) utility.

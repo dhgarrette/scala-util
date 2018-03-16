@@ -1,18 +1,17 @@
 name := "scala-util"
 
-version := "0.0.2-SNAPSHOT"
+version := "0.0.3-SNAPSHOT"
 
 organization := "dhg"
 
-scalaVersion := "2.12.1"
+scalaVersion := "2.12.4"
 
 libraryDependencies ++= Seq(
   "org.apache.commons" % "commons-math3" % "3.6.1",
-  "org.scalaz" %% "scalaz-core" % "7.2.9",
-  //"org.spire-math" %% "spire" % "0.8.2",
-  "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0",
-  //"org.slf4j" % "slf4j-log4j12" % "1.7.9",
-  "ch.qos.logback" % "logback-classic" % "1.1.7",
+  "org.scalaz" %% "scalaz-core" % "7.2.20",
+  //"org.typelevel" %% "spire" % "0.15.0",
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.8.0",
+  "ch.qos.logback" % "logback-classic" % "1.2.3",
   "junit" % "junit" % "4.12",
   "com.novocode" % "junit-interface" % "0.11" % "test") //switch to ScalaTest at some point...
 
