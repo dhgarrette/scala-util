@@ -88,6 +88,7 @@ import org.netbeans.api.visual.widget.Widget
 import javax.swing.JDialog
 import javax.swing.JFrame
 import javax.swing.JScrollPane
+import javax.swing.WindowConstants
 import scalaz._
 
 /**
@@ -3969,7 +3970,7 @@ object util {
         //frame.pack()
         frame.setBounds(a, b, width, height)
         frame.setVisible(true)
-        if (exitOnClose) frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
+        if (exitOnClose) frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
       }
     }
 
