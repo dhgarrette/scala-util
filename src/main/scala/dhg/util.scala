@@ -1,4 +1,3 @@
-
 package dhg
 
 import collection.mutable.LinkedHashMap
@@ -172,7 +171,7 @@ object util {
     def toFloat = toDouble.toFloat
     def toDouble = exp(logValue)
 
-    override def toString = s"LogDouble(${toDouble})"
+    override def toString() = s"LogDouble(${toDouble})"
   }
 
   object LogDouble {
@@ -295,7 +294,7 @@ object util {
         }
         currentChunk.next()
       }
-      def hasNext() = currentChunk.hasNext || self.hasNext
+      def hasNext = currentChunk.hasNext || self.hasNext
     }
   }
 
@@ -308,7 +307,7 @@ object util {
   //    private[this] def balance(): Unit = { while (q.length > k) q.dequeue }
   //    def iterator = toVector.iterator
   //    def toVector = (collection.mutable.PriorityQueue.empty[A](ord) ++= q.iterator).dequeueAll.toVector
-  //    override def toString = f"KMaxPriorityQueue(k)(${q})"
+  //    override def toString() = f"KMaxPriorityQueue(k)(${q})"
   //  }
   //  object KMaxPriorityQueue {
   //    def empty[A](k: Int)(implicit ord: scala.math.Ordering[A]) = new KMaxPriorityQueue(k)(ord)
@@ -647,13 +646,13 @@ object util {
   //   - Extend Traversable.splitAt to Iterator
   //////////////////////////////////////////////////////
 
-  class Counter(startAt: Int = 0) { private[this] var i = startAt; def get = i; def inc() = { i += 1; this }; override def toString = f"Counter($i)" }
+  class Counter(startAt: Int = 0) { private[this] var i = startAt; def get = i; def inc() = { i += 1; this }; override def toString() = f"Counter($i)" }
   private[this] class Enriched_splitAt_Iterator_FirstItr[A](self: Iterator[A], n: Int, c: Counter) extends Iterator[A] {
     def next(): A = {
       assert(hasNext, "first has already been read completely")
       c.inc(); self.next
     }
-    def hasNext() = c.get < n && self.hasNext
+    def hasNext = c.get < n && self.hasNext
   }
   private[this] class Enriched_splitAt_Iterator_SecondItr[A](self: Iterator[A], n: Int, c: Counter) extends Iterator[A] {
     def next(): A = {
@@ -661,7 +660,7 @@ object util {
       assert(hasNext, "second has already been read completely")
       c.inc(); self.next
     }
-    def hasNext() = self.hasNext
+    def hasNext = self.hasNext
   }
   final implicit class Enriched_splitAt_Iterator[A](val self: Iterator[A]) extends AnyVal {
     /**
@@ -757,7 +756,7 @@ object util {
       group
     }
 
-    def hasNext() = {
+    def hasNext = {
       if (queued.isEmpty) {
         takeUntilDelim()
       }
@@ -858,13 +857,13 @@ object util {
   //////////////////////////////////////////////////////
 
   private[this] class ZipSafeIterator[A, B](self: Iterator[A], thatItr: Iterator[B]) extends Iterator[(A, B)] {
-    def hasNext() = {
+    def hasNext = {
       val hn = self.hasNext
       assert(hn == thatItr.hasNext, s"Attempting to zipSafe collections of different lengths.  ${if (hn) "Second" else "First"} ran out.")
       hn
     }
     def next() = {
-      hasNext()
+      hasNext
       (self.next, thatItr.next)
     }
   }
@@ -916,7 +915,7 @@ object util {
     }
   }
 
-  final implicit class Enriched_zipSafe_Tuple_of_Iterator[A, B](val self: (Iterator[A], GenTraversableOnce[B])) extends AnyVal {
+  final implicit class Enriched_zippedpSafe_Tuple_of_Iterator[A, B](val self: (Iterator[A], GenTraversableOnce[B])) extends AnyVal {
     /**
      * zip this collection with another, throwing an exception if they
      * are not of equal length.
@@ -924,10 +923,10 @@ object util {
      * @return an iterator of pairs
      * @throws RuntimeException thrown if collections differ in length
      */
-    def zipSafe = self._1 zipSafe self._2
+    def zippedSafe = self._1 zipSafe self._2
   }
 
-  final implicit class Enriched_zipSafe_Tuple_of_GenTraversable[A, Repr, B](val self: (GenTraversableLike[A, Repr], GenTraversableOnce[B])) extends AnyVal {
+  final implicit class Enriched_zippedSafe_Tuple_of_GenTraversable[A, Repr, B](val self: (GenTraversableLike[A, Repr], GenTraversableOnce[B])) extends AnyVal {
     /**
      * zip this collection with another, throwing an exception if they
      * are not of equal length.
@@ -936,7 +935,7 @@ object util {
      * @return an iterator of pairs
      * @throws RuntimeException thrown if collections differ in length
      */
-    def zipSafe[A1 >: A, That](implicit bf: CanBuildFrom[Repr, (A1, B), That]): That = {
+    def zippedSafe[A1 >: A, That](implicit bf: CanBuildFrom[Repr, (A1, B), That]): That = {
       val b = bf(self._1.asInstanceOf[Repr])
       b ++= (self._1.toIterator zipSafe self._2)
       b.result
@@ -1054,7 +1053,7 @@ object util {
   private[this] abstract class QueuedPairIterator[A, B, T, O](self: Iterator[(A, B)], thisQueue: mutable.Queue[T], otherQueue: mutable.Queue[O]) extends Iterator[T] {
     protected[this] def swapOrNot(p: (A, B)): (T, O)
     override def hasNext = thisQueue.nonEmpty || self.hasNext
-    override def next =
+    override def next() =
       if (thisQueue.nonEmpty) thisQueue.dequeue()
       else { val (t, o) = swapOrNot(self.next()); otherQueue.enqueue(o); t }
   }
@@ -1308,7 +1307,7 @@ object util {
       val x = self.next
       f(x._1, x._2)
     }
-    def hasNext() = self.hasNext
+    def hasNext = self.hasNext
   }
   final implicit class Enriched_mapt_2_Iterator[A, B](val self: Iterator[(A, B)]) extends AnyVal {
     def mapt[R](f: (A, B) => R): Iterator[R] = new Mapt2Iterator(self, f)
@@ -1325,7 +1324,7 @@ object util {
       val x = self.next
       f(x._1, x._2, x._3)
     }
-    def hasNext() = self.hasNext
+    def hasNext = self.hasNext
   }
   final implicit class Enriched_mapt_3_Iterator[A, B, C](val self: Iterator[(A, B, C)]) extends AnyVal {
     def mapt[R](f: (A, B, C) => R): Iterator[R] = new Mapt3Iterator(self, f)
@@ -1342,7 +1341,7 @@ object util {
       val x = self.next
       f(x._1, x._2, x._3, x._4)
     }
-    def hasNext() = self.hasNext
+    def hasNext = self.hasNext
   }
   final implicit class Enriched_mapt_4_Iterator[A, B, C, D](val self: Iterator[(A, B, C, D)]) extends AnyVal {
     def mapt[R](f: (A, B, C, D) => R): Iterator[R] = new Mapt4Iterator(self, f)
@@ -1810,11 +1809,11 @@ object util {
 
           override def hasNext = !done && p(z)
 
-          override def next = {
+          override def next() = {
             if (hasNext) {
               val x = nextElement
               if (self.hasNext) {
-                nextElement = self.next
+                nextElement = self.next()
                 z += nextElement
               }
               else
@@ -1863,7 +1862,7 @@ object util {
 
           override def hasNext = 0 <= total && total <= n
 
-          override def next = {
+          override def next() = {
             if (hasNext) {
               val x = nextElement
               if (self.hasNext) {
@@ -1915,7 +1914,7 @@ object util {
     /**
      * @return The last item in the iterator.  Note that the iterator will be consumed after calling.
      */
-    def last(): A = {
+    def last: A = {
       if (!self.hasNext) throw new AssertionError("cannot call Iterator.last on an empty iterator")
       var a = self.next()
       while (self.hasNext) a = self.next()
@@ -1946,7 +1945,7 @@ object util {
      *
      * @return the only element
      */
-    def only(): A = {
+    def only: A = {
       val itr = self.toIterator
       assert(itr.hasNext, "cannot call `only` on empty collection.")
       val a = itr.next
@@ -1961,7 +1960,7 @@ object util {
      *
      * @return the only element
      */
-    def only(): A = {
+    def only: A = {
       assert(self.size == 1, f"cannot call `only` on collection with ${self.size + 1} elements.")
       self(0)
     }
@@ -1993,12 +1992,12 @@ object util {
   //////////////////////////////////////////////////////
 
   final implicit class Enriched_shuffle_Seq[A, Repr](val self: SeqLike[A, Repr]) extends AnyVal {
-    def shuffle[That](implicit bf: CanBuildFrom[Repr, A, That]): That =
+    def shuffled[That](implicit bf: CanBuildFrom[Repr, A, That]): That =
       (bf(self.asInstanceOf[Repr]) ++= Random.shuffle(self)).result
   }
 
   final implicit class Enriched_shuffle_Iterator[A](val self: Iterator[A]) extends AnyVal {
-    def shuffle: Iterator[A] = Random.shuffle(self)
+    def shuffled: Iterator[A] = Random.shuffle(self)
   }
 
   //////////////////////////////////////////////////////
@@ -2219,7 +2218,7 @@ object util {
       self.parent.foreach(_.mkdirs())
     }
 
-    def ls(): Vector[File] = {
+    def ls: Vector[File] = {
       assert(self.exists, s"'$self' does not exist")
       assert(self.isDirectory, s"'$self' is not a directory")
       self.listFiles.toVector
@@ -2238,30 +2237,32 @@ object util {
     /**
      * List all files (but not directories), searching recursively through sub-directories.
      */
-    def listFilesRecursive(): Vector[File] = {
+    def lsRecursive: Vector[File] = {
       assert(self.exists, s"'$self' does not exist")
       assert(self.isDirectory, s"'$self' is not a directory")
       self.ls.flatMap { f =>
         if (f.isDirectory)
-          f.listFilesRecursive
+          f.lsRecursive
         else
           Vector(f)
       }
     }
+    def lsr: Vector[File] = lsRecursive
 
     /**
      * List all files (but not directories), searching recursively through sub-directories.
      */
-    def listFilesRecursive(regex: Regex, pathMatch: Boolean = false): Vector[File] = {
+    def lsRecursive(regex: Regex, pathMatch: Boolean = false): Vector[File] = {
       assert(self.exists, s"'$self' does not exist")
       assert(self.isDirectory, s"'$self' is not a directory")
       self.ls(regex, pathMatch) ++ self.ls.flatMap { f =>
         if (f.isDirectory)
-          f.listFilesRecursive(regex, pathMatch)
+          f.lsRecursive(regex, pathMatch)
         else
           Vector()
       }
     }
+    def lsr(regex: Regex, pathMatch: Boolean = false): Vector[File] = lsRecursive(regex, pathMatch)
 
     /**
      * Return a path to this relative to the given directory.
@@ -2282,7 +2283,7 @@ object util {
      * Read the contents of this file, making sure to close the file after all
      * lines have been read.
      */
-    def readLines: SelfClosingBufferedReaderIterator = {
+    def readLines(): SelfClosingBufferedReaderIterator = {
       readLines("UTF-8")
     }
 
@@ -2304,7 +2305,7 @@ object util {
    * Get an Iterator over the lines in the BufferedReader.
    */
   case class BufferedReaderIterator(reader: BufferedReader) extends Iterator[String] {
-    override def hasNext() = reader.ready
+    override def hasNext = reader.ready
     override def next() = reader.readLine()
     def close() = reader.close()
   }
@@ -2330,13 +2331,13 @@ object util {
     private[this] val blockItr = BufferedReaderIterator(reader)
     private[this] var finished = false
     override def next() = {
-      hasNext()
+      hasNext
       if (finished) throw new NoSuchElementException("next on empty iterator")
       val n = blockItr.next
-      hasNext()
+      hasNext
       n
     }
-    override def hasNext() = {
+    override def hasNext = {
       if (finished)
         false
       else {
@@ -2617,14 +2618,23 @@ object util {
   //////////////////////////////////
 
   val WhitespaceRe = """\s*""".r
+  val LTrimRe = """\s*(\S.*)""".r
   val RTrimRe = """(.*\S)\s*""".r
 
   implicit class EnrichedString(val self: String) extends AnyVal {
 
     /**
+     * Trim whitespace only from the left side of the string
+     */
+    def ltrim() = self match {
+      case WhitespaceRe() => ""
+      case LTrimRe(trimmed) => trimmed
+    }
+
+    /**
      * Trim whitespace only from the right side of the string
      */
-    def rtrim = self match {
+    def rtrim() = self match {
       case WhitespaceRe() => ""
       case RTrimRe(trimmed) => trimmed
     }
@@ -2632,13 +2642,13 @@ object util {
     /**
      * Split on newlines
      */
-    def splitlines: Vector[String] = self.lines.toVector
+    def splitlines(): Vector[String] = self.lines.toVector
 
     /**
      * Split on whitespace
      */
-    def splitWhitespace: Vector[String] = self.lsplit("\\s+")
-    def sw = splitWhitespace
+    def splitWhitespace(): Vector[String] = self.lsplit("\\s+")
+    def sw() = splitWhitespace()
 
     /**
      * Split a string into `limit` pieces, starting from the left side.
@@ -2789,7 +2799,7 @@ object util {
     var queued: Option[(Int, Int)] = None
     var nextE: Option[Int] = Some(0)
 
-    def hasNext() =
+    def hasNext =
       if (queued.isDefined) {
         true
       }
@@ -2825,7 +2835,7 @@ object util {
       else
         Iterator().next()
 
-    override def toString = s"RegexMatcherSplitIterator(string=$str, pattern=$pattern, keepDelimiter=$keepDelimiter, prevE=$prevE, queued=$queued, nextE=$nextE, hasNext=$hasNext)"
+    override def toString() = s"RegexMatcherSplitIterator(string=$str, pattern=$pattern, keepDelimiter=$keepDelimiter, prevE=$prevE, queued=$queued, nextE=$nextE, hasNext=$hasNext)"
   }
 
   implicit class EnrichedRegex(val self: Regex) extends AnyVal {
@@ -2907,8 +2917,8 @@ object util {
      */
     def apply(newArgs: String*) = new Subprocess(binary, args ++ newArgs)
 
-    def base() = new Subprocess(binary, Nil)
-    def noargs() = this.base
+    def base = new Subprocess(binary, Nil)
+    def noargs = this.base
 
     /**
      * Call the binary
