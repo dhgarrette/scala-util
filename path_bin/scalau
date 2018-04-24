@@ -1,0 +1,9 @@
+# sbt dependencyList
+# find/replace RE '\[info\] ([^ \t:]+):([^ \t:]+):([^ \t\n:]+)\n' ==> ':$HOME/.ivy2/cache/\1/\2/jars/\2-\3.jar'
+# find/replace 'scala-logging_2.12/jars' ==> 'scala-logging_2.12/bundles'
+# find/replace 'scalaz-core_2.12/jars' ==> 'scalaz-core_2.12/bundles'
+# scala -J-Xmx8g -cp "..." "$@"
+# import dhg.util._, scalaz._, Scalaz._
+
+scala -J-Xmx8g -cp "$HOME/.ivy2/cache/ch.qos.logback/logback-classic/jars/logback-classic-1.2.3.jar:$HOME/.ivy2/cache/ch.qos.logback/logback-core/jars/logback-core-1.2.3.jar:$HOME/.ivy2/cache/com.typesafe.scala-logging/scala-logging_2.12/bundles/scala-logging_2.12-3.8.0.jar:$HOME/.ivy2/cache/dhg/scala-util_2.12/jars/scala-util_2.12-0.0.4-SNAPSHOT.jar:$HOME/.ivy2/cache/junit/junit/jars/junit-4.12.jar:$HOME/.ivy2/cache/org.abego.treelayout/org.abego.treelayout.core/jars/org.abego.treelayout.core-1.0.1.jar:$HOME/.ivy2/cache/org.abego.treelayout/org.abego.treelayout.netbeans/jars/org.abego.treelayout.netbeans-1.0.1.jar:$HOME/.ivy2/cache/org.apache.commons/commons-math3/jars/commons-math3-3.6.1.jar:$HOME/.ivy2/cache/org.codeartisans.thirdparties.swing/org-netbeans-api-visual/jars/org-netbeans-api-visual-2.23.1.jar:$HOME/.ivy2/cache/org.codeartisans.thirdparties.swing/org-openide-util/jars/org-openide-util-8.6.2.jar:$HOME/.ivy2/cache/org.codeartisans.thirdparties.swing/org-openide-util-lookup/jars/org-openide-util-lookup-8.3.1.jar:$HOME/.ivy2/cache/org.hamcrest/hamcrest-core/jars/hamcrest-core-1.3.jar:$HOME/.ivy2/cache/org.jfree/jcommon/jars/jcommon-1.0.23.jar:$HOME/.ivy2/cache/org.jfree/jfreechart/jars/jfreechart-1.0.19.jar:$HOME/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.12.5.jar:$HOME/.ivy2/cache/org.scalaz/scalaz-core_2.12/bundles/scalaz-core_2.12-7.2.20.jar:$HOME/.ivy2/cache/org.slf4j/slf4j-api/jars/slf4j-api-1.7.25.jar" "$@"
+
