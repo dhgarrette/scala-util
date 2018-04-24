@@ -3,8 +3,10 @@
 projectname=scala-util
 version_len=5
 
+sbt clean publishLocal
+
 rm -rf target/scala-2.12/${projectname}_2.12-*
-sbt publish
+sbt clean publish
 
 rm -rf target/scala-2.12/api
 sbt doc
